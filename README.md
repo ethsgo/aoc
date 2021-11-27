@@ -1,8 +1,8 @@
 # Advent of Code - Solidity/JS
 
 ```
-npx hardhat run scripts/hello-world.js
-npx hardhat test
+npx hardhat solrun C20_01
+node js/20-01.js
 ```
 
 https://twitter.com/ethsgo_
