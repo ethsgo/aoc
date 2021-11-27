@@ -1,10 +1,10 @@
 const hre = require('hardhat')
 
 async function main() {
-  const Contract = await hre.ethers.getContractFactory('HelloWorld')
+  const Contract = await hre.ethers.getContractFactory('C20_01')
   const contract = await Contract.deploy()
 
-  console.log(await contract.helloWorld())
+  console.log(await contract.p1())
 }
 
 main().catch((e) => {

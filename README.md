@@ -1,4 +1,4 @@
-# Advent of Code 2021 - Solidity
+# Advent of Code - Solidity/JS
 
 ```
 npx hardhat run scripts/hello-world.js

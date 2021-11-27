@@ -8,3 +8,6 @@ typechain
 # Hardhat files
 cache
 artifacts
+
+# AOC inputs
+inputs/
