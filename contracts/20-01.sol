@@ -5,12 +5,16 @@ import "hardhat/console.sol";
 import "./Parser.sol";
 
 contract C20_01 is Parser {
-    function p1(string memory input) external returns (uint) {
+    function main(string memory input) external returns (uint, uint) {
         uint[] memory xs = parseInts(input);
         if (xs.length == 0) {
             xs = parseInts("[1721, 979, 366, 299, 675, 1456]");
         }
 
+        return (p1(xs), 0); // p2(xs));
+    }
+
+    function p1(uint[] memory xs) private pure returns (uint) {
         for (uint i = 0; i < xs.length; i++) {
             for (uint j = i + 1; j < xs.length; j++) {
                 if (xs[i] + xs[j] == 2020) {
@@ -18,16 +22,10 @@ contract C20_01 is Parser {
                 }
             }
         }
-
         revert();
     }
 
-    function p2(string memory input) external returns (uint) {
-        uint[] memory xs = parseInts(input);
-        if (xs.length == 0) {
-            xs = parseInts("[1721, 979, 366, 299, 675, 1456]");
-        }
-
+    function p2(uint[] memory xs) private pure returns (uint) {
         for (uint i = 0; i < xs.length; i++) {
             for (uint j = i + 1; j < xs.length; j++) {
                 for (uint k = j + 1; k < xs.length; k++) {
@@ -37,7 +35,6 @@ contract C20_01 is Parser {
                 }
             }
         }
-
         revert();
     }
 }
