@@ -1,4 +1,5 @@
 require('@nomiclabs/hardhat-ethers')
+const fs = require('fs')
 
 // https://hardhat.org/guides/create-task.html
 task('solrun', 'Deploy and run the named contract')
@@ -11,9 +12,18 @@ task('solrun', 'Deploy and run the named contract')
     const contract = await Contract.deploy()
     await contract.deployed()
 
-    console.log((await contract.p1()).toString())
+    let input = ''
+    try {
+      input = fs.readFileSync(process.stdin.fd).toString()
+    } catch {}
+
+    console.log(input)
+    const result1 = await contract.callStatic.p1(input)
+    console.log(result1.toString())
+
     if (Contract.interface.functions['p2()']) {
-      console.log((await contract.p2()).toString())
+      const result2 = await contract.callStatic.p2(input)
+      console.log(result2.toString())
     }
   })
 

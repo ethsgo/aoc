@@ -20,6 +20,7 @@ If no inputs are passed in stdin, then the programs execute with the example
 given in the puzzle. To pass input, pipe into stdin:
 
 ```
+cat inputs/20-01 | npx hardhat solrun C20_01
 cat inputs/20-01 | node js/20-01.js
 ```
 
