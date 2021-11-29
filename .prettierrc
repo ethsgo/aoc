@@ -1,0 +1,7 @@
+{
+  "semi": false,
+  "singleQuote": true,
+  "overrides": [
+    { "files": "*.sol", "options": { "explicitTypes": "preserve" } }
+  ]
+}
