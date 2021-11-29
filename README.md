@@ -5,7 +5,7 @@
 ## Prerequisites
 
 You only need node to be installed on your machine. To get the rest of the
-dependencies, run `npm install` the first time.
+dependencies, run `npm install`.
 
 ## Using
 
@@ -31,4 +31,4 @@ cat inputs/20-01 | node js/20-01.js
 
 ## By
 
-https://twitter.com/ethsgo_
+[https://twitter.com/ethsgo_](https://twitter.com/ethsgo_)
