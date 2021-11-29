@@ -5,10 +5,27 @@ if (!process.stdin.isTTY) {
   xs = lines.map((s) => parseInt(s)).filter((x) => x)
 }
 
-for (let i = 0; i < xs.length; i++) {
-  for (let j = i + 1; j < xs.length; j++) {
-    if (xs[i] + xs[j] === 2020) {
-      console.log(xs[i] * xs[j])
+function p1(xs) {
+  for (let i = 0; i < xs.length; i++) {
+    for (let j = i + 1; j < xs.length; j++) {
+      if (xs[i] + xs[j] === 2020) {
+        return xs[i] * xs[j]
+      }
     }
   }
 }
+
+function p2(xs) {
+  for (let i = 0; i < xs.length; i++) {
+    for (let j = i + 1; j < xs.length; j++) {
+      for (let k = j + 1; k < xs.length; k++) {
+        if (xs[i] + xs[j] + xs[k] === 2020) {
+          return xs[i] * xs[j] * xs[k]
+        }
+      }
+    }
+  }
+}
+
+console.log(p1(xs))
+console.log(p2(xs))
