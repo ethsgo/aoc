@@ -17,7 +17,6 @@ function p1(xs) {
 
 function p2(xs) {
   const m = new Map(xs.map((x) => [x, true]))
-  console.log(m)
   for (let i = 0; i < xs.length; i++) {
     for (let j = i + 1; j < xs.length; j++) {
       const xk = 2020 - (xs[i] + xs[j])

@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 
-contract C20_01 is Parser {
+contract Y20_01 is Parser {
     function main(string memory input) external returns (uint256, uint256) {
         uint256[] memory xs = parseInts(input);
         if (xs.length == 0) {

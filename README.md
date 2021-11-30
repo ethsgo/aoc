@@ -5,30 +5,30 @@
 ## Prerequisites
 
 You only need node to be installed on your machine. To get the rest of the
-dependencies, run `npm install`.
+dependencies, run `npm install` after checking out this repository.
 
 ## Using
 
 To run any of the Solidity contracts in the `contracts` folder:
 
 ```
-npx hardhat solrun C20_01
+npx hardhat solrun Y20_01
 ```
 
 To run the JS solutions:
 
 ```
-node js/20-01.js
+node js/Y20_01.js
 ```
 
 If no inputs are passed in stdin, then the programs execute with the example
 given in the puzzle. To pass input, pipe into stdin:
 
 ```
-cat inputs/20-01 | npx hardhat solrun C20_01
-cat inputs/20-01 | node js/20-01.js
+cat inputs/Y20_01 | npx hardhat solrun Y20_01
+cat inputs/Y20_01 | node js/Y20_01.js
 ```
 
-## By
+## Say hello
 
-[https://twitter.com/ethsgo_](https://twitter.com/ethsgo_)
+[https://twitter.com/ethsgo\_](https://twitter.com/ethsgo_)
