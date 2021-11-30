@@ -21,6 +21,7 @@ contract C20_01 is Parser {
                 }
             }
         }
+
         revert();
     }
 
@@ -45,6 +46,7 @@ contract C20_01 is Parser {
                 }
             }
         }
+
         revert();
     }
 }
