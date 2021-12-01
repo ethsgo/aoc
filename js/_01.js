@@ -1,4 +1,9 @@
-const xs = [199, 200, 208, 210, 200, 207, 240, 269, 260, 263]
+let xs = [199, 200, 208, 210, 200, 207, 240, 269, 260, 263]
+
+if (!process.stdin.isTTY) {
+  const lines = require('fs').readFileSync(0).toString().split('\n')
+  xs = lines.filter((x) => x.length > 0).map(Number)
+}
 
 function p1(xs) {
   let increases = 0
