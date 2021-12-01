@@ -5,15 +5,14 @@ if (!process.stdin.isTTY) {
   xs = lines.filter((x) => x.length > 0).map(Number)
 }
 
+/// Return the number of changes in xs that are greater than the previous value.
 function p1(xs) {
   let increases = 0
-  // Assume 0 is not a valid depth
-  let previous
-  for (let i = 0; i < xs.length; i++) {
-    if (previous && previous < xs[i]) {
+  // Need at least on sample
+  for (let i = 1; i < xs.length; i++) {
+    if (xs[i - 1] < xs[i]) {
       increases++
     }
-    previous = xs[i]
   }
   return increases
 }
