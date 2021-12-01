@@ -18,15 +18,13 @@ function p1(xs) {
 
 function p2(xs) {
   let increases = 0
-  // Need at least three samples
+  // Need at least three samples.
   if (xs.length < 3) return 0
-  let previousSum = xs[0] + xs[1] + xs[2]
   for (let i = 3; i < xs.length; i++) {
-    const sum = previousSum - xs[i - 3] + xs[i]
-    if (previousSum < sum) {
+    // Only the extreme values differ in the previous and this measurement window.
+    if (xs[i - 3] < xs[i]) {
       increases++
     }
-    previousSum = sum
   }
   return increases
 }

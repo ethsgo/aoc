@@ -29,13 +29,12 @@ contract _01 is Parser {
         uint256 increases;
         // Need at least 3 samples for a measurement.
         if (xs.length < 3) return 0;
-        uint256 previousSum = xs[0] + xs[1] + xs[2];
         for (uint256 i = 3; i < xs.length; i++) {
-            uint256 sum = previousSum - xs[i - 3] + xs[i];
-            if (previousSum < sum) {
+            // The middle two values are the same in both windows, so they cancel
+            // out and we can just compare the extremes.
+            if (xs[i - 3] < xs[i]) {
                 increases++;
             }
-            previousSum = sum;
         }
         return increases;
     }
