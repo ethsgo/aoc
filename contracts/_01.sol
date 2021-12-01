@@ -29,17 +29,10 @@ contract _01 is Parser {
         uint256 increases;
         // Need at least 3 samples for a measurement.
         if (xs.length < 3) return 0;
-        // Sliding window of measurements
-        uint256[3] memory mx = [xs[0], xs[1], 0];
-        // Index into the the sliding window.
-        uint256 mi = 2;
-        // Assume that a valid sum will never be 0, so we can treat 0 as null.
-        uint256 previousSum;
-        for (uint256 i = 2; i < xs.length; i++) {
-            mx[mi] = xs[i];
-            mi = (mi + 1) % 3;
-            uint256 sum = mx[0] + mx[1] + mx[2];
-            if (previousSum > 0 && previousSum < sum) {
+        uint256 previousSum = xs[0] + xs[1] + xs[2];
+        for (uint256 i = 3; i < xs.length; i++) {
+            uint256 sum = previousSum - xs[i - 3] + xs[i];
+            if (previousSum < sum) {
                 increases++;
             }
             previousSum = sum;
