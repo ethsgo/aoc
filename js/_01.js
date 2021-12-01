@@ -18,4 +18,27 @@ function p1(xs) {
   return increases
 }
 
+function p2(xs) {
+  let increases = 0
+  // Need at least three samples
+  if (xs.length < 3) return 0
+  // Measurement window
+  let ys = [xs[0], xs[1], 0]
+  // Index into the measurement window
+  let yi = 2
+  // Assume 0 is not a valid sum
+  let previousSum
+  for (let i = 2; i < xs.length; i++) {
+    ys[yi] = xs[i]
+    yi = (yi + 1) % 3
+    const sum = ys[0] + ys[1] + ys[2]
+    if (previousSum && previousSum < sum) {
+      increases++
+    }
+    previousSum = sum
+  }
+  return increases
+}
+
 console.log(p1(xs))
+console.log(p2(xs))
