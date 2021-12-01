@@ -27,4 +27,9 @@ task('solrun', 'Deploy and run the named contract')
  */
 module.exports = {
   solidity: '0.8.4',
+  networks: {
+    hardhat: {
+      gas: 100000000000,
+    },
+  },
 }
