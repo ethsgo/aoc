@@ -8,12 +8,12 @@ contract BytesConcat {
         require(parseDigit(parseToken("0")) == 0);
     }
 
-    bytes private tokenStorage;
     uint8[] private tokenStorageUint8;
 
     function parseToken(string memory s) internal returns (string memory) {
         bytes memory b = bytes(s);
 
+        bytes memory tokenStorage;
         for (uint256 i = 0; i < b.length; i++) {
             uint8 ascii = uint8(b[i]);
 

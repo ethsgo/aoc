@@ -18,8 +18,6 @@ contract Parser {
     /// internal array used by the parse methods as a state variable.
     uint256[] private xsStorage;
     string[] private tokensStorage;
-    /// Scratch pad for a single token, used when constructing tokensStorage.
-    bytes private tokenStorage;
 
     /// Convert the given string into an array of integers.
     ///
@@ -73,11 +71,7 @@ contract Parser {
         // Get a local reference to the storage.
         string[] storage tokens = tokensStorage;
 
-        // We cannot use a local reference to the tokenStorage, Solidity
-        // complains that 'Unary operator delete cannot be appliet to type
-        // bytes storage pointer'. So for clarity, we just don't create an
-        // alias and directly use the storage.
-        delete tokenStorage;
+        bytes memory token;
 
         bool didSeeNonSeparator = false;
         for (uint256 i = 0; i < b.length; i++) {
@@ -88,23 +82,20 @@ contract Parser {
                 // lowercase letter
                 (ascii >= ascii_a && ascii <= ascii_z)
             ) {
-                // Need to use bytes.contact instead of creating an array of
-                // uint8 to ensure that the encoding is correct (otherwise the
-                // string indexing stops working later on down the line).
-                tokenStorage = bytes.concat(tokenStorage, bytes1(ascii));
+                token = bytes.concat(token, bytes1(ascii));
                 didSeeNonSeparator = true;
             } else {
                 // separator
                 if (didSeeNonSeparator) {
-                    tokens.push(string(tokenStorage));
-                    delete tokenStorage;
+                    tokens.push(string(token));
+                    delete token;
                 }
                 didSeeNonSeparator = false;
             }
         }
 
         if (didSeeNonSeparator) {
-            tokens.push(string(tokenStorage));
+            tokens.push(string(token));
         }
 
         // The return type has data location memory, so we return a copy
