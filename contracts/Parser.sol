@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/// Parse simple types, like arrays of integers.
 contract Parser {
     /// ASCII constants
     ///
-    /// 48 - '0'
-    /// 57 - '9'
-    uint256 private constant ascii0 = 48;
-    uint256 private constant ascii9 = 57;
+    /// 48  - '0'
+    /// 57  - '9'
+    uint256 internal constant ascii_0 = 48;
+    uint256 internal constant ascii_9 = 57;
+    /// 97  - 'a'
+    /// 122 - 'z'   
+    uint256 internal constant ascii_a = 97;
+    uint256 internal constant ascii_z = 112;
 
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
@@ -29,8 +34,8 @@ contract Parser {
         bool didSeeDigit = false;
         for (uint256 i = 0; i < b.length; i++) {
             uint8 ascii = uint8(b[i]);
-            if (ascii >= ascii0 && ascii <= ascii9) {
-                uint256 digit = ascii - ascii0;
+            if (ascii >= ascii_0 && ascii <= ascii_9) {
+                uint256 digit = ascii - ascii_0;
                 x *= 10;
                 x += digit;
 
