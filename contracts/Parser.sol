@@ -17,7 +17,7 @@ contract Parser {
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
     uint256[] private xsStorage;
-    uint8[][] private tokensStorage;
+    string[] private tokensStorage;
     /// Scratch pad for a single token, used when constructing tokensStorage.
     uint8[] private tokenStorage;
 
@@ -64,14 +64,14 @@ contract Parser {
     /// Convert the given string into an array of tokens.
     ///
     /// Any non-lowercase-letter or non-digit character acts as a separator.
-    function parseTokens(string memory s) internal returns (uint8[][] memory) {
+    function parseTokens(string memory s) internal returns (string[] memory) {
         // Strings are not indexable.
         bytes memory b = bytes(s);
 
         // Clear the stored array, emptying it.
         delete tokensStorage;
         // Get a local reference to the storage.
-        uint8[][] storage tokens = tokensStorage;
+        string[] storage tokens = tokensStorage;
 
         // We cannot use a local reference to the tokenStorage, Solidity
         // complains that 'Unary operator delete cannot be appliet to type
@@ -93,7 +93,7 @@ contract Parser {
             } else {
                 // separator
                 if (didSeeNonSeparator) {
-                    tokens.push(tokenStorage);
+                    tokens.push(string(abi.encodePacked(tokenStorage)));
                     delete tokenStorage;
                 }
                 didSeeNonSeparator = false;
@@ -101,7 +101,7 @@ contract Parser {
         }
 
         if (didSeeNonSeparator) {
-            tokens.push(tokenStorage);
+            tokens.push(string(abi.encodePacked(tokenStorage)));
         }
 
         // The return type has data location memory, so we return a copy

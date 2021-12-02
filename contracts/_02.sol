@@ -13,10 +13,10 @@ contract _02 is Parser {
         }
         return (p1(xs), p2(xs));
         */
-        uint8[][] memory tokens = parseTokens(
+        string[] memory tokens = parseTokens(
             "forward 5 down 5 forward 8 up 3 down 8 forward 2"
         );
-        console.log(string(abi.encodePacked(tokens[0])));
+        console.log(tokens[0]);
         return (tokens.length, 0);
     }
 
