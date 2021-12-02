@@ -49,19 +49,16 @@ function p1(dxdy) {
   return x * y
 }
 
-function p2(xs) {
-  let increases = 0
-  // Need at least three samples.
-  if (xs.length < 3) return 0
-  for (let i = 3; i < xs.length; i++) {
-    // Only the extreme values differ in the previous and this measurement window.
-    if (xs[i - 3] < xs[i]) {
-      increases++
-    }
+function p2(dxdy) {
+  let [x, y, aim] = [0, 0, 0]
+  for (let i = 0; i < dxdy.length; i += 1) {
+    aim += dxdy[i][1]
+    x += dxdy[i][0]
+    y += (dxdy[i][0] * aim)
   }
-  return increases
+  return x * y
 }
 
 const dxdy = parseDxDy(tokens)
 console.log(p1(dxdy))
-// console.log(p2(xs))
+console.log(p2(dxdy))
