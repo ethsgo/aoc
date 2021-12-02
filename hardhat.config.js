@@ -17,8 +17,8 @@ task('solrun', 'Deploy and run the named contract')
       input = fs.readFileSync(process.stdin.fd).toString()
     } catch {}
 
-    const result1 = await contract.callStatic.main(input)
-    console.log(result1.toString())
+    const result = await contract.callStatic.main(input)
+    console.log(result.toString())
   })
 
 /**
