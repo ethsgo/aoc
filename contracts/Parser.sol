@@ -119,7 +119,7 @@ contract Parser {
         bytes memory b = bytes(s);
         uint256 x;
         for (uint256 i = 0; i < b.length; i++) {
-            uint8 ascii = uint8(bytes(s)[i]);
+            uint8 ascii = uint8(b[i]);
             require(ascii >= ascii_0 && ascii <= ascii_9);
             uint256 digit = ascii - ascii_0;
             x *= 10;
