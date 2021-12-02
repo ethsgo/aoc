@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Parser.sol";
+import "./ParserDxDy.sol";
 import "hardhat/console.sol";
 
-contract _02 is Parser {
+contract _02 is ParserDxDy {
     function main(string calldata input) external returns (uint256, uint256) {
         /*
         uint256[] memory xs = parseInts(input);
@@ -16,8 +16,9 @@ contract _02 is Parser {
         string[] memory tokens = parseTokens(
             "forward 5 down 5 forward 8 up 3 down 8 forward 2"
         );
+        uint256[2][] memory dxdy = parseDxDy(tokens);
         console.log(tokens[0]);
-        return (tokens.length, 0);
+        return (tokens.length, dxdy.length);
     }
 
     function p1(uint256[] memory xs) private pure returns (uint256) {

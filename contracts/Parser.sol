@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
+
 /// Parse simple types, like arrays of integers, or string tokens.
 contract Parser {
     /// ASCII constants
@@ -19,7 +21,7 @@ contract Parser {
     uint256[] private xsStorage;
     string[] private tokensStorage;
     /// Scratch pad for a single token, used when constructing tokensStorage.
-    uint8[] private tokenStorage;
+    bytes private tokenStorage;
 
     /// Convert the given string into an array of integers.
     ///
@@ -75,20 +77,23 @@ contract Parser {
 
         // We cannot use a local reference to the tokenStorage, Solidity
         // complains that 'Unary operator delete cannot be appliet to type
-        // uint8[] storage pointer'. So for clarity, we just don't create an
+        // bytes storage pointer'. So for clarity, we just don't create an
         // alias and directly use the storage.
         delete tokenStorage;
 
         bool didSeeNonSeparator = false;
         for (uint256 i = 0; i < b.length; i++) {
             uint8 ascii = uint8(b[i]);
-            if (ascii >= ascii_0 && ascii <= ascii_9) {
+            if (
                 // digit
-                tokenStorage.push(ascii);
-                didSeeNonSeparator = true;
-            } else if (ascii >= ascii_a && ascii <= ascii_z) {
+                (ascii >= ascii_0 && ascii <= ascii_9) ||
                 // lowercase letter
-                tokenStorage.push(ascii);
+                (ascii >= ascii_a && ascii <= ascii_z)
+            ) {
+                // Need to use bytes.contact instead of creating an array of
+                // uint8 to ensure that the encoding is correct (otherwise the
+                // string indexing stops working later on down the line).
+                tokenStorage = bytes.concat(tokenStorage, bytes1(ascii));
                 didSeeNonSeparator = true;
             } else {
                 // separator
@@ -114,19 +119,14 @@ contract Parser {
     /// Any non-digit character causes reversion.
     function parseUint(string memory s) internal pure returns (uint256) {
         bytes memory b = bytes(s);
-
         uint256 x;
         for (uint256 i = 0; i < b.length; i++) {
-            uint8 ascii = uint8(b[i]);
-            require(
-                ascii >= ascii_0 && ascii <= ascii_9,
-                "Non digit character passed to parseUint"
-            );
+            uint8 ascii = uint8(bytes(s)[i]);
+            require(ascii >= ascii_0 && ascii <= ascii_9);
             uint256 digit = ascii - ascii_0;
             x *= 10;
             x += digit;
         }
-
         return x;
     }
 }

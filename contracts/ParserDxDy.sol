@@ -11,33 +11,15 @@ contract ParserDxDy is Parser {
     /// internal array used by the parse methods as a state variable.
     uint256[2][] private dxdyStorage;
 
-    /// Currently there doesn't seem to be a way of marking the enum private, we
-    /// make do with the underscore prefix.
-    enum _ParseDxDyState {
-        expectingDirection,
-        expectingValue
-    }
-
-    enum _Direction {
-        invalid,
-        forward,
-        up,
-        down
-    }
-
-    bytes private constant forward = bytes("forward");
-    bytes private constant up = bytes("up");
-    bytes private constant down = bytes("down");
-
-    /// Parse the given string into an dynamic array of (dx, dy) pairs.
-    ///
-    /// Any non-lowercase, non-digit character acts as a separator.
+    /// Construct an array of (dx, dy) pairs from the given tokens.
     ///
     /// Directions are encoded as "forward", "up", "down". Since we're under
     /// water, "up" and "down" are reversed.
-    function parseDxDy(string memory s) internal returns (uint256[2][] memory) {
-        // Strings are not indexable.
-        bytes memory b = bytes(s);
+    function parseDxDy(string[] memory tokens)
+        internal
+        returns (uint256[2][] memory)
+    {
+        require(tokens.length % 2 == 0, "parseDxDy expects pairs of tokens");
 
         // Clear the stored array, emptying it.
         delete dxdyStorage;
@@ -45,50 +27,15 @@ contract ParserDxDy is Parser {
         uint256[2][] storage dxdy = dxdyStorage;
 
         uint256 i = 0;
-        while (i < b.length) {
+        for (uint256 i = 0; i < tokens.length; i += 2) {
+            uint256 d = parseUint(tokens[i + 1]);
             // Look for direction.
-
-            // Ignore everything until the first letter.
-            uint8 ascii = uint8(b[i]);
-            while (!(ascii >= ascii_a && ascii <= ascii_z)) {
-                i++;
-                if (i == b.length) break;
-                ascii = uint8(b[i]);
-            }
-            if (i == b.length) break;
-
-            // Luckily all three directions don't share any prefix so we can
-            // just barge along the first match.
-            uint256 j = 0;
-            _Direction direction = _Direction.invalid;
+            bytes32 tokenHash = keccak256(abi.encodePacked(tokens[i]));
+            if (tokenHash == keccak256("forward")) {}
+            dxdy.push([0, 0]);
         }
-        uint256 x;
-        uint256 y;
-        _ParseDxDyState state = _ParseDxDyState.expectingDirection;
 
-        // bool didSeeDigit = false;
-        // for (uint256 i = 0; i < b.length; i++) {
-        //     uint8 ascii = uint8(b[i]);
-        //     if (ascii >= ascii0 && ascii <= ascii9) {
-        //         uint256 digit = ascii - ascii0;
-        //         x *= 10;
-        //         x += digit;
-
-        //         didSeeDigit = true;
-        //     } else {
-        //         if (didSeeDigit) {
-        //             xs.push() = x;
-        //         }
-        //         x = 0;
-        //         didSeeDigit = false;
-        //     }
-        // }
-
-        // if (didSeeDigit) {
-        //     xs.push() = x;
-        // }
-
-        // return xs;
+        // Return a memory copy.
         return dxdy;
     }
 }
