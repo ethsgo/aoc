@@ -16,7 +16,7 @@ contract _02 is Parser {
         uint8[][] memory tokens = parseTokens(
             "forward 5 down 5 forward 8 up 3 down 8 forward 2"
         );
-        console.log(string(abi.encodePacked(tokens[0][0])));
+        console.log(string(abi.encodePacked(tokens[0])));
         return (tokens.length, 0);
     }
 

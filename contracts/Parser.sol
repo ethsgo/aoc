@@ -12,7 +12,7 @@ contract Parser {
     /// 97  - 'a'
     /// 122 - 'z'
     uint256 internal constant ascii_a = 97;
-    uint256 internal constant ascii_z = 112;
+    uint256 internal constant ascii_z = 122;
 
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
