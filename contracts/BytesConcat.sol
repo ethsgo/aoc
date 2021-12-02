@@ -24,7 +24,7 @@ contract BytesConcat {
             tokenStorageUint8.push(ascii);
         }
 
-        return string(abi.encodePacked(tokenStorage));
+        return string(tokenStorage);
         // return string(abi.encodePacked(tokenStorageUint8));
     }
 

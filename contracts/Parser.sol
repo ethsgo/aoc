@@ -96,7 +96,7 @@ contract Parser {
             } else {
                 // separator
                 if (didSeeNonSeparator) {
-                    tokens.push(string(abi.encodePacked(tokenStorage)));
+                    tokens.push(string(tokenStorage));
                     delete tokenStorage;
                 }
                 didSeeNonSeparator = false;
@@ -104,7 +104,7 @@ contract Parser {
         }
 
         if (didSeeNonSeparator) {
-            tokens.push(string(abi.encodePacked(tokenStorage)));
+            tokens.push(string(tokenStorage));
         }
 
         // The return type has data location memory, so we return a copy
