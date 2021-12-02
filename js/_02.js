@@ -13,12 +13,12 @@ let tokens = [
   2,
 ]
 
-// if (!process.stdin.isTTY) {
-//   const lines = require('fs').readFileSync(0).toString().split('\n')
-//   xs = lines.filter((x) => x.length > 0).map(Number)
-// }
+if (!process.stdin.isTTY) {
+  tokens = require('fs').readFileSync(0).toString().split(/\s+/)
+  tokens = tokens.filter((t) => t.length > 0)
+}
 
-// Parse the input into [dx, dy] pairs
+/// Parse the input into [dx, dy] pairs
 function parseDxDy(tokens) {
   let dxdy = []
   // Make sure that input consists of pairs.
