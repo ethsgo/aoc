@@ -2,22 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
-contract _02 {
-    //is Parser {
-    /// Dynamic array of pairs
-    uint256[2][] private _dxdy;
-
-    // Returns a pointer to storage
-    function parseDxDy(string calldata input)
-        private
-        returns (uint256[2][] storage)
-    {
-        delete _dxdy;
-        _dxdy.push([uint256(1), 2]);
-        return _dxdy;
-    }
-
+contract _02 is Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         /*
         uint256[] memory xs = parseInts(input);
@@ -26,8 +13,12 @@ contract _02 {
         }
         return (p1(xs), p2(xs));
         */
-        uint256[2][] storage dxdy = parseDxDy(input);
-        return (dxdy.length, 0);
+        uint8[][] memory tokens = parseTokens(
+            "forward 5 down 5 forward 8 up 3 down 8 forward 2"
+        );
+        // string s0 = string(tokens[0]);
+        console.log(tokens[0][0]);
+        return (tokens.length, 0);
     }
 
     function p1(uint256[] memory xs) private pure returns (uint256) {
