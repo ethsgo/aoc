@@ -17,7 +17,7 @@ contract _02 is Parser {
             "forward 5 down 5 forward 8 up 3 down 8 forward 2"
         );
         // string s0 = string(tokens[0]);
-        console.log(tokens[0][0]);
+        console.log(tokens[3][0]);
         return (tokens.length, 0);
     }
 

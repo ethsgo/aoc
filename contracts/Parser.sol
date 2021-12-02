@@ -45,7 +45,7 @@ contract Parser {
                 didSeeDigit = true;
             } else {
                 if (didSeeDigit) {
-                    xs.push() = x;
+                    xs.push(x);
                 }
                 x = 0;
                 didSeeDigit = false;
@@ -53,9 +53,11 @@ contract Parser {
         }
 
         if (didSeeDigit) {
-            xs.push() = x;
+            xs.push(x);
         }
 
+        // The return type has data location memory, so we return a copy
+        // (instead of a pointer to our internal storage).
         return xs;
     }
 
@@ -82,16 +84,16 @@ contract Parser {
             uint8 ascii = uint8(b[i]);
             if (ascii >= ascii_0 && ascii <= ascii_9) {
                 // digit
-                tokenStorage.push() = ascii;
+                tokenStorage.push(ascii);
                 didSeeNonSeparator = true;
             } else if (ascii >= ascii_a && ascii <= ascii_z) {
                 // lowercase letter
-                tokenStorage.push() = ascii;
+                tokenStorage.push(ascii);
                 didSeeNonSeparator = true;
             } else {
                 // separator
                 if (didSeeNonSeparator) {
-                    tokens.push() = tokenStorage;
+                    tokens.push(tokenStorage);
                     delete tokenStorage;
                 }
                 didSeeNonSeparator = false;
@@ -99,9 +101,11 @@ contract Parser {
         }
 
         if (didSeeNonSeparator) {
-            tokens.push() = tokenStorage;
+            tokens.push(tokenStorage);
         }
 
+        // The return type has data location memory, so we return a copy
+        // (instead of a pointer to our internal storage).
         return tokens;
     }
 }
