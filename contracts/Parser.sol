@@ -108,4 +108,25 @@ contract Parser {
         // (instead of a pointer to our internal storage).
         return tokens;
     }
+
+    /// Convert the given string into an unsigned integer.
+    ///
+    /// Any non-digit character causes reversion.
+    function parseUint(string memory s) internal pure returns (uint256) {
+        bytes memory b = bytes(s);
+
+        uint256 x;
+        for (uint256 i = 0; i < b.length; i++) {
+            uint8 ascii = uint8(b[i]);
+            require(
+                ascii >= ascii_0 && ascii <= ascii_9,
+                "Non digit character passed to parseUint"
+            );
+            uint256 digit = ascii - ascii_0;
+            x *= 10;
+            x += digit;
+        }
+
+        return x;
+    }
 }
