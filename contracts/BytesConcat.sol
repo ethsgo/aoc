@@ -4,11 +4,8 @@ pragma solidity ^0.8.0;
 /// Demonstrate the need to use bytes.contact instead of uint8[].push when
 /// constructing strings from ASCII codepoints.
 contract BytesConcat {
-    function main(string calldata input) external returns (uint256) {
-        string[] memory tokens = parseTokens(input);
-        if (tokens.length == 0) {
-            tokens = parseTokens("5");
-        }
+    function main() external returns (uint256) {
+        string[] memory tokens = parseTokens("5");
 
         uint256 d = uint256(parseUint(tokens[0]));
 
