@@ -12,7 +12,7 @@ contract _03 is Parser {
                 "10000 11001 00010 01010"
             );
         }
-
+        //return (bitStringToUint(tokens[0]), 0);
         return (p1(tokens), p2(tokens));
     }
 
@@ -21,6 +21,18 @@ contract _03 is Parser {
         bytes memory bits = parity(numbers);
 
         return decimal(bits) * decimal(inverted(bits));
+    }
+
+    /// Convert a string representing the binary bits of an unsigned integer
+    /// into a uint256.
+    function bitStringToUint(string memory s) private pure returns (uint256) {
+        bytes memory bs = bytes(s);
+        uint256 result = 0;
+        for (uint i = 0; i < bs.length; i++) {
+            result *= 2;
+            result += (bs[i] == b0) ? 0 : 1;
+        }
+        return result;
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
