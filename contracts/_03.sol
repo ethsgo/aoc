@@ -24,13 +24,20 @@ contract _03 is Parser {
         uint256 bits;
     }
 
+    // Return a bitmap which has a bit set if the corresponding position in
+    // token had more 1s than 0s.
     function parity(string[] memory tokens)
         private
         pure
         returns (Bitmap memory)
     {
-        // uint256 len;
-        Bitmap memory result = Bitmap({len: 0, bits: 0});
+        uint256 len = bytes(tokens[0]).length;
+        uint256 bits = 0;
+        // For each bit position
+        for (uint256 j = 0; j < len; j++) {
+            for (uint256 i = 0; i < tokens.length; i++) {}
+        }
+        Bitmap memory result = Bitmap({len: len, bits: bits});
         return result;
     }
 
