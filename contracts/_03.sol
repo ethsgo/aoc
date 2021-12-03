@@ -26,23 +26,36 @@ contract _03 is Parser {
     /// Convert a string representing the binary bits of an unsigned integer
     /// into a uint256.
     function bitStringToUint(string memory s) private pure returns (uint256) {
-        bytes memory bs = bytes(s);
-        uint256 result = 0;
-        for (uint i = 0; i < bs.length; i++) {
-            result *= 2;
-            result += (bs[i] == b0) ? 0 : 1;
-        }
-        return result;
+        return uint256(parseBitString(s));
     }
 
-    bytes[] private parseBitStringsStorage;
+    bytes32[] private parseBitStringsStorage;
 
-    function parseBitStrings(string[] memory bitStrings) private returns (bytes[] memory) {
+    /// Convert an array of binary bit strings into an array of bytes32
+    function parseBitStrings(string[] memory bitStrings)
+        private
+        returns (bytes32[] memory)
+    {
         delete parseBitStringsStorage;
-        for (uint i = 0; i < bitStrings.length; i++) {
-            parseBitStringsStorage.push() = bytes.concat(bytes32(0));
+        for (uint256 i = 0; i < bitStrings.length; i++) {
+            parseBitStringsStorage.push(parseBitString(bitStrings[i]));
         }
         return parseBitStringsStorage;
+    }
+
+    /// Convert a binary bit string into bytes32
+    function parseBitString(string memory bitString)
+        private
+        pure
+        returns (bytes32)
+    {
+        bytes32 result;
+        bytes memory bits = bytes(bitString);
+        for (uint256 i = 0; i < bits.length; i++) {
+            result <<= 1;
+            result |= bytes1((bits[i] == b0) ? 0 : 1);
+        }
+        return result;
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
