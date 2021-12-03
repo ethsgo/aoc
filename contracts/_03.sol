@@ -35,6 +35,16 @@ contract _03 is Parser {
         return result;
     }
 
+    bytes[] private parseBitStringsStorage;
+
+    function parseBitStrings(string[] memory bitStrings) private returns (bytes[] memory) {
+        delete parseBitStringsStorage;
+        for (uint i = 0; i < bitStrings.length; i++) {
+            parseBitStringsStorage.push() = bytes.concat(bytes32(0));
+        }
+        return parseBitStringsStorage;
+    }
+
     /// Return a byte array where each bytes1 represents a bit indicating if the
     /// corresponding position in tokens had more 1s than 0s.
     function parity(string[] memory tokens)
