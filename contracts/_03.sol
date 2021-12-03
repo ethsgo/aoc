@@ -15,7 +15,7 @@ contract _03 is Parser {
 
         bytes memory px = parity(tokens);
 
-        return (px.length, uint256(bytes32(px[0])));
+        return (px.length, uint8(bytes1(px[0])));
         // return (p1(dxdy), p2(dxdy));
     }
 
@@ -41,7 +41,7 @@ contract _03 is Parser {
             }
             result = bytes.concat(
                 result,
-                bytes32(count > 0 ? uint256(1) : uint256(0))
+                bytes1(count > 0 ? uint8(1) : uint8(0))
             );
         }
         return result;
