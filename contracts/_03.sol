@@ -13,15 +13,15 @@ contract _03 is Parser {
             );
         }
 
-        bytes memory px = parity(tokens);
+        bytes memory parity = parityBytes(tokens);
 
-        return (px.length, uint8(bytes1(px[0])));
+        return (parity.length, uint8(bytes1(parity[0])));
         // return (p1(dxdy), p2(dxdy));
     }
 
-    // Return a byte array where each byte represents a bit indicating if the
+    // Return a byte array where each bytes1 represents a bit indicating if the
     // corresponding position in tokens had more 1s than 0s.
-    function parity(string[] memory tokens)
+    function parityBytes(string[] memory tokens)
         private
         pure
         returns (bytes memory)
@@ -31,18 +31,11 @@ contract _03 is Parser {
         // For each bit position
         for (uint256 j = 0; j < len; j++) {
             // See what pre-dominates in each token
-            int256 count = 0;
+            int256 c = 0;
             for (uint256 i = 0; i < tokens.length; i++) {
-                if (bytes(tokens[i])[j] == bytes32(ascii_0)) {
-                    count -= 1;
-                } else {
-                    count += 1;
-                }
+                c += (bytes(tokens[i])[j] == bytes1(ascii_0)) ? -1 : int8(1);
             }
-            result = bytes.concat(
-                result,
-                bytes1(count > 0 ? uint8(1) : uint8(0))
-            );
+            result = bytes.concat(result, bytes1(c > 0 ? uint8(1) : uint8(0)));
         }
         return result;
     }
