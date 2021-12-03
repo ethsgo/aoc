@@ -13,9 +13,14 @@ contract _03 is Parser {
             );
         }
 
-        bytes memory bits = parity(tokens);
+        return (p1(tokens), p2(tokens));
+    }
 
-        return (p1(bits), p2(bits));
+    /// Each string in numbers is the binary representation of a number.
+    function p1(string[] memory numbers) private pure returns (uint256) {
+        bytes memory bits = parity(numbers);
+
+        return decimal(bits) * decimal(inverted(bits));
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
@@ -59,12 +64,8 @@ contract _03 is Parser {
         return n;
     }
 
-    /// @param bits are the parity bits
-    function p1(bytes memory bits) private pure returns (uint256) {
-        return decimal(bits) * decimal(inverted(bits));
-    }
-
-    function p2(bytes memory bits) private pure returns (uint256) {
+    /// Each string in numbers is the binary representation of a number.
+    function p2(string[] memory numbers) private pure returns (uint256) {
         return 0;
     }
 }
