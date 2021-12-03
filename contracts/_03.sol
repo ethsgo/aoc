@@ -37,7 +37,7 @@ contract _03 is Parser {
             // See what pre-dominates in each token
             int256 c = 0;
             for (uint256 i = 0; i < tokens.length; i++) {
-                c += (bytes(tokens[i])[j] == bytes1(ascii_0)) ? -1 : int8(1);
+                c += (bytes(tokens[i])[j] == b0) ? -1 : int8(1);
             }
             result = bytes.concat(result, bytes1(c > 0 ? uint8(1) : uint8(0)));
         }
@@ -69,31 +69,56 @@ contract _03 is Parser {
         return 0;
     }
 
-    // We cannot create memory-dynamic arrays yet in Solidity, so use a storage
-    // variable as the scratchpad.
-    string[] private filterStorage;
-
     /// Return the string that matches the bit criteria (most or least common).
     ///
-    /// Each string in numbers is the binary representation of a number.
-    ///
-    /// `mostCommon` indicates if we should filter by the most common bit.
-    function filter(string[] memory numbers, bool mostCommon)
-        private
-        pure
-        returns (string memory)
-    {
+    /// - Each string in numbers is the binary representation of a number.
+    /// - `mostCommon` indicates if we should filter by the most common bit.
+    /// - `position` in the bit position where we should consider the bit criteria.
+    function filter(
+        string[] memory numbers,
+        bool mostCommon,
+        uint256 position
+    ) private returns (string memory) {
         uint256 len = bytes(numbers[0]).length;
         // For each bit,
         for (uint256 j = 0; j < len; j++) {
             // Count the number of ones in that position.
             int256 oneCount = 0;
             for (uint256 i = 0; i < numbers.length; i++) {
-                oneCount += (bytes(numbers[i])[j] == bytes1(ascii_0))
-                    ? -1
-                    : int8(1);
+                oneCount += (bytes(numbers[i])[j] == b0) ? -1 : int8(1);
             }
+
+            // If we're filtering by mostCommon, then filter those numbers that
+            // have the more common byte in the jth position
+            bytes1 bit = mostCommon
+                ? (oneCount >= 0 ? b1 : b0)
+                : (oneCount < 0 ? b1 : b0);
+
+            string[] memory filteredNumbers = filter(numbers, j, bit);
         }
         revert();
     }
+
+    // We cannot create memory-dynamic arrays yet in Solidity, so use a storage
+    // variable as the scratchpad.
+    string[] private filterStorage;
+
+    /// Return those strings that have `bit` in the given `position`.
+    function filter(
+        string[] memory numbers,
+        uint256 position,
+        bytes1 bit
+    ) private returns (string[] memory) {
+        delete filterStorage;
+        for (uint256 i = 0; i < numbers.length; i++) {
+            if (bytes(numbers[i])[position] == bit) {
+                filterStorage.push(numbers[i]);
+            }
+        }
+        return filterStorage;
+    }
+
+    // Some useful constants
+    bytes1 private constant b0 = bytes1(ascii_0);
+    bytes1 private constant b1 = bytes1(ascii_0 + 1);
 }
