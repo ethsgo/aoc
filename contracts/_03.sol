@@ -13,15 +13,14 @@ contract _03 is Parser {
             );
         }
 
-        bytes memory parity = parityBytes(tokens);
+        bytes memory bits = parity(tokens);
 
-        return (parity.length, uint8(bytes1(parity[0])));
-        // return (p1(dxdy), p2(dxdy));
+        return (p1(bits), p2(bits));
     }
 
-    // Return a byte array where each bytes1 represents a bit indicating if the
-    // corresponding position in tokens had more 1s than 0s.
-    function parityBytes(string[] memory tokens)
+    /// Return a byte array where each bytes1 represents a bit indicating if the
+    /// corresponding position in tokens had more 1s than 0s.
+    function parity(string[] memory tokens)
         private
         pure
         returns (bytes memory)
@@ -40,11 +39,32 @@ contract _03 is Parser {
         return result;
     }
 
-    function p1() private pure returns (uint256) {
-        return 0;
+    /// Return an inverted representation of the given bits (stored as a bytes1 array).
+    function inverted(bytes memory bits) private pure returns (bytes memory) {
+        bytes memory result = bytes.concat();
+        for (uint256 i = 0; i < bits.length; i++) {
+            uint8 flipped = uint8(bits[i]) == 1 ? uint8(0) : uint8(1);
+            result = bytes.concat(result, bytes1(flipped));
+        }
+        return result;
     }
 
-    function p2() private pure returns (uint256) {
+    /// Return a decimal representation of the given bits (stored as a bytes1 array).
+    function decimal(bytes memory bits) private pure returns (uint256) {
+        uint256 n = 0;
+        for (uint256 i = 0; i < bits.length; i++) {
+            n *= 2;
+            n += uint8(bits[i]);
+        }
+        return n;
+    }
+
+    /// @param bits are the parity bits
+    function p1(bytes memory bits) private pure returns (uint256) {
+        return decimal(bits) * decimal(inverted(bits));
+    }
+
+    function p2(bytes memory bits) private pure returns (uint256) {
         return 0;
     }
 }

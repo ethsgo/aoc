@@ -14,7 +14,7 @@ let input = `
 `
 
 if (!process.stdin.isTTY) {
-  tokens = require('fs').readFileSync(0).toString()
+  input = require('fs').readFileSync(0).toString()
 }
 
 const tokens = input.split(/\s+/).filter((t) => t.length > 0)
