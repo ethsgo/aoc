@@ -12,7 +12,7 @@ dependencies, run `npm install` after checking out this repository.
 To run any of the Solidity contracts in the `contracts` folder:
 
 ```
-npx hardhat solrun _01
+npx hardhat exec _01
 ```
 
 To run the JS solutions:
@@ -25,7 +25,7 @@ If no inputs are passed in stdin, then the programs execute with the example
 given in the puzzle. To pass input, pipe into stdin:
 
 ```
-cat inputs/_01 | npx hardhat solrun _01
+cat inputs/_01 | npx hardhat exec _01
 cat inputs/_01 | node js/_01.js
 ```
 

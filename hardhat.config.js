@@ -2,7 +2,7 @@ require('@nomiclabs/hardhat-ethers')
 const fs = require('fs')
 
 // https://hardhat.org/guides/create-task.html
-task('solrun', 'Deploy and run the named contract')
+task('exec', 'Deploy and run the named contract')
   .addPositionalParam('name', 'Contract name')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile', { quiet: true })
