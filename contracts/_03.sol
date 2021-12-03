@@ -13,31 +13,37 @@ contract _03 is Parser {
             );
         }
 
-        Bitmap memory parityBitmap = parity(tokens);
+        bytes memory px = parity(tokens);
 
-        return (parityBitmap.len, parityBitmap.bits);
+        return (px.length, uint256(bytes32(px[0])));
         // return (p1(dxdy), p2(dxdy));
     }
 
-    struct Bitmap {
-        uint256 len;
-        uint256 bits;
-    }
-
-    // Return a bitmap which has a bit set if the corresponding position in
-    // token had more 1s than 0s.
+    // Return a byte array where each byte represents a bit indicating if the
+    // corresponding position in tokens had more 1s than 0s.
     function parity(string[] memory tokens)
         private
         pure
-        returns (Bitmap memory)
+        returns (bytes memory)
     {
         uint256 len = bytes(tokens[0]).length;
-        uint256 bits = 0;
+        bytes memory result = bytes.concat();
         // For each bit position
         for (uint256 j = 0; j < len; j++) {
-            for (uint256 i = 0; i < tokens.length; i++) {}
+            // See what pre-dominates in each token
+            int256 count = 0;
+            for (uint256 i = 0; i < tokens.length; i++) {
+                if (bytes(tokens[i])[j] == bytes32(ascii_0)) {
+                    count -= 1;
+                } else {
+                    count += 1;
+                }
+            }
+            result = bytes.concat(
+                result,
+                bytes32(count > 0 ? uint256(1) : uint256(0))
+            );
         }
-        Bitmap memory result = Bitmap({len: len, bits: bits});
         return result;
     }
 
