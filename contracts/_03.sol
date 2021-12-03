@@ -68,4 +68,32 @@ contract _03 is Parser {
     function p2(string[] memory numbers) private pure returns (uint256) {
         return 0;
     }
+
+    // We cannot create memory-dynamic arrays yet in Solidity, so use a storage
+    // variable as the scratchpad.
+    string[] private filterStorage;
+
+    /// Return the string that matches the bit criteria (most or least common).
+    ///
+    /// Each string in numbers is the binary representation of a number.
+    ///
+    /// `mostCommon` indicates if we should filter by the most common bit.
+    function filter(string[] memory numbers, bool mostCommon)
+        private
+        pure
+        returns (string memory)
+    {
+        uint256 len = bytes(numbers[0]).length;
+        // For each bit,
+        for (uint256 j = 0; j < len; j++) {
+            // Count the number of ones in that position.
+            int256 oneCount = 0;
+            for (uint256 i = 0; i < numbers.length; i++) {
+                oneCount += (bytes(numbers[i])[j] == bytes1(ascii_0))
+                    ? -1
+                    : int8(1);
+            }
+        }
+        revert();
+    }
 }
