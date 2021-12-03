@@ -32,8 +32,11 @@ function parity(tokens) {
   return parity
 }
 
-// Convert lit bit array to a decimal number
+// Convert boolean bit array to a decimal number
 const decimal = (bits) => bits.reduce((n, x) => n * 2 + (x ? 1 : 0))
+
+// Convert string bit array to a boolean bit array
+const boolBits = (bits) => [...bits].map((c) => c === '1')
 
 function p1(tokens) {
   const px = parity(tokens)
@@ -42,5 +45,40 @@ function p1(tokens) {
   return decimal(bits) * decimal(inverse)
 }
 
+function p2(numbers) {
+  // If equal (parity == 0) then use 1
+  const mostCommon = filter(numbers, (parity) => parity >= 0)
+  // If equal (parity == 1) then use 0
+  const leastCommon = filter(numbers, (parity) => parity <= 0)
+  return decimal(boolBits(mostCommon))
+}
+
+/// Filter down the given numbers (provided as bit strings of their
+/// binary representation) until we find a singleton that satisfies the given
+/// bit criteria.
+///
+/// The criteria is passed the parity (positive value if there are more numbers
+/// with 1 in that bit position).
+function filter(numbers, criteria) {
+  const len = numbers[0].length
+
+  // For each bit position
+  for (let j = 0; j < len; j += 1) {
+    // Determine the most common bit in that position
+    let parity = 0
+    for (let i = 0; i < numbers.length; i++) {
+      parity += numbers[i][j] === '0' ? +1 : -1
+    }
+
+    const bit = criteria(parity) ? '1' : '0'
+
+    // Keep only numbers that have that bit in that position
+    numbers = numbers.filter((number) => number[j] == bit)
+    if (numbers.length == 1) return numbers[0]
+  }
+
+  return ''
+}
+
 console.log(p1(tokens))
-// console.log(p2(dxdy))
+console.log(p2(tokens))
