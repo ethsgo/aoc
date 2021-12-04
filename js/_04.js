@@ -1,5 +1,6 @@
-let input = `
-7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+const { utils } = require('ethers')
+
+let input = `7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 22 13 17 11  0
  8  2 23  4 24
@@ -24,11 +25,23 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString()
 }
 
-const numbers = input.split(/\s+/).filter((t) => t.length > 0)
+// The first line is the draw
+const [drawInput, ...remainingLines] = input.split('\n')
+const remainingInput = remainingLines.join('\n')
 
-function p1(numbers) {
-  return numbers
+function toNumbers(s) {
+  return s
+    .split(/[^\d.]+/)
+    .filter((t) => t.length > 0)
+    .map(Number)
 }
 
-console.log(p1(numbers))
+const draw = toNumbers(drawInput)
+// const boardNumbers = toNumbers(boardsInput)
+
+function p1(numbers) {
+  return toNumbers(numbers)
+}
+
+console.log(JSON.stringify(p1(remainingInput)))
 // console.log(p2(tokens))
