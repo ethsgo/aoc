@@ -5,9 +5,9 @@ import "./Parser.sol";
 
 contract Y20_01 is Parser {
     function main(string memory input) external returns (uint256, uint256) {
-        uint256[] memory xs = parseInts(input);
+        uint256[] memory xs = parseUints(input);
         if (xs.length == 0) {
-            xs = parseInts("[1721, 979, 366, 299, 675, 1456]");
+            xs = parseUints("[1721, 979, 366, 299, 675, 1456]");
         }
 
         return (p1(xs), p2(xs));

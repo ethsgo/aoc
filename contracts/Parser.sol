@@ -19,10 +19,26 @@ contract Parser {
     uint256[] private xsStorage;
     string[] private tokensStorage;
 
-    /// Convert the given string into an array of integers.
+    /// Convert the given string into an array of uints.
     ///
     /// Any non-digit character acts as a separator.
-    function parseInts(string memory s) internal returns (uint256[] memory) {
+    function parseUints(string memory s) internal returns (uint256[] memory) {
+        return parseUintsSlice(s, 0, bytes(s).length);
+    }
+
+    /// Convert the given string slice into an array of integers.
+    ///
+    /// startIndex and endIndex behave similar to arguments to the Javascript
+    /// Array.slice method, i.e, we parse [startIndex, endIndex), the start
+    /// index is inclusive but the end index is excluded, we stop before the end
+    /// index.
+    ///
+    /// Any non-digit character acts as a separator.
+    function parseUintsSlice(
+        string memory s,
+        uint256 startIndex,
+        uint256 endIndex
+    ) internal returns (uint256[] memory) {
         // Strings are not indexable.
         bytes memory b = bytes(s);
 
@@ -33,7 +49,7 @@ contract Parser {
 
         uint256 x;
         bool didSeeDigit = false;
-        for (uint256 i = 0; i < b.length; i++) {
+        for (uint256 i = startIndex; i < endIndex; i++) {
             uint8 ascii = uint8(b[i]);
             if (ascii >= ascii_0 && ascii <= ascii_9) {
                 uint256 digit = ascii - ascii_0;
