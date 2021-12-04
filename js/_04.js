@@ -46,9 +46,9 @@ function parseBoards(numbers) {
       // Start a new board
       boards.push(board)
       board = [[]]
-      ;[x, y] = [0, 0]
-    }
-    if (x === 4) {
+      x = 0
+      y = 0
+    } else if (x === 4) {
       // Start a new row
       board.push([])
       x = 0
@@ -65,24 +65,24 @@ const boards = parseBoards(toNumbers(remainingInput))
 
 function play(draw, boards) {
   for (let i = 0; i < draw.length; i++) {
-    // Mark the draw on all boards,
-    const m = draw[i]
+    // Draw a call, and mark it on all boards.
+    const call = draw[i]
     for (let b = 0; b < boards.length; b++) {
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
-          if (boards[b][y][x] === m) {
-            boards[b][y][x] = -m
+          if (boards[b][y][x] === call) {
+            boards[b][y][x] = -call
           }
         }
       }
     }
 
-    // and then check to see if someone won.
+    // Check to see if someone won.
     for (let b = 0; b < boards.length; b++) {
       const board = boards[b]
       for (let y = 0; y < 5; y++) {
         if (board[y].every((n) => n < 0)) {
-          return { b, y, board }
+          return { b, call, y, board }
         }
       }
       for (let x = 0; x < 5; x++) {
@@ -94,7 +94,7 @@ function play(draw, boards) {
           }
         }
         if (marked) {
-          return { b, x, board }
+          return { b, call, x, board }
         }
       }
     }
@@ -102,7 +102,13 @@ function play(draw, boards) {
 }
 
 function p1(draw, boards) {
-  return play(draw, boards)
+  const { call, board } = play(draw, boards)
+  const unmarkedSum = board
+    .flat()
+    .filter((n) => n > 0)
+    .reduce((n, s) => n + s)
+  // return { call, unmarkedSum, board }
+  return call * unmarkedSum
 }
 
 console.log(p1(draw, boards))
