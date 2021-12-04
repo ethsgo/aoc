@@ -42,18 +42,19 @@ function parseBoards(numbers) {
   let [x, y] = [0, 0]
   for (let i = 0; i < numbers.length; i++) {
     board[y].push(numbers[i])
-    x++
-    if (x == 4 && y == 4) {
+    if (x === 4 && y === 4) {
       // Start a new board
       boards.push(board)
       board = [[]]
       ;[x, y] = [0, 0]
     }
-    if (x == 4) {
+    if (x === 4) {
       // Start a new row
       board.push([])
       x = 0
       y++
+    } else {
+      x++
     }
   }
   return boards
@@ -62,22 +63,46 @@ function parseBoards(numbers) {
 const draw = toNumbers(drawInput)
 const boards = parseBoards(toNumbers(remainingInput))
 
-function p1(draw, boards) {
+function play(draw, boards) {
   for (let i = 0; i < draw.length; i++) {
-    // Mark the draw on all boards, and then check to see if someone won.
+    // Mark the draw on all boards,
     const m = draw[i]
     for (let b = 0; b < boards.length; b++) {
-      const board = boards[b]
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
-          if (board[y][x] === m) {
-            board[y][x] = -m
+          if (boards[b][y][x] === m) {
+            boards[b][y][x] = -m
           }
         }
       }
     }
+
+    // and then check to see if someone won.
+    for (let b = 0; b < boards.length; b++) {
+      const board = boards[b]
+      for (let y = 0; y < 5; y++) {
+        if (board[y].every((n) => n < 0)) {
+          return { b, y, board }
+        }
+      }
+      for (let x = 0; x < 5; x++) {
+        let marked = true
+        for (let y = 0; y < 5; y++) {
+          if (board[y][x] >= 0) {
+            marked = false
+            break
+          }
+        }
+        if (marked) {
+          return { b, x, board }
+        }
+      }
+    }
   }
-  return boards //{ draw, boards }
+}
+
+function p1(draw, boards) {
+  return play(draw, boards)
 }
 
 console.log(p1(draw, boards))
