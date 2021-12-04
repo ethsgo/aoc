@@ -67,55 +67,57 @@ function parseGame(input) {
 }
 
 function play({ draw, boards }, { toEnd = false } = {}) {
-  const winningBoards = []
+  let hasWon = {}
+  let lastWin
   for (let i = 0; i < draw.length; i++) {
     // Draw a call
     const call = draw[i]
     for (let b = 0; b < boards.length; b++) {
-      const board = boards[b]
-      const orig = JSON.parse(JSON.stringify(board))
-      let didMark = false
+      // Skip boards that have already won.
+      if (hasWon[b]) continue
 
-      // Mark it on the board
+      const board = boards[b]
+
+      // Mark the call on the board
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
           if (board[y][x] === call) {
             board[y][x] = -1
-            didMark = true
           }
         }
       }
 
-      // And see if it won.
-      //
-      // Only do this if we marked something, so as to not overwrite lastWin.
-      if (!didMark) continue
-
-      console.log({ call, orig, board })
-      for (let y = 0; y < 5; y++) {
-        if (board[y].every((n) => n < 0)) {
-          lastWin = { b, call, y, board }
-          if (!toEnd) return lastWin
-        }
-      }
-      for (let x = 0; x < 5; x++) {
-        let marked = true
-        for (let y = 0; y < 5; y++) {
-          if (board[y][x] >= 0) {
-            marked = false
-            break
-          }
-        }
-        if (marked) {
-          lastWin = { b, call, x, board }
-          if (!toEnd) return lastWin
-        }
+      // And see if the board is now complete
+      if (isComplete(board)) {
+        hasWon[b] = true
+        lastWin = { b, call, board }
+        if (!toEnd) return lastWin
       }
     }
   }
   return lastWin
 }
 
+function isComplete(board) {
+  for (let y = 0; y < 5; y++) {
+    if (board[y].every((n) => n < 0)) {
+      return true
+    }
+  }
+
+  for (let x = 0; x < 5; x++) {
+    let marked = true
+    for (let y = 0; y < 5; y++) {
+      if (board[y][x] >= 0) {
+        marked = false
+        break
+      }
+    }
+    if (marked) {
+      return true
+    }
+  }
+}
 function score({ call, board }) {
   const unmarkedSum = board
     .flat()
