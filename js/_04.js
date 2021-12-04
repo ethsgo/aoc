@@ -64,36 +64,26 @@ function parseBoards(numbers) {
   return boards
 }
 
-function play({ draw, boards }, { toEnd = false } = {}) {
-  let hasWon = {}
-  let lastWin
+function* play({ draw, boards }) {
   for (let i = 0; i < draw.length; i++) {
-    // Draw a call
     const call = draw[i]
-    for (let b = 0; b < boards.length; b++) {
-      // Skip boards that have already won.
-      if (hasWon[b]) continue
-
-      const board = boards[b]
-
-      // Mark the call on the board
+    let b = 0
+    while (b < boards.length) {
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
-          if (board[y][x] === call) {
-            board[y][x] = -1
+          if (boards[b][y][x] === call) {
+            boards[b][y][x] = -1
           }
         }
       }
 
-      // And see if the board is now complete
-      if (isComplete(board)) {
-        hasWon[b] = true
-        lastWin = { b, call, board }
-        if (!toEnd) return lastWin
+      if (isComplete(boards[b])) {
+        yield { b, call, board: boards.splice(b, 1)[0] }
+      } else {
+        b++
       }
     }
   }
-  return lastWin
 }
 
 function isComplete(board) {
@@ -113,10 +103,16 @@ function score({ call, board }) {
 }
 
 function p1(input) {
-  return score(play(parseGame(input)))
+  return score(play(parseGame(input)).next().value)
 }
+
 function p2(input) {
-  return score(play(parseGame(input), { toEnd: true }))
+  let generator = play(parseGame(input))
+  while (true) {
+    let { value, done } = generator.next()
+    if (done) return score(lastValue)
+    lastValue = value
+  }
 }
 
 console.log(p1(input))
