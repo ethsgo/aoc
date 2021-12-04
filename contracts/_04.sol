@@ -26,7 +26,12 @@ contract _04Parser is Parser, StringUtils {
 22 11 13  6  5\n\
  2  0 12  3  7";
 
-    function parseBingo(string memory input) internal returns (uint256) {
+    struct Bingo {
+        uint256[] draw;
+        uint256[5][5][] boards;
+    }
+
+    function parseBingo(string memory input) internal returns (Bingo memory) {
         int256 firstNewlineIndex = indexOf(input, ascii_nl);
         require(firstNewlineIndex >= 0);
         uint256 drawEndIndex = uint256(firstNewlineIndex);
@@ -38,17 +43,37 @@ contract _04Parser is Parser, StringUtils {
             bytes(input).length
         );
 
-        return (boardNumbers.length);
+        uint256[5][5][] memory boards = parseBoards(boardNumbers);
+
+        return Bingo({draw: draw, boards: boards});
+    }
+
+    function parseBoards(uint256[] memory numbers)
+        private
+        pure
+        returns (uint256[5][5][] memory)
+    {
+        require(numbers.length % 25 == 0, "Expected 5x5 boards");
+        uint256 boardCount = numbers.length / 25;
+        uint256[5][5][] memory boards = new uint256[5][5][](boardCount);
+        for (uint256 i = 0; i < numbers.length; i++) {
+            uint256 b = i / 25;
+            uint256 bi = i % 25;
+            uint256 y = bi / 5;
+            uint256 x = bi % 5;
+            boards[b][y][x] = numbers[i];
+        }
+        return boards;
     }
 }
 
 contract _04 is _04Parser {
     function main(string calldata input) external returns (uint256, uint256) {
-        uint256 bingo = parseBingo(
+        Bingo memory bingo = parseBingo(
             bytes(input).length == 0 ? exampleInput : input
         );
 
-        return (bingo, 0);
+        return (bingo.draw.length, 0);
     }
 
     function p1(string[] memory tokens) private pure returns (uint256) {
