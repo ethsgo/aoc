@@ -10,15 +10,14 @@ contract _03Parser is Parser {
         "10000 11001 00010 01010";
 
     /// Construct an array of uints from an array of bit strings.
-    function parseBitStrings(string memory input)
+    function parseBitStrings(string[] memory strings)
         internal
+        pure
         returns (uint256[] memory)
     {
-        string[] memory tokens = parseTokens(input);
-
-        uint256[] memory result = new uint256[](tokens.length);
-        for (uint256 i = 0; i < tokens.length; i++) {
-            result[i] = bitStringToUint(tokens[i]);
+        uint256[] memory result = new uint256[](strings.length);
+        for (uint256 i = 0; i < strings.length; i++) {
+            result[i] = bitStringToUint(strings[i]);
         }
         return result;
     }
@@ -37,18 +36,38 @@ contract _03Parser is Parser {
 
 contract _03Alt is _03Parser {
     function main(string calldata input) external returns (uint256, uint256) {
-        uint256[] memory numbers = parseBitStrings(
+        string[] memory tokens = parseTokens(
             bytes(input).length == 0 ? exampleInput : input
         );
+        uint256[] memory numbers = parseBitStrings(tokens);
+        uint256 bitCount = bytes(tokens[0]).length;
 
-        return (numbers.length, 0);
+        return (p1(numbers, bitCount), 0);
     }
 
-    /// Each string in numbers is the binary representation of a number.
-    function p1(string[] memory numbers) private pure returns (uint256) {
-        bytes memory bits = parity(numbers);
+    function p1(uint256[] memory numbers, uint256 bitCount)
+        private
+        pure
+        returns (uint256)
+    {
+        // For each bit position, set the result bit depending on which of 0 or
+        // 1 occurs more amongst all numbers in that bit position.
+        uint256 result;
 
-        return decimal(bits) * decimal(inverted(bits));
+        for (uint256 position = 0; position < bitCount; position++) {
+            int256 c = 0;
+            for (uint256 j = 0; j < numbers.length; j++) {
+                c += int256((numbers[j] >> position) & 1);
+            }
+            result <<= 1;
+            require(c != 0);
+            if (c > 0) {
+                result += 1;
+            }
+        }
+        return result;
+
+        //        return decimal(bits) * decimal(inverted(bits));
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
