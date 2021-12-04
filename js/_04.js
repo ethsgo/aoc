@@ -97,25 +97,13 @@ function play({ draw, boards }, { toEnd = false } = {}) {
 }
 
 function isComplete(board) {
-  for (let y = 0; y < 5; y++) {
-    if (board[y].every((n) => n < 0)) {
-      return true
-    }
-  }
-
-  for (let x = 0; x < 5; x++) {
-    let marked = true
-    for (let y = 0; y < 5; y++) {
-      if (board[y][x] >= 0) {
-        marked = false
-        break
-      }
-    }
-    if (marked) {
-      return true
-    }
-  }
+  const marked = (xs) => xs.every((n) => n < 0)
+  return [...Array(5)].some(
+    (_, i) =>
+      marked(board[i]) || marked([...Array(5)].map((_, j) => board[j][i]))
+  )
 }
+
 function score({ call, board }) {
   const unmarkedSum = board
     .flat()
