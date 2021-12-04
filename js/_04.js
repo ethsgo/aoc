@@ -36,12 +36,35 @@ function toNumbers(s) {
     .map(Number)
 }
 
-const draw = toNumbers(drawInput)
-// const boardNumbers = toNumbers(boardsInput)
-
-function p1(numbers) {
-  return toNumbers(numbers)
+function parseBoards(numbers) {
+  let boards = []
+  let board = [[]]
+  let [x, y] = [0, 0]
+  for (let i = 0; i < numbers.length; i++) {
+    board[y].push(numbers[i])
+    x++
+    if (x == 4 && y == 4) {
+      // Start a new board
+      boards.push(board)
+      board = [[]]
+      ;[x, y] = [0, 0]
+    }
+    if (x == 4) {
+      // Start a new row
+      board.push([])
+      x = 0
+      y++
+    }
+  }
+  return boards
 }
 
-console.log(JSON.stringify(p1(remainingInput)))
+const draw = toNumbers(drawInput)
+const boards = parseBoards(toNumbers(remainingInput))
+
+function p1(draw, boards) {
+  return { draw, boards }
+}
+
+console.log(p1(draw, boards))
 // console.log(p2(tokens))
