@@ -13,6 +13,9 @@ contract Parser {
     /// 122 - 'z'
     uint8 internal constant ascii_a = 97;
     uint8 internal constant ascii_z = 122;
+    /// Newline
+    /// 10 - '\n'
+    uint8 internal constant ascii_nl = 10;
 
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
