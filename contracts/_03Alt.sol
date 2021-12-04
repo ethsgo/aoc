@@ -3,7 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 
-contract _03 is Parser {
+/// WIP Alternative solution to _03
+contract _03Alt is Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         string[] memory tokens = parseTokens(input);
         if (tokens.length == 0) {
@@ -13,7 +14,7 @@ contract _03 is Parser {
             );
         }
 
-        return (p1(tokens), p2(tokens));
+        return (bitStringToUint(tokens[0]), 0);
     }
 
     /// Each string in numbers is the binary representation of a number.
@@ -21,6 +22,31 @@ contract _03 is Parser {
         bytes memory bits = parity(numbers);
 
         return decimal(bits) * decimal(inverted(bits));
+    }
+
+    /// Construct a uint from a bit string.
+    function bitStringToUint(string memory s) private pure returns (uint256) {
+        uint256 result;
+        bytes memory bits = bytes(s);
+        for (uint256 i = 0; i < bits.length; i++) {
+            result <<= 1;
+            result += (bits[i] == b0) ? 0 : 1;
+        }
+        return result;
+    }
+
+    uint256[] private parseBitStringsStorage;
+
+    /// Construct an array of uints from an array of bit strings.
+    function parseBitStrings(string[] memory strings)
+        private
+        returns (uint256[] memory)
+    {
+        delete parseBitStringsStorage;
+        for (uint256 i = 0; i < strings.length; i++) {
+            parseBitStringsStorage.push(bitStringToUint(strings[i]));
+        }
+        return parseBitStringsStorage;
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
