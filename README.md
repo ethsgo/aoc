@@ -15,6 +15,8 @@ To run any of the Solidity contracts in the `contracts` folder:
 npx hardhat exec _01
 ```
 
+It prints a gas estimate and the return from the main function in the contract.
+
 To run the JS solutions:
 
 ```

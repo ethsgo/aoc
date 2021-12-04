@@ -82,11 +82,9 @@ contract _04Parser is Parser, StringUtils {
 
 contract _04 is _04Parser {
     function main(string calldata input) external returns (uint256, uint256) {
-        Bingo memory bingo = parseBingo(
-            bytes(input).length == 0 ? exampleInput : input
-        );
+        string memory s = bytes(input).length == 0 ? exampleInput : input;
 
-        return (p1(bingo), 0);
+        return (p1(parseBingo(s)), p2(parseBingo(s)));
     }
 
     function play(Bingo memory bingo) private pure {
@@ -158,8 +156,7 @@ contract _04 is _04Parser {
         return sum;
     }
 
-    function p1(Bingo memory bingo) private pure returns (uint256) {
-        play(bingo);
+    function score(Bingo memory bingo) private pure returns (uint256) {
         uint256 lastDraw = bingo.draw[bingo.drawIndex];
         uint256 unmarkedSum = unmarkedSumOfBoard(
             bingo.boards[bingo.winningBoardIndex]
@@ -167,7 +164,13 @@ contract _04 is _04Parser {
         return lastDraw * unmarkedSum;
     }
 
-    function p2(string[] memory tokens) private pure returns (uint256) {
-        return 0;
+    function p1(Bingo memory bingo) private pure returns (uint256) {
+        play(bingo);
+        return score(bingo);
+    }
+
+    function p2(Bingo memory bingo) private pure returns (uint256) {
+        play(bingo);
+        return score(bingo);
     }
 }
