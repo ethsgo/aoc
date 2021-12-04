@@ -103,14 +103,8 @@ contract _03 is _03Parser {
         pure
         returns (uint256)
     {
-        uint256 result;
-        for (uint256 position = bitCount; position > 0; position--) {
-            result <<= 1;
-            if ((number >> (position - 1)) & 1 == 0) {
-                result += 1;
-            }
-        }
-        return result;
+        uint256 mask = (1 << bitCount) - 1;
+        return (~number & mask);
     }
 
     function p2(uint256[] memory numbers, uint256 bitCount)
