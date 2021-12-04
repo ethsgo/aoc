@@ -20,27 +20,18 @@ if (!process.stdin.isTTY) {
 const tokens = input.split(/\s+/).filter((t) => t.length > 0)
 
 function p1(tokens) {
-  const px = parity(tokens)
-  const bits = px.map((x) => x > 0)
-  const inverse = px.map((x) => x < 0)
-  return decimal(bits) * decimal(inverse)
+  const px = parityBits(tokens)
+  const bits = px.join('')
+  const inverse = px.map((x) => (x === '1' ? '0' : '1')).join('')
+  return parseInt(bits, 2) * parseInt(inverse, 2)
 }
 
-// Positive if there are more 1s than 0s in the given index.
-function parity(tokens) {
-  const len = tokens[0].length
-  let parity = Array(len).fill(0)
-  for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i]
-    for (let j = 0; j < len; j += 1) {
-      parity[j] += token[j] === '1' ? +1 : -1
-    }
-  }
-  return parity
+function parityBits(numbers) {
+  return [...Array(numbers[0].length)].map((_, i) => {
+    const ones = numbers.filter((n) => n[i] == '1')
+    return ones.length > numbers.length / 2 ? '1' : '0'
+  })
 }
-
-// Convert boolean bit array to a decimal number
-const decimal = (bits) => bits.reduce((n, x) => n * 2 + (x ? 1 : 0))
 
 function p2(numbers) {
   return reduce(numbers, 0, true) * reduce(numbers, 0, false)
@@ -48,15 +39,10 @@ function p2(numbers) {
 
 function reduce(numbers, i, mostCommon) {
   if (numbers.length == 1) return parseInt(numbers[0], 2)
-  const zeroes = numbers.filter((n) => n[i] == '0')
   const ones = numbers.filter((n) => n[i] === '1')
-  if (mostCommon) {
-    if (ones.length >= zeroes.length) return reduce(ones, i + 1, mostCommon)
-    else return reduce(zeroes, i + 1, mostCommon)
-  } else {
-    if (ones.length < zeroes.length) return reduce(ones, i + 1, mostCommon)
-    else return reduce(zeroes, i + 1, mostCommon)
-  }
+  const zeroes = numbers.filter((n) => n[i] == '0')
+  const useOnes = ones.length >= zeroes.length == mostCommon
+  return reduce(useOnes ? ones : zeroes, i + 1, mostCommon)
 }
 
 console.log(p1(tokens))
