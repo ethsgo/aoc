@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
-/// WIP Alternative solution to _03
 contract _03Parser is Parser {
     string internal constant exampleInput =
         "00100 11110 10110 10111 10101 01111 00111 11100 "
@@ -52,12 +52,29 @@ contract _03Alt is _03Parser {
     {
         // For each bit position, set the result bit depending on which of 0 or
         // 1 occurs more amongst all numbers in that bit position.
-        uint256 result;
+        uint256 a = fromMostCommon(numbers, bitCount);
+        uint256 b = invertBits(a, bitCount);
+        return a * b;
+    }
 
-        for (uint256 position = 0; position < bitCount; position++) {
+    /// Construct a number by using the most common bit in each position.
+    ///
+    /// For each bit position, set the result bit depending on which of 0 or
+    /// 1 occurs more amongst all numbers in that bit position.
+    function fromMostCommon(uint256[] memory numbers, uint256 bitCount)
+        private
+        pure
+        returns (uint256)
+    {
+        uint256 result;
+        for (uint256 position = bitCount; position > 0; position--) {
             int256 c = 0;
             for (uint256 j = 0; j < numbers.length; j++) {
-                c += int256((numbers[j] >> position) & 1);
+                if ((numbers[j] >> (position - 1)) & 1 == 0) {
+                    c -= 1;
+                } else {
+                    c += 1;
+                }
             }
             result <<= 1;
             require(c != 0);
@@ -66,8 +83,24 @@ contract _03Alt is _03Parser {
             }
         }
         return result;
+    }
 
-        //        return decimal(bits) * decimal(inverted(bits));
+    /// Construct a number by inverting the bits of the given number.
+    ///
+    /// Consider only the lower bitCount bits.
+    function invertBits(uint256 number, uint256 bitCount)
+        private
+        pure
+        returns (uint256)
+    {
+        uint256 result;
+        for (uint256 position = bitCount; position > 0; position--) {
+            result <<= 1;
+            if ((number >> (position - 1)) & 1 == 0) {
+                result += 1;
+            }
+        }
+        return result;
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
