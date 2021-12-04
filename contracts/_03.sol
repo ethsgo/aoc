@@ -34,7 +34,6 @@ contract _03Parser is Parser {
     }
 }
 
-/// Solution to _03 using bit manipulation.
 contract _03 is _03Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         string[] memory tokens = parseTokens(
