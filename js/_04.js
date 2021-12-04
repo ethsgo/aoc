@@ -39,22 +39,22 @@ function toNumbers(s) {
 function parseBoards(numbers) {
   let boards = []
   let board = [[]]
-  let [x, y] = [0, 0]
+  let y = 0
   for (let i = 0; i < numbers.length; i++) {
     board[y].push(numbers[i])
-    if (x === 4 && y === 4) {
-      // Start a new board
-      boards.push(board)
-      board = [[]]
-      x = 0
-      y = 0
-    } else if (x === 4) {
-      // Start a new row
-      board.push([])
-      x = 0
-      y++
-    } else {
-      x++
+    // If the row filled up
+    if (board[y].length == 5) {
+      // And we have 5 rows
+      if (board.length == 5) {
+        // Start a new board
+        boards.push(board)
+        board = [[]]
+        y = 0
+      } else {
+        // Start a new row
+        board.push([])
+        y++
+      }
     }
   }
   return boards
@@ -106,8 +106,8 @@ function p1(draw, boards) {
   const unmarkedSum = board
     .flat()
     .filter((n) => n > 0)
-    .reduce((n, s) => n + s)
-  // return { call, unmarkedSum, board }
+    .reduce((s, n) => s + n)
+  console.log({ call, unmarkedSum, board })
   return call * unmarkedSum
 }
 
