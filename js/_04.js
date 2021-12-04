@@ -63,7 +63,21 @@ const draw = toNumbers(drawInput)
 const boards = parseBoards(toNumbers(remainingInput))
 
 function p1(draw, boards) {
-  return { draw, boards }
+  for (let i = 0; i < draw.length; i++) {
+    // Mark the draw on all boards, and then check to see if someone won.
+    const m = draw[i]
+    for (let b = 0; b < boards.length; b++) {
+      const board = boards[b]
+      for (let y = 0; y < 5; y++) {
+        for (let x = 0; x < 5; x++) {
+          if (board[y][x] === m) {
+            board[y][x] = -m
+          }
+        }
+      }
+    }
+  }
+  return boards //{ draw, boards }
 }
 
 console.log(p1(draw, boards))
