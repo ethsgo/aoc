@@ -25,10 +25,18 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString()
 }
 
+function parseGame(input) {
+  input = input.split('\n')
+  // The first line is the draw
+  const draw = toNumbers(input.shift())
+  const boards = parseBoards(toNumbers(input.join(' ')))
+  return { draw, boards }
+}
+
 function toNumbers(s) {
   return s
     .split(/[^\d.]+/)
-    .filter((t) => t.length > 0)
+    .filter((t) => t !== '')
     .map(Number)
 }
 
@@ -54,16 +62,6 @@ function parseBoards(numbers) {
     }
   }
   return boards
-}
-
-function parseGame(input) {
-  // The first line is the draw
-  const [drawInput, ...remainingLines] = input.split('\n')
-  const remainingInput = remainingLines.join('\n')
-
-  const draw = toNumbers(drawInput)
-  const boards = parseBoards(toNumbers(remainingInput))
-  return { draw, boards }
 }
 
 function play({ draw, boards }, { toEnd = false } = {}) {
