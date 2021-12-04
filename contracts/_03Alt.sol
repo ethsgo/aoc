@@ -4,24 +4,23 @@ pragma solidity ^0.8.0;
 import "./Parser.sol";
 
 /// WIP Alternative solution to _03
-contract _03Alt is Parser {
-    function main(string calldata input) external returns (uint256, uint256) {
+contract _03Parser is Parser {
+    string internal constant exampleInput =
+        "00100 11110 10110 10111 10101 01111 00111 11100 "
+        "10000 11001 00010 01010";
+
+    /// Construct an array of uints from an array of bit strings.
+    function parseBitStrings(string memory input)
+        internal
+        returns (uint256[] memory)
+    {
         string[] memory tokens = parseTokens(input);
-        if (tokens.length == 0) {
-            tokens = parseTokens(
-                "00100 11110 10110 10111 10101 01111 00111 11100 "
-                "10000 11001 00010 01010"
-            );
+
+        uint256[] memory result = new uint256[](tokens.length);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            result[i] = bitStringToUint(tokens[i]);
         }
-
-        return (bitStringToUint(tokens[0]), 0);
-    }
-
-    /// Each string in numbers is the binary representation of a number.
-    function p1(string[] memory numbers) private pure returns (uint256) {
-        bytes memory bits = parity(numbers);
-
-        return decimal(bits) * decimal(inverted(bits));
+        return result;
     }
 
     /// Construct a uint from a bit string.
@@ -30,23 +29,26 @@ contract _03Alt is Parser {
         bytes memory bits = bytes(s);
         for (uint256 i = 0; i < bits.length; i++) {
             result <<= 1;
-            result += (bits[i] == b0) ? 0 : 1;
+            result += (bits[i] == bytes1(ascii_0)) ? 0 : 1;
         }
         return result;
     }
+}
 
-    uint256[] private parseBitStringsStorage;
+contract _03Alt is _03Parser {
+    function main(string calldata input) external returns (uint256, uint256) {
+        uint256[] memory numbers = parseBitStrings(
+            bytes(input).length == 0 ? exampleInput : input
+        );
 
-    /// Construct an array of uints from an array of bit strings.
-    function parseBitStrings(string[] memory strings)
-        private
-        returns (uint256[] memory)
-    {
-        delete parseBitStringsStorage;
-        for (uint256 i = 0; i < strings.length; i++) {
-            parseBitStringsStorage.push(bitStringToUint(strings[i]));
-        }
-        return parseBitStringsStorage;
+        return (numbers.length, 0);
+    }
+
+    /// Each string in numbers is the binary representation of a number.
+    function p1(string[] memory numbers) private pure returns (uint256) {
+        bytes memory bits = parity(numbers);
+
+        return decimal(bits) * decimal(inverted(bits));
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
