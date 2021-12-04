@@ -25,10 +25,6 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString()
 }
 
-// The first line is the draw
-const [drawInput, ...remainingLines] = input.split('\n')
-const remainingInput = remainingLines.join('\n')
-
 function toNumbers(s) {
   return s
     .split(/[^\d.]+/)
@@ -60,10 +56,18 @@ function parseBoards(numbers) {
   return boards
 }
 
-const draw = toNumbers(drawInput)
-const boards = parseBoards(toNumbers(remainingInput))
+function parseGame(input) {
+  // The first line is the draw
+  const [drawInput, ...remainingLines] = input.split('\n')
+  const remainingInput = remainingLines.join('\n')
 
-function play(draw, boards) {
+  const draw = toNumbers(drawInput)
+  const boards = parseBoards(toNumbers(remainingInput))
+  return { draw, boards }
+}
+
+function play({ draw, boards }, { toEnd = false } = {}) {
+  let lastWin
   for (let i = 0; i < draw.length; i++) {
     // Draw a call, and mark it on all boards.
     const call = draw[i]
@@ -82,7 +86,8 @@ function play(draw, boards) {
       const board = boards[boards.length - 1 - b]
       for (let y = 0; y < 5; y++) {
         if (board[y].every((n) => n < 0)) {
-          return { b, call, y, board }
+          lastWin = { b, call, y, board }
+          if (!toEnd) return lastWin
         }
       }
       for (let x = 0; x < 5; x++) {
@@ -94,22 +99,29 @@ function play(draw, boards) {
           }
         }
         if (marked) {
-          return { b, call, x, board }
+          lastWin = { b, call, x, board }
+          if (!toEnd) return lastWin
         }
       }
     }
   }
+  return lastWin
 }
 
-function p1(draw, boards) {
-  const { call, board } = play(draw, boards)
+function score({ call, board }) {
   const unmarkedSum = board
     .flat()
     .filter((n) => n > 0)
-    .reduce((s, n) => s + n)
-  console.log({ call, unmarkedSum, board, ...boards })
+    .reduce((s, n) => s + n, 0)
   return call * unmarkedSum
 }
 
-console.log(p1(draw, boards))
-// console.log(p2(tokens))
+function p1(input) {
+  return score(play(parseGame(input)))
+}
+function p2(input) {
+  return score(play(parseGame(input), { toEnd: true }))
+}
+
+console.log(p1(input))
+console.log(p2(input))
