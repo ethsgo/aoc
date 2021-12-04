@@ -87,57 +87,63 @@ contract _04 is _04Parser {
         return (p1(parseBingo(s)), p2(parseBingo(s)));
     }
 
-    function play(Bingo memory bingo) private pure {
+    function play(Bingo memory bingo, bool toEnd) private pure {
         for (uint256 i = 0; i < bingo.draw.length; i++) {
+            int256 call = int256(bingo.draw[i]);
             bingo.drawIndex = i;
 
-            int256 call = int256(bingo.draw[i]);
-
-            // Mark the call on the boards.
             for (uint256 b = 0; b < bingo.boards.length; b++) {
-                for (uint256 y = 0; y < 5; y++) {
-                    for (uint256 x = 0; x < 5; x++) {
-                        if (bingo.boards[b][y][x] == call) {
-                            bingo.boards[b][y][x] = -1;
-                        }
-                    }
-                }
-            }
-
-            // See if anyone won.
-            for (uint256 b = 0; b < bingo.boards.length; b++) {
-                // Column
-                for (uint256 y = 0; y < 5; y++) {
-                    bool marked = true;
-                    for (uint256 x = 0; x < 5; x++) {
-                        if (bingo.boards[b][y][x] >= 0) {
-                            marked = false;
-                            break;
-                        }
-                    }
-                    if (marked) {
-                        bingo.winningBoardIndex = b;
-                        return;
-                    }
-                }
-
-                // Row
-                for (uint256 x = 0; x < 5; x++) {
-                    bool marked = true;
-                    for (uint256 y = 0; y < 5; y++) {
-                        if (bingo.boards[b][y][x] >= 0) {
-                            marked = false;
-                            break;
-                        }
-                    }
-                    if (marked) {
-                        bingo.winningBoardIndex = b;
-                        return;
-                    }
+                mark(bingo.boards[b], call);
+                if (isComplete(bingo.boards[b])) {
+                    bingo.winningBoardIndex = b;
+                    return;
                 }
             }
         }
         revert();
+    }
+
+    function mark(int256[5][5] memory board, int256 call) private pure {
+        for (uint256 y = 0; y < 5; y++) {
+            for (uint256 x = 0; x < 5; x++) {
+                if (board[y][x] == call) {
+                    board[y][x] = -1;
+                }
+            }
+        }
+    }
+
+    /// Return true if the given board has been completed.
+    function isComplete(int256[5][5] memory board) private pure returns (bool) {
+        // Column
+        for (uint256 y = 0; y < 5; y++) {
+            bool marked = true;
+            for (uint256 x = 0; x < 5; x++) {
+                if (board[y][x] >= 0) {
+                    marked = false;
+                    break;
+                }
+            }
+            if (marked) {
+                return true;
+            }
+        }
+
+        // Row
+        for (uint256 x = 0; x < 5; x++) {
+            bool marked = true;
+            for (uint256 y = 0; y < 5; y++) {
+                if (board[y][x] >= 0) {
+                    marked = false;
+                    break;
+                }
+            }
+            if (marked) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function unmarkedSumOfBoard(int256[5][5] memory board)
@@ -165,12 +171,12 @@ contract _04 is _04Parser {
     }
 
     function p1(Bingo memory bingo) private pure returns (uint256) {
-        play(bingo);
+        play(bingo, false);
         return score(bingo);
     }
 
     function p2(Bingo memory bingo) private pure returns (uint256) {
-        play(bingo);
+        play(bingo, true);
         return score(bingo);
     }
 }
