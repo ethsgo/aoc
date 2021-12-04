@@ -67,23 +67,31 @@ function parseGame(input) {
 }
 
 function play({ draw, boards }, { toEnd = false } = {}) {
-  let lastWin
+  const winningBoards = []
   for (let i = 0; i < draw.length; i++) {
-    // Draw a call, and mark it on all boards.
+    // Draw a call
     const call = draw[i]
     for (let b = 0; b < boards.length; b++) {
+      const board = boards[b]
+      const orig = JSON.parse(JSON.stringify(board))
+      let didMark = false
+
+      // Mark it on the board
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
-          if (boards[b][y][x] === call) {
-            boards[b][y][x] = -1
+          if (board[y][x] === call) {
+            board[y][x] = -1
+            didMark = true
           }
         }
       }
-    }
 
-    // Check to see if someone won.
-    for (let b = 0; b < boards.length; b++) {
-      const board = boards[boards.length - 1 - b]
+      // And see if it won.
+      //
+      // Only do this if we marked something, so as to not overwrite lastWin.
+      if (!didMark) continue
+
+      console.log({ call, orig, board })
       for (let y = 0; y < 5; y++) {
         if (board[y].every((n) => n < 0)) {
           lastWin = { b, call, y, board }
