@@ -28,7 +28,13 @@ contract _04Parser is Parser, StringUtils {
 
     struct Bingo {
         uint256[] draw;
-        uint256[5][5][] boards;
+        /// Use int instead of uint so that we can mark elements on the board
+        /// itself by negating them.
+        int256[5][5][] boards;
+        /// Store the index of the current move within the game.
+        uint256 drawIndex;
+        /// Winning board's index
+        uint256 winningBoardIndex;
     }
 
     function parseBingo(string memory input) internal returns (Bingo memory) {
@@ -43,25 +49,31 @@ contract _04Parser is Parser, StringUtils {
             bytes(input).length
         );
 
-        uint256[5][5][] memory boards = parseBoards(boardNumbers);
+        int256[5][5][] memory boards = parseBoards(boardNumbers);
 
-        return Bingo({draw: draw, boards: boards});
+        return
+            Bingo({
+                draw: draw,
+                boards: boards,
+                drawIndex: 0,
+                winningBoardIndex: 0
+            });
     }
 
     function parseBoards(uint256[] memory numbers)
         private
         pure
-        returns (uint256[5][5][] memory)
+        returns (int256[5][5][] memory)
     {
         require(numbers.length % 25 == 0, "Expected 5x5 boards");
         uint256 boardCount = numbers.length / 25;
-        uint256[5][5][] memory boards = new uint256[5][5][](boardCount);
+        int256[5][5][] memory boards = new int256[5][5][](boardCount);
         for (uint256 i = 0; i < numbers.length; i++) {
             uint256 b = i / 25;
             uint256 bi = i % 25;
             uint256 y = bi / 5;
             uint256 x = bi % 5;
-            boards[b][y][x] = numbers[i];
+            boards[b][y][x] = int256(numbers[i]);
         }
         return boards;
     }
@@ -73,11 +85,85 @@ contract _04 is _04Parser {
             bytes(input).length == 0 ? exampleInput : input
         );
 
-        return (bingo.draw.length, 0);
+        return (p1(bingo), 0);
     }
 
-    function p1(string[] memory tokens) private pure returns (uint256) {
-        return 0;
+    function play(Bingo memory bingo) private pure {
+        for (uint256 i = 0; i < bingo.draw.length; i++) {
+            bingo.drawIndex = i;
+
+            int256 call = int256(bingo.draw[i]);
+
+            // Mark the call on the boards.
+            for (uint256 b = 0; b < bingo.boards.length; b++) {
+                for (uint256 y = 0; y < 5; y++) {
+                    for (uint256 x = 0; x < 5; x++) {
+                        if (bingo.boards[b][y][x] == call) {
+                            bingo.boards[b][y][x] = -call;
+                        }
+                    }
+                }
+            }
+
+            // See if anyone won.
+            for (uint256 b = 0; b < bingo.boards.length; b++) {
+                // Column
+                for (uint256 y = 0; y < 5; y++) {
+                    bool marked = true;
+                    for (uint256 x = 0; x < 5; x++) {
+                        if (bingo.boards[b][y][x] >= 0) {
+                            marked = false;
+                            break;
+                        }
+                    }
+                    if (marked) {
+                        bingo.winningBoardIndex = b;
+                        return;
+                    }
+                }
+
+                // Row
+                for (uint256 x = 0; x < 5; x++) {
+                    bool marked = true;
+                    for (uint256 y = 0; y < 5; y++) {
+                        if (bingo.boards[b][y][x] >= 0) {
+                            marked = false;
+                            break;
+                        }
+                    }
+                    if (marked) {
+                        bingo.winningBoardIndex = b;
+                        return;
+                    }
+                }
+            }
+        }
+        revert();
+    }
+
+    function unmarkedSumOfBoard(int256[5][5] memory board)
+        private
+        pure
+        returns (uint256)
+    {
+        uint256 sum;
+        for (uint256 y = 0; y < 5; y++) {
+            for (uint256 x = 0; x < 5; x++) {
+                if (board[y][x] >= 0) {
+                    sum += uint256(board[y][x]);
+                }
+            }
+        }
+        return sum;
+    }
+
+    function p1(Bingo memory bingo) private pure returns (uint256) {
+        play(bingo);
+        uint256 lastDraw = bingo.draw[bingo.drawIndex];
+        uint256 unmarkedSum = unmarkedSumOfBoard(
+            bingo.boards[bingo.winningBoardIndex]
+        );
+        return lastDraw * unmarkedSum;
     }
 
     function p2(string[] memory tokens) private pure returns (uint256) {
