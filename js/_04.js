@@ -71,7 +71,7 @@ function play(draw, boards) {
       for (let y = 0; y < 5; y++) {
         for (let x = 0; x < 5; x++) {
           if (boards[b][y][x] === call) {
-            boards[b][y][x] = -call
+            boards[b][y][x] = -1
           }
         }
       }
@@ -79,7 +79,7 @@ function play(draw, boards) {
 
     // Check to see if someone won.
     for (let b = 0; b < boards.length; b++) {
-      const board = boards[b]
+      const board = boards[boards.length - 1 - b]
       for (let y = 0; y < 5; y++) {
         if (board[y].every((n) => n < 0)) {
           return { b, call, y, board }
@@ -107,7 +107,7 @@ function p1(draw, boards) {
     .flat()
     .filter((n) => n > 0)
     .reduce((s, n) => s + n)
-  console.log({ call, unmarkedSum, board })
+  console.log({ call, unmarkedSum, board, ...boards })
   return call * unmarkedSum
 }
 

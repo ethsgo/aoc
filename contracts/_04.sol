@@ -29,7 +29,8 @@ contract _04Parser is Parser, StringUtils {
     struct Bingo {
         uint256[] draw;
         /// Use int instead of uint so that we can mark elements on the board
-        /// itself by negating them.
+        /// itself by using -1 (note that negating them doesn't work, because
+        /// -0 == 0).
         int256[5][5][] boards;
         /// Store the index of the current move within the game.
         uint256 drawIndex;
@@ -99,7 +100,7 @@ contract _04 is _04Parser {
                 for (uint256 y = 0; y < 5; y++) {
                     for (uint256 x = 0; x < 5; x++) {
                         if (bingo.boards[b][y][x] == call) {
-                            bingo.boards[b][y][x] = -call;
+                            bingo.boards[b][y][x] = -1;
                         }
                     }
                 }
