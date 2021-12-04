@@ -33,7 +33,7 @@ contract _04Parser is Parser, StringUtils {
         /// -0 == 0).
         int256[5][5][] boards;
         /// Store the index of the current move within the game.
-        uint256 drawIndex;
+        uint256 winningDrawIndex;
         /// Winning board's index
         uint256 winningBoardIndex;
     }
@@ -56,7 +56,7 @@ contract _04Parser is Parser, StringUtils {
             Bingo({
                 draw: draw,
                 boards: boards,
-                drawIndex: 0,
+                winningDrawIndex: 0,
                 winningBoardIndex: 0
             });
     }
@@ -87,20 +87,29 @@ contract _04 is _04Parser {
         return (p1(parseBingo(s)), p2(parseBingo(s)));
     }
 
-    function play(Bingo memory bingo, bool toEnd) private pure {
+    // Mappings cannot be in memory (yet).
+    mapping(uint256 => bool) private hasWon;
+
+    function play(Bingo memory bingo, bool toEnd) private {
+        // Mappings cannot be deleted, we reset it ourselves.
+        for (uint256 b = 0; b < bingo.boards.length; b++) {
+            hasWon[b] = false;
+        }
+
         for (uint256 i = 0; i < bingo.draw.length; i++) {
             int256 call = int256(bingo.draw[i]);
-            bingo.drawIndex = i;
 
             for (uint256 b = 0; b < bingo.boards.length; b++) {
+                if (hasWon[b]) continue;
                 mark(bingo.boards[b], call);
                 if (isComplete(bingo.boards[b])) {
+                    hasWon[b] = true;
+                    bingo.winningDrawIndex = i;
                     bingo.winningBoardIndex = b;
-                    return;
+                    if (!toEnd) return;
                 }
             }
         }
-        revert();
     }
 
     function mark(int256[5][5] memory board, int256 call) private pure {
@@ -163,19 +172,19 @@ contract _04 is _04Parser {
     }
 
     function score(Bingo memory bingo) private pure returns (uint256) {
-        uint256 lastDraw = bingo.draw[bingo.drawIndex];
+        uint256 lastDraw = bingo.draw[bingo.winningDrawIndex];
         uint256 unmarkedSum = unmarkedSumOfBoard(
             bingo.boards[bingo.winningBoardIndex]
         );
         return lastDraw * unmarkedSum;
     }
 
-    function p1(Bingo memory bingo) private pure returns (uint256) {
+    function p1(Bingo memory bingo) private returns (uint256) {
         play(bingo, false);
         return score(bingo);
     }
 
-    function p2(Bingo memory bingo) private pure returns (uint256) {
+    function p2(Bingo memory bingo) private returns (uint256) {
         play(bingo, true);
         return score(bingo);
     }
