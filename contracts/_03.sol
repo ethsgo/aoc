@@ -12,7 +12,7 @@ contract _03 is Parser {
                 "10000 11001 00010 01010"
             );
         }
-        //return (bitStringToUint(tokens[0]), 0);
+        // return (bitStringToUint(tokens[0]), 0);
         return (p1(tokens), p2(tokens));
     }
 
@@ -23,39 +23,29 @@ contract _03 is Parser {
         return decimal(bits) * decimal(inverted(bits));
     }
 
-    /// Convert a string representing the binary bits of an unsigned integer
-    /// into a uint256.
+    /// Construct a uint from a bit string.
     function bitStringToUint(string memory s) private pure returns (uint256) {
-        return uint256(parseBitString(s));
-    }
-
-    bytes32[] private parseBitStringsStorage;
-
-    /// Convert an array of binary bit strings into an array of bytes32
-    function parseBitStrings(string[] memory bitStrings)
-        private
-        returns (bytes32[] memory)
-    {
-        delete parseBitStringsStorage;
-        for (uint256 i = 0; i < bitStrings.length; i++) {
-            parseBitStringsStorage.push(parseBitString(bitStrings[i]));
-        }
-        return parseBitStringsStorage;
-    }
-
-    /// Convert a binary bit string into bytes32
-    function parseBitString(string memory bitString)
-        private
-        pure
-        returns (bytes32)
-    {
-        bytes32 result;
-        bytes memory bits = bytes(bitString);
+        uint256 result;
+        bytes memory bits = bytes(s);
         for (uint256 i = 0; i < bits.length; i++) {
             result <<= 1;
-            result |= bytes1((bits[i] == b0) ? 0 : 1);
+            result += (bits[i] == b0) ? 0 : 1;
         }
         return result;
+    }
+
+    uint256[] private parseBitStringsStorage;
+
+    /// Construct an array of uints from an array of bit strings.
+    function parseBitStrings(string[] memory strings)
+        private
+        returns (uint256[] memory)
+    {
+        delete parseBitStringsStorage;
+        for (uint256 i = 0; i < strings.length; i++) {
+            parseBitStringsStorage.push(bitStringToUint(strings[i]));
+        }
+        return parseBitStringsStorage;
     }
 
     /// Return a byte array where each bytes1 represents a bit indicating if the
