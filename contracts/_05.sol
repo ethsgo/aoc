@@ -80,7 +80,7 @@ contract _05 is _05Parser, MathUtils {
     }
 
     function p2(uint256[4][] memory segments) private pure returns (uint256) {
-        return countOverlap(filterHVSegments(segments));
+        return countOverlap(segments);
     }
 
     function countOverlap(uint256[4][] memory segments)
@@ -149,12 +149,28 @@ contract _05 is _05Parser, MathUtils {
         pure
     {
         for (uint256 i = 0; i < segments.length; i++) {
-            uint256[4] memory s = segments[i];
-            for (uint256 x = min(s[0], s[2]); x <= max(s[0], s[2]); x++) {
-                for (uint256 y = min(s[1], s[3]); y <= max(s[1], s[3]); y++) {
-                    grid[y][x] += 1;
-                }
+            uint256[4] memory us = segments[i];
+
+            // Create int variants for reduce casting noise below.
+            int256 s0 = int256(us[0]);
+            int256 s1 = int256(us[1]);
+            int256 s2 = int256(us[2]);
+            int256 s3 = int256(us[3]);
+
+            int256 dx = s2 - s0;
+            int256 dy = s3 - s1;
+            // Keep only the sign
+            dx = dx == 0 ? int256(0) : (dx < 0 ? -1 : int256(1));
+            dy = dy == 0 ? int256(0) : (dy < 0 ? -1 : int256(1));
+
+            int256 x = s0;
+            int256 y = s1;
+            while (x != s2 || y != s3) {
+                grid[uint256(y)][uint256(x)] += 1;
+                x += dx;
+                y += dy;
             }
+            grid[uint256(y)][uint256(x)] += 1;
         }
     }
 
