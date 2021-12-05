@@ -31,7 +31,12 @@ contract _05Parser is Parser {
 }
 
 contract MathUtils {
-    /// Return the minimum of up to three numbers
+    /// Return the minimum of two numbers
+    function min(uint256 x, uint256 y) internal pure returns (uint256) {
+        return (x <= y) ? x : y;
+    }
+
+    /// Return the minimum of three numbers
     function min(
         uint256 x,
         uint256 y,
@@ -44,7 +49,12 @@ contract MathUtils {
         }
     }
 
-    /// Return the maximum of up to three numbers
+    /// Return the maximum of two numbers
+    function max(uint256 x, uint256 y) internal pure returns (uint256) {
+        return (x >= y) ? x : y;
+    }
+
+    /// Return the maximum of three numbers
     function max(
         uint256 x,
         uint256 y,
@@ -68,7 +78,7 @@ contract _05 is _05Parser, MathUtils {
     function p1(uint256[4][] memory segments) private pure returns (uint256) {
         segments = filterHVSegments(segments);
         (uint256 maxX, uint256 maxY) = bounds(segments);
-        uint256[][] memory grid = makeGrid(maxX, maxY);
+        uint256[][] memory grid = makeGrid(maxX + 1, maxY + 1);
         fillGrid(grid, segments);
         return countGrid(grid, 2);
     }
@@ -111,14 +121,14 @@ contract _05 is _05Parser, MathUtils {
         return (maxX, maxY);
     }
 
-    function makeGrid(uint256 maxX, uint256 maxY)
+    function makeGrid(uint256 width, uint256 height)
         private
         pure
         returns (uint256[][] memory)
     {
-        uint256[][] memory grid = new uint256[][](maxY);
-        for (uint256 y = 0; y < maxY; y++) {
-            grid[y] = new uint256[](maxX);
+        uint256[][] memory grid = new uint256[][](height);
+        for (uint256 y = 0; y < height; y++) {
+            grid[y] = new uint256[](width);
         }
         return grid;
     }
@@ -129,12 +139,8 @@ contract _05 is _05Parser, MathUtils {
     {
         for (uint256 i = 0; i < segments.length; i++) {
             uint256[4] memory s = segments[i];
-            for (uint256 x = min(0, s[0], s[2]); x < max(0, s[0], s[2]); x++) {
-                for (
-                    uint256 y = min(0, s[1], s[3]);
-                    y < max(0, s[1], s[3]);
-                    y++
-                ) {
+            for (uint256 x = min(s[0], s[2]); x <= max(s[0], s[2]); x++) {
+                for (uint256 y = min(s[1], s[3]); y <= max(s[1], s[3]); y++) {
                     grid[y][x] += 1;
                 }
             }
