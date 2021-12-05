@@ -46,18 +46,15 @@ function countOverlap(segments) {
   const grid = makeGrid(segments)
 
   for (s of segments) {
-    const p0 = [s[0], s[1]]
-    const p1 = [s[2], s[3]]
+    let dx = s[2] - s[0]
+    let dy = s[3] - s[1]
 
-    let dx = p1[0] - p0[0]
-    let dy = p1[1] - p0[1]
-
-    let x = p0[0]
-    let y = p0[1]
     dx = dx === 0 ? 0 : dx < 0 ? -1 : 1
     dy = dy === 0 ? 0 : dy < 0 ? -1 : 1
 
-    while (x != p1[0] || y != p1[1]) {
+    let x = s[0]
+    let y = s[1]
+    while (x !== s[2] || y != s[3]) {
       grid[y][x] += 1
       x += dx
       y += dy
