@@ -42,28 +42,7 @@ function makeGrid(segments) {
   return [...Array(maxY + 1)].map((x) => Array(maxX + 1).fill(0))
 }
 
-function countOverlap(grid) {
-  return grid.flat().filter((x) => x > 1).length
-}
-
-function p1(segments) {
-  // consider only horizontal or vertical line segments
-  segments = segments.filter((s) => s[0] == s[2] || s[1] == s[3])
-
-  const grid = makeGrid(segments)
-
-  for (s of segments) {
-    for (let x = Math.min(s[0], s[2]); x <= Math.max(s[0], s[2]); x++) {
-      for (let y = Math.min(s[1], s[3]); y <= Math.max(s[1], s[3]); y++) {
-        grid[y][x] += 1
-      }
-    }
-  }
-
-  return countOverlap(grid)
-}
-
-function p2(segments) {
+function countOverlap(segments) {
   const grid = makeGrid(segments)
 
   for (s of segments) {
@@ -86,7 +65,16 @@ function p2(segments) {
     grid[y][x] += 1
   }
 
-  return countOverlap(grid)
+  return grid.flat().filter((x) => x > 1).length
+}
+
+function p1(segments) {
+  // consider only horizontal or vertical line segments
+  return countOverlap(segments.filter((s) => s[0] == s[2] || s[1] == s[3]))
+}
+
+function p2(segments) {
+  return countOverlap(segments)
 }
 
 let segments = parse(input)
