@@ -17,16 +17,6 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString()
 }
 
-function* chunks(xs) {
-  for (let i = 0; i < xs.length; i += 4) {
-    yield [xs[i], xs[i+1], xs[i+2], xs[i+3]]
-  }
-}
-
-function parse(input) {
-  return [...chunks(numbers(input))]
-}
-
 function numbers(s) {
   return s
     .split(/[^\d.]+/)
@@ -34,19 +24,41 @@ function numbers(s) {
     .map(Number)
 }
 
-function p1(input) {
-  return score(play(parseGame(input)).next().value)
-}
-
-function p2(input) {
-  let generator = play(parseGame(input))
-  while (true) {
-    let { value, done } = generator.next()
-    if (done) return score(lastValue)
-    lastValue = value
+function* chunks(xs, n) {
+  for (let i = 0; i < xs.length; i += n) {
+    yield xs.slice(i, i + n)
   }
 }
 
-console.log(parse(input))
-// console.log(p1(input))
+function parse(input) {
+  return [...chunks(numbers(input), 4)]
+}
+
+// line segments
+let segments = parse(input)
+
+function p1(segments) {
+  // consider only horizontal or vertical line segments
+  segments = segments.filter((s) => s[0] == s[2] || s[1] == s[3])
+
+  const maxX = segments.reduce((a, s) => Math.max(a, s[0], s[2]), 0)
+  const maxY = segments.reduce((a, s) => Math.max(a, s[1], s[3]), 0)
+
+  const grid = [...Array(maxY + 1)].map((x) => Array(maxX + 1).fill(0))
+
+  for (s of segments) {
+    for (let x = Math.min(s[0], s[2]); x <= Math.max(s[0], s[2]); x++) {
+      for (let y = Math.min(s[1], s[3]); y <= Math.max(s[1], s[3]); y++) {
+        grid[y][x] += 1
+      }
+    }
+    // console.log(grid.map(JSON.stringify))
+  }
+
+  return grid.flat().filter((x) => x > 1).length
+}
+
+function p2(input) {}
+
+console.log(p1(segments))
 // console.log(p2(input))
