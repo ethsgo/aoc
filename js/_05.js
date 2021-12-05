@@ -70,31 +70,35 @@ function p2(segments) {
   const grid = makeGrid(segments)
 
   for (s of segments) {
-    let p0, p1
-    if (s[0] <= s[2]) {
-      if (s[1] <= s[3]) {
-        p0 = [s[0], s[1]]
-        p1 = [s[2], s[3]]
-      } else {
-        p1 = [s[0], s[1]]
-        p0 = [s[2], s[3]]
-      }
-    } else {
-      if (s[3] <= s[1]) {
-        p1 = [s[0], s[1]]
-        p0 = [s[2], s[3]]
-      } else {
-        p0 = [s[0], s[1]]
-        p1 = [s[2], s[3]]
-      }
-    }
-    console.log(p0, p1)
-    for (let x = p0[0]; x <= p1[0]; x++) {
-      for (let y = p0[1]; y <= p1[1]; y++) {
+    const p0 = [s[0], s[1]]
+    const p1 = [s[2], s[3]]
+
+    let dx = p1[0] - p0[0]
+    let dy = p1[1] - p0[1]
+
+    // console.log(s, p0, p1, dx, dy)
+
+    if (dx === 0) {
+      const x = p0[0]
+      let y = p0[1]
+      dy = dy < 0 ? -1 : 1
+      while (y != p1[1]) {
         grid[y][x] += 1
+        y += dy
       }
+      grid[y][x] += 1
+    } else if (dy === 0) {
+      const y = p0[1]
+      let x = p0[0]
+      dx = dx < 0 ? -1 : 1
+      while (x != p1[0]) {
+        grid[y][x] += 1
+        x += dx
+      }
+      grid[y][x] += 1
     }
-    // console.log(grid.map(JSON.stringify))
+
+    console.log(grid.map(JSON.stringify))
   }
 
   return countOverlap(grid)
