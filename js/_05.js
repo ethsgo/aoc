@@ -30,21 +30,27 @@ function* chunks(xs, n) {
   }
 }
 
+// parse line segments
 function parse(input) {
   return [...chunks(numbers(input), 4)]
 }
 
-// line segments
-let segments = parse(input)
+function makeGrid(segments) {
+  const maxX = segments.reduce((a, s) => Math.max(a, s[0], s[2]), 0)
+  const maxY = segments.reduce((a, s) => Math.max(a, s[1], s[3]), 0)
+
+  return [...Array(maxY + 1)].map((x) => Array(maxX + 1).fill(0))
+}
+
+function countOverlap(grid) {
+  return grid.flat().filter((x) => x > 1).length
+}
 
 function p1(segments) {
   // consider only horizontal or vertical line segments
   segments = segments.filter((s) => s[0] == s[2] || s[1] == s[3])
 
-  const maxX = segments.reduce((a, s) => Math.max(a, s[0], s[2]), 0)
-  const maxY = segments.reduce((a, s) => Math.max(a, s[1], s[3]), 0)
-
-  const grid = [...Array(maxY + 1)].map((x) => Array(maxX + 1).fill(0))
+  const grid = makeGrid(segments)
 
   for (s of segments) {
     for (let x = Math.min(s[0], s[2]); x <= Math.max(s[0], s[2]); x++) {
@@ -55,10 +61,45 @@ function p1(segments) {
     // console.log(grid.map(JSON.stringify))
   }
 
-  return grid.flat().filter((x) => x > 1).length
+  return countOverlap(grid)
 }
 
-function p2(input) {}
+function p2(segments) {
+  segments = segments.filter((s) => s[0] == s[2] || s[1] == s[3])
 
+  const grid = makeGrid(segments)
+
+  for (s of segments) {
+    let p0, p1
+    if (s[0] <= s[2]) {
+      if (s[1] <= s[3]) {
+        p0 = [s[0], s[1]]
+        p1 = [s[2], s[3]]
+      } else {
+        p1 = [s[0], s[1]]
+        p0 = [s[2], s[3]]
+      }
+    } else {
+      if (s[3] <= s[1]) {
+        p1 = [s[0], s[1]]
+        p0 = [s[2], s[3]]
+      } else {
+        p0 = [s[0], s[1]]
+        p1 = [s[2], s[3]]
+      }
+    }
+    console.log(p0, p1)
+    for (let x = p0[0]; x <= p1[0]; x++) {
+      for (let y = p0[1]; y <= p1[1]; y++) {
+        grid[y][x] += 1
+      }
+    }
+    // console.log(grid.map(JSON.stringify))
+  }
+
+  return countOverlap(grid)
+}
+
+let segments = parse(input)
 console.log(p1(segments))
-// console.log(p2(input))
+console.log(p2(segments))
