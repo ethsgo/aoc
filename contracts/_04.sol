@@ -80,15 +80,6 @@ contract _04Parser is Parser, StringUtils {
     }
 }
 
-// Unfortunately p2 doesn't run to completion if we pass the full input.
-//
-// > FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed -
-// > JavaScript heap out of memory
-//
-// Workaround is to run npx after setting
-//
-//    NODE_OPTIONS="--max-old-space-size=4096"
-//
 contract _04 is _04Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;

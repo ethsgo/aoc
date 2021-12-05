@@ -12,21 +12,30 @@ task('exec', 'Deploy and run the named contract')
     const contract = await Contract.deploy()
     await contract.deployed()
 
-    let result, gasEstimate
+    let result, gasEstimate, didEstimateGas
     if (contract.interface.getFunction('main').inputs.length) {
       let input = ''
       try {
         input = fs.readFileSync(process.stdin.fd).toString()
-      } catch {}
+      } catch {
+        // Only estimate gas if we're running without stdin input, it
+        // takes too long otherwise.
+        gasEstimate = await contract.estimateGas.main(input)
+        didEstimateGas = true
+      }
 
-      gasEstimate = await contract.estimateGas.main(input)
       result = await contract.callStatic.main(input)
     } else {
       gasEstimate = await contract.estimateGas.main()
+      didEstimateGas = true
       result = await contract.callStatic.main()
     }
 
-    console.log(`[${gasEstimate.toString()}] ${result.toString()}`)
+    if (didEstimateGas) {
+      console.log(`[${gasEstimate.toString()}] ${result.toString()}`)
+    } else {
+      console.log(result.toString())
+    }
   })
 
 /**
