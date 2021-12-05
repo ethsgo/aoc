@@ -58,15 +58,12 @@ function p1(segments) {
         grid[y][x] += 1
       }
     }
-    // console.log(grid.map(JSON.stringify))
   }
 
   return countOverlap(grid)
 }
 
 function p2(segments) {
-  segments = segments.filter((s) => s[0] == s[2] || s[1] == s[3])
-
   const grid = makeGrid(segments)
 
   for (s of segments) {
@@ -75,8 +72,6 @@ function p2(segments) {
 
     let dx = p1[0] - p0[0]
     let dy = p1[1] - p0[1]
-
-    // console.log(s, p0, p1, dx, dy)
 
     let x = p0[0]
     let y = p0[1]
@@ -89,8 +84,6 @@ function p2(segments) {
       y += dy
     }
     grid[y][x] += 1
-
-    // console.log(grid.map(JSON.stringify))
   }
 
   return countOverlap(grid)
