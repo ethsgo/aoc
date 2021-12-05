@@ -75,23 +75,18 @@ contract _05 is _05Parser, MathUtils {
         return (p1(segments), p2(segments));
     }
 
-    function p1(uint256[4][] memory segments) private pure returns (uint256) {
-        return countOverlap(filterHVSegments(segments));
+    /// Mappings cannot be created in memory (yet), and mappings cannot be
+    /// cleared either, so create two separate mappings, one for each part of
+    /// the puzzle.
+    mapping(uint256 => uint256) private gridP1;
+    mapping(uint256 => uint256) private gridP2;
+
+    function p1(uint256[4][] memory segments) private returns (uint256) {
+        return countOverlap(filterHVSegments(segments), gridP1);
     }
 
-    function p2(uint256[4][] memory segments) private pure returns (uint256) {
-        return countOverlap(segments);
-    }
-
-    function countOverlap(uint256[4][] memory segments)
-        private
-        pure
-        returns (uint256)
-    {
-        (uint256 maxX, uint256 maxY) = bounds(segments);
-        uint256[][] memory grid = makeGrid(maxX + 1, maxY + 1);
-        fillGrid(grid, segments);
-        return countGrid(grid, 2);
+    function p2(uint256[4][] memory segments) private returns (uint256) {
+        return countOverlap(segments, gridP2);
     }
 
     /// Return only horizontal or vertical segments from the given segments.
@@ -132,30 +127,20 @@ contract _05 is _05Parser, MathUtils {
         return (maxX, maxY);
     }
 
-    function makeGrid(uint256 width, uint256 height)
-        private
-        pure
-        returns (uint256[][] memory)
-    {
-        uint256[][] memory grid = new uint256[][](height);
-        for (uint256 y = 0; y < height; y++) {
-            grid[y] = new uint256[](width);
-        }
-        return grid;
-    }
+    function countOverlap(
+        uint256[4][] memory segments,
+        mapping(uint256 => uint256) storage grid
+    ) private returns (uint256) {
+        (uint256 maxX, ) = bounds(segments);
 
-    function fillGrid(uint256[][] memory grid, uint256[4][] memory segments)
-        private
-        pure
-    {
+        uint256 c = 0;
+
         for (uint256 i = 0; i < segments.length; i++) {
-            uint256[4] memory us = segments[i];
-
             // Create int variants for reduce casting noise below.
-            int256 s0 = int256(us[0]);
-            int256 s1 = int256(us[1]);
-            int256 s2 = int256(us[2]);
-            int256 s3 = int256(us[3]);
+            int256 s0 = int256(segments[i][0]);
+            int256 s1 = int256(segments[i][1]);
+            int256 s2 = int256(segments[i][2]);
+            int256 s3 = int256(segments[i][3]);
 
             int256 dx = s2 - s0;
             int256 dy = s3 - s1;
@@ -166,26 +151,17 @@ contract _05 is _05Parser, MathUtils {
             int256 x = s0;
             int256 y = s1;
             while (x != s2 || y != s3) {
-                grid[uint256(y)][uint256(x)] += 1;
+                if ((grid[(uint256(y) * maxX) + uint256(x)] += 1) == 2) {
+                    c++;
+                }
                 x += dx;
                 y += dy;
             }
-            grid[uint256(y)][uint256(x)] += 1;
-        }
-    }
-
-    /// Return the number of grid entries that are >= threshold.
-    function countGrid(uint256[][] memory grid, uint256 threshold)
-        private
-        pure
-        returns (uint256)
-    {
-        uint256 c = 0;
-        for (uint256 y = 0; y < grid.length; y++) {
-            for (uint256 x = 0; x < grid[y].length; x++) {
-                if (grid[y][x] >= threshold) c++;
+            if ((grid[(uint256(y) * maxX) + uint256(x)] += 1) == 2) {
+                c++;
             }
         }
+
         return c;
     }
 }

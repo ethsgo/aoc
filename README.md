@@ -32,9 +32,6 @@ This allows hardhat to use more memory that the default.
 
     export NODE_OPTIONS="--max-old-space-size=4096"
 
-Unfortunately, some of the Solidity programs are still not able to run on the
-full input (e.g. contract _05).
-
 ## Say hello
 
 [https://twitter.com/ethsgo\_](https://twitter.com/ethsgo_)
