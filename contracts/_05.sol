@@ -71,12 +71,23 @@ contract MathUtils {
 contract _05 is _05Parser, MathUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
-
-        return (p1(parse(s)), 0);
+        uint256[4][] memory segments = parse(s);
+        return (p1(segments), p2(segments));
     }
 
     function p1(uint256[4][] memory segments) private pure returns (uint256) {
-        segments = filterHVSegments(segments);
+        return countOverlap(filterHVSegments(segments));
+    }
+
+    function p2(uint256[4][] memory segments) private pure returns (uint256) {
+        return countOverlap(filterHVSegments(segments));
+    }
+
+    function countOverlap(uint256[4][] memory segments)
+        private
+        pure
+        returns (uint256)
+    {
         (uint256 maxX, uint256 maxY) = bounds(segments);
         uint256[][] memory grid = makeGrid(maxX + 1, maxY + 1);
         fillGrid(grid, segments);
