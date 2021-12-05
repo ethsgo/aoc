@@ -78,27 +78,19 @@ function p2(segments) {
 
     // console.log(s, p0, p1, dx, dy)
 
-    if (dx === 0) {
-      const x = p0[0]
-      let y = p0[1]
-      dy = dy < 0 ? -1 : 1
-      while (y != p1[1]) {
-        grid[y][x] += 1
-        y += dy
-      }
-      grid[y][x] += 1
-    } else if (dy === 0) {
-      const y = p0[1]
-      let x = p0[0]
-      dx = dx < 0 ? -1 : 1
-      while (x != p1[0]) {
-        grid[y][x] += 1
-        x += dx
-      }
-      grid[y][x] += 1
-    }
+    let x = p0[0]
+    let y = p0[1]
+    dx = dx === 0 ? 0 : dx < 0 ? -1 : 1
+    dy = dy === 0 ? 0 : dy < 0 ? -1 : 1
 
-    console.log(grid.map(JSON.stringify))
+    while (x != p1[0] || y != p1[1]) {
+      grid[y][x] += 1
+      x += dx
+      y += dy
+    }
+    grid[y][x] += 1
+
+    // console.log(grid.map(JSON.stringify))
   }
 
   return countOverlap(grid)
