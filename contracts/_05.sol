@@ -30,7 +30,35 @@ contract _05Parser is Parser {
     }
 }
 
-contract _05 is _05Parser {
+contract MathUtils {
+    /// Return the minimum of up to three numbers
+    function min(
+        uint256 x,
+        uint256 y,
+        uint256 z
+    ) internal pure returns (uint256) {
+        if (x <= y) {
+            return (x <= z) ? x : z;
+        } else {
+            return (y <= z) ? y : z;
+        }
+    }
+
+    /// Return the maximum of up to three numbers
+    function max(
+        uint256 x,
+        uint256 y,
+        uint256 z
+    ) internal pure returns (uint256) {
+        if (x >= y) {
+            return (x >= z) ? x : z;
+        } else {
+            return (y >= z) ? y : z;
+        }
+    }
+}
+
+contract _05 is _05Parser, MathUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
@@ -40,8 +68,9 @@ contract _05 is _05Parser {
     function p1(uint256[4][] memory segments) private pure returns (uint256) {
         segments = filterHVSegments(segments);
         (uint256 maxX, uint256 maxY) = bounds(segments);
-
-        return maxX;
+        uint256[][] memory grid = makeGrid(maxX, maxY);
+        fillGrid(grid, segments);
+        return countGrid(grid, 2);
     }
 
     /// Return only horizontal or vertical segments from the given segments.
@@ -82,16 +111,48 @@ contract _05 is _05Parser {
         return (maxX, maxY);
     }
 
-    /// Return the maximum of up to three numbers
-    function max(
-        uint256 x,
-        uint256 y,
-        uint256 z
-    ) private pure returns (uint256) {
-        if (x >= y) {
-            return (x >= z) ? x : z;
-        } else {
-            return (y >= z) ? y : z;
+    function makeGrid(uint256 maxX, uint256 maxY)
+        private
+        pure
+        returns (uint256[][] memory)
+    {
+        uint256[][] memory grid = new uint256[][](maxY);
+        for (uint256 y = 0; y < maxY; y++) {
+            grid[y] = new uint256[](maxX);
         }
+        return grid;
+    }
+
+    function fillGrid(uint256[][] memory grid, uint256[4][] memory segments)
+        private
+        pure
+    {
+        for (uint256 i = 0; i < segments.length; i++) {
+            uint256[4] memory s = segments[i];
+            for (uint256 x = min(0, s[0], s[2]); x < max(0, s[0], s[2]); x++) {
+                for (
+                    uint256 y = min(0, s[1], s[3]);
+                    y < max(0, s[1], s[3]);
+                    y++
+                ) {
+                    grid[y][x] += 1;
+                }
+            }
+        }
+    }
+
+    /// Return the number of grid entries that are >= threshold.
+    function countGrid(uint256[][] memory grid, uint256 threshold)
+        private
+        pure
+        returns (uint256)
+    {
+        uint256 c = 0;
+        for (uint256 y = 0; y < grid.length; y++) {
+            for (uint256 x = 0; x < grid[y].length; x++) {
+                if (grid[y][x] >= threshold) c++;
+            }
+        }
+        return c;
     }
 }
