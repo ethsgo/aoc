@@ -12,7 +12,23 @@ function numbers(s) {
 }
 
 function p1(xs) {
-  return xs
+  let fishes = new Map()
+  for (const x of xs) {
+    fishes.set(x, (fishes.get(x) ?? 0) + 1)
+  }
+  for (let day = 0; day < 80; day++) {
+    let newFishes = new Map()
+    for (const [k, v] of fishes) {
+      if (k === 0) {
+        newFishes.set(6, (newFishes.get(6) ?? 0) + v)
+        newFishes.set(8, (newFishes.get(8) ?? 0) + v)
+      } else {
+        newFishes.set(k - 1, (newFishes.get(k - 1) ?? 0) + v)
+      }
+    }
+    fishes = newFishes
+  }
+  return [...fishes.values()].reduce((a, x) => a + x)
 }
 
 function p2(xs) {}
