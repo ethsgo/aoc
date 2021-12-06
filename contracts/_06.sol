@@ -31,8 +31,8 @@ contract _06 is _06Parser {
             for (uint256 i = 0; i < fishes.length; i++) {
                 uint256 v = fishes[i];
                 if (i == 0) {
-                    newFishes[6] = newFishes[6] + v;
-                    newFishes[8] = newFishes[8] + v;
+                    newFishes[6] = v;
+                    newFishes[8] = v;
                 } else {
                     newFishes[i - 1] = newFishes[i - 1] + v;
                 }
