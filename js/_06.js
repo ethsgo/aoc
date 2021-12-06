@@ -1,32 +1,29 @@
 let input = '3,4,3,1,2'
 
 if (!process.stdin.isTTY) {
-  input = require('fs').readFileSync(0).toString()
+  input = require('fs').readFileSync(0).toString().trim()
 }
 
-function numbers(s) {
-  return s
-    .split(/[^\d.]+/)
-    .filter((t) => t !== '')
-    .map(Number)
-}
+const numbers = (s) => s.split(/[^\d.]+/).map(Number)
 
 function parse(input) {
-  const xs = numbers(input)
   let fishes = Array(9).fill(0)
-  for (const x of xs) {
+  for (const x of numbers(input)) {
     fishes[x] += 1
   }
   return fishes
 }
 
 function grow(fishes, days) {
+  let f = [...fishes]
+
   for (; days > 0; days--) {
-    const newFish = fishes.shift()
-    fishes.push(newFish)
-    fishes[6] += newFish
+    const newFish = f.shift()
+    f.push(newFish)
+    f[6] += newFish
   }
-  return fishes.reduce((a, x) => a + x)
+
+  return f.reduce((a, x) => a + x)
 }
 
 const p1 = (fishes) => grow(fishes, 80)
