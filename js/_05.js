@@ -1,5 +1,3 @@
-const { utils } = require('ethers')
-
 let input = `
 0,9 -> 5,9
 8,0 -> 0,8
