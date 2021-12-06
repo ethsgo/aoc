@@ -22,17 +22,9 @@ function parse(input) {
 
 function grow(fishes, days) {
   for (; days > 0; days--) {
-    let newFishes = Array(9).fill(0)
-    for (let k = 0; k < 9; k++) {
-      const v = fishes[k]
-      if (k === 0) {
-        newFishes[6] = v
-        newFishes[8] = v
-      } else {
-        newFishes[k - 1] = newFishes[k - 1] + v
-      }
-    }
-    fishes = newFishes
+    const newFish = fishes.shift()
+    fishes.push(newFish)
+    fishes[6] += newFish
   }
   return fishes.reduce((a, x) => a + x)
 }
