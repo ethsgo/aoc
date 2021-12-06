@@ -20,8 +20,8 @@ function parse(input) {
   return fishes
 }
 
-function p1(fishes) {
-  for (let day = 0; day < 80; day++) {
+function grow(fishes, days) {
+  for (; days > 0; days--) {
     let newFishes = Array(9).fill(0)
     for (let k = 0; k < 9; k++) {
       const v = fishes[k]
@@ -37,8 +37,9 @@ function p1(fishes) {
   return fishes.reduce((a, x) => a + x)
 }
 
-function p2(xs) {}
+const p1 = (fishes) => grow(fishes, 80)
+const p2 = (fishes) => grow(fishes, 256)
 
 let fishes = parse(input)
 console.log(p1(fishes))
-// console.log(p2(xs))
+console.log(p2(fishes))

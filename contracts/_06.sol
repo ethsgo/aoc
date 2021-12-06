@@ -25,8 +25,12 @@ contract _06 is _06Parser {
         return (p1(fishes), p2(fishes));
     }
 
-    function p1(uint256[9] memory fishes) private pure returns (uint256) {
-        for (uint256 day = 0; day < 80; day++) {
+    function grow(uint256[9] memory fishes, uint256 ndays)
+        private
+        pure
+        returns (uint256)
+    {
+        for (; ndays > 0; ndays--) {
             uint256[9] memory newFishes;
             for (uint256 i = 0; i < fishes.length; i++) {
                 uint256 v = fishes[i];
@@ -51,7 +55,11 @@ contract _06 is _06Parser {
         return c;
     }
 
-    function p2(uint256[9] memory fishes) private returns (uint256) {
-        return 0;
+    function p1(uint256[9] memory fishes) private pure returns (uint256) {
+        return grow(fishes, 80);
+    }
+
+    function p2(uint256[9] memory fishes) private pure returns (uint256) {
+        return grow(fishes, 256);
     }
 }
