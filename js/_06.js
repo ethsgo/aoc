@@ -16,7 +16,7 @@ function p1(xs) {
   for (const x of xs) {
     fishes[x] += 1
   }
-  for (let day = 0; day < 80; day++) {
+  for (let day = 0; day < 18; day++) {
     let newFishes = Array(9).fill(0)
     for (const [k, v] of fishes.entries()) {
       if (k === 0) {
