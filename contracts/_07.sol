@@ -35,8 +35,29 @@ contract _07 is _07Parser, ArrayUtils, MathUtils {
         return fuel(xs, median(xs));
     }
 
+    /// Find the median by partially selection sorting the input.
+    ///
+    /// https://en.wikipedia.org/wiki/Selection_algorithm
     function median(uint256[] memory xs) private pure returns (uint256) {
-        return 0;
+        // If the number of elements is even, then either of the two middle
+        // elements is a valid median; we choose the first of them.
+        uint256 n = xs.length;
+        uint256 k = n / 2;
+        for (uint256 i = 0; i <= k; i++) {
+            uint256 minIndex = i;
+            uint256 minValue = xs[i];
+            for (uint256 j = i + 1; j < n; j++) {
+                if (xs[j] < minValue) {
+                    minIndex = j;
+                    minValue = xs[j];
+                }
+            }
+            // swap
+            xs[minIndex] = xs[i];
+            xs[i] = minValue;
+        }
+
+        return xs[k];
     }
 
     function fuel(uint256[] memory xs, uint256 m)
