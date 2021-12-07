@@ -6,16 +6,10 @@ if (!process.stdin.isTTY) {
 
 const numbers = (s) => s.split(/[^\d.]+/).map(Number)
 
-const fuel = (xs, m) => xs.map((x) => Math.abs(x - m)).reduce((a, x) => a + x)
+const fuel = (crabs, position) =>
+  crabs.map((x) => Math.abs(x - position)).reduce((a, x) => a + x)
 
-function p1(xs) {
-  const n = xs.length
-  if (n % 2 == 0) {
-    return fuel(xs, xs[n / 2])
-  } else {
-    return Math.min(fuel(xs, xs[n / 2]), fuel(xs, xs[n / 2 + 1]))
-  }
-}
+const p1 = (xs) => Math.min(...crabs.map((p) => fuel(crabs, p)))
 
 let crabs = numbers(input)
 crabs.sort()
