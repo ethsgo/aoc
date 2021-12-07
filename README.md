@@ -28,7 +28,7 @@ given in the puzzle. To pass input, pipe into stdin:
 Gas estimates are omitted when input is passed via stdin, because otherwise it
 takes too long. Even so, we sometimes hit memory limits with hardhat. As a
 workaround, set the following environment variable and run npx hardhat again.
-This allows hardhat to use more memory that the default.
+This allows hardhat to use more memory than the default.
 
     export NODE_OPTIONS="--max-old-space-size=4096"
 
