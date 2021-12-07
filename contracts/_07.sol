@@ -19,6 +19,21 @@ contract _07 is _07Parser {
         return (p1(crabs), p2(crabs));
     }
 
+    function minmax(uint256[] memory xs) private returns (uint256, uint256) {
+        uint256 min = xs[0];
+        uint256 max = xs[0];
+        for (uint256 i = 0; i < xs.length; i++) {
+            uint256 x = xs[i];
+            if (x < min) {
+                min = x;
+            }
+            if (x > max) {
+                max = x;
+            }
+        }
+        return (min, max);
+    }
+
     // Memoize fuel.
     mapping(uint256 => uint256) mfuel;
 
@@ -43,9 +58,10 @@ contract _07 is _07Parser {
     }
 
     function p1(uint256[] memory crabs) private returns (uint256) {
+        (uint256 s, uint256 e) = minmax(crabs);
         uint256 m = type(uint256).max;
-        for (uint256 i = 0; i < crabs.length; i++) {
-            uint256 f = fuel(crabs, crabs[i]);
+        for (; s <= e; s++) {
+            uint256 f = fuel(crabs, s);
             if (f < m) {
                 m = f;
             }
