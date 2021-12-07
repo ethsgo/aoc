@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "./MathUtils.sol";
 
 contract _07Parser is Parser {
     string private constant exampleInput = "16,1,2,0,4,2,7,1,2,14";
@@ -13,74 +14,62 @@ contract _07Parser is Parser {
     }
 }
 
-contract _07 is _07Parser {
+contract ArrayUtils {
+    function sum(uint256[] memory xs) internal pure returns (uint256) {
+        uint256 c = 0;
+        for (uint256 i = 0; i < xs.length; i++) {
+            c += xs[i];
+        }
+        return c;
+    }
+}
+
+contract _07 is _07Parser, ArrayUtils, MathUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[] memory crabs = parse(input);
         return (p1(crabs), p2(crabs));
     }
 
-    function minmax(uint256[] memory xs)
-        private
-        pure
-        returns (uint256, uint256)
-    {
-        uint256 min = xs[0];
-        uint256 max = xs[0];
-        for (uint256 i = 0; i < xs.length; i++) {
-            uint256 x = xs[i];
-            if (x < min) {
-                min = x;
-            }
-            if (x > max) {
-                max = x;
-            }
-        }
-        return (min, max);
+    function p1(uint256[] memory xs) private pure returns (uint256) {
+        // Median minimizes the absolute distance.
+        return fuel(xs, median(xs));
     }
 
-    function fuel(
-        uint256[] memory crabs,
-        uint256 position,
-        bool shouldSumTo
-    ) private pure returns (uint256) {
-        uint256 c = 0;
-        for (uint256 i = 0; i < crabs.length; i++) {
-            uint256 d = position < crabs[i]
-                ? crabs[i] - position
-                : position - crabs[i];
-            if (shouldSumTo) {
-                c += (d * (d + 1)) / 2;
-            } else {
-                c += d;
-            }
-        }
-        return c;
+    function median(uint256[] memory xs) private pure returns (uint256) {
+        return 0;
     }
 
-    function minFuel(uint256[] memory crabs, bool shouldSumTo)
+    function fuel(uint256[] memory xs, uint256 m)
         private
         pure
         returns (uint256)
     {
-        (uint256 s, uint256 e) = minmax(crabs);
-        uint256 m = type(uint256).max;
-        for (; s <= e; s++) {
-            uint256 f = fuel(crabs, s, shouldSumTo);
-            if (f <= m) {
-                m = f;
-            } else {
-                // There is only one minima.
-                return m;
-            }
+        uint256 c = 0;
+        for (uint256 i = 0; i < xs.length; i++) {
+            c += absdiff(xs[i], m);
         }
-        return m;
+        return c;
     }
 
-    function p1(uint256[] memory crabs) private pure returns (uint256) {
-        return minFuel(crabs, false);
+    function p2(uint256[] memory xs) private pure returns (uint256) {
+        // Arithmetic mean minimizes square of distance. In our case we want to
+        // minimize (n^2 + n) / 2, which is close enough such that trying the
+        // floor and the ceiling of the mean works.
+        uint256 m = sum(xs) / xs.length;
+
+        return min(fuel2(xs, m), fuel2(xs, m + 1));
     }
 
-    function p2(uint256[] memory crabs) private pure returns (uint256) {
-        return minFuel(crabs, true);
+    function fuel2(uint256[] memory xs, uint256 m)
+        private
+        pure
+        returns (uint256)
+    {
+        uint256 c = 0;
+        for (uint256 i = 0; i < xs.length; i++) {
+            uint256 d = absdiff(xs[i], m);
+            c += (d * (d + 1)) / 2;
+        }
+        return c;
     }
 }
