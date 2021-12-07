@@ -19,21 +19,30 @@ contract _07 is _07Parser {
         return (p1(crabs), p2(crabs));
     }
 
+    // Memoize fuel.
+    mapping(uint256 => uint256) mfuel;
+
     function fuel(uint256[] memory crabs, uint256 position)
         private
-        pure
         returns (uint256)
     {
+        uint256 mf = mfuel[position];
+        if (mf > 0) {
+            return mf;
+        }
+
         uint256 c = 0;
         for (uint256 i = 0; i < crabs.length; i++) {
             c += position < crabs[i]
                 ? crabs[i] - position
                 : position - crabs[i];
         }
+
+        mfuel[position] = c;
         return c;
     }
 
-    function p1(uint256[] memory crabs) private pure returns (uint256) {
+    function p1(uint256[] memory crabs) private returns (uint256) {
         uint256 m = type(uint256).max;
         for (uint256 i = 0; i < crabs.length; i++) {
             uint256 f = fuel(crabs, crabs[i]);
