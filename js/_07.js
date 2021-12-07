@@ -12,6 +12,6 @@ const fuel = (crabs, position) =>
 const p1 = (xs) => Math.min(...crabs.map((p) => fuel(crabs, p)))
 
 let crabs = numbers(input)
-crabs.sort()
+
 console.log(p1(crabs))
 //console.log(p2(crabs))
