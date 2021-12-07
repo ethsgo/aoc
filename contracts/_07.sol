@@ -12,26 +12,7 @@ contract _07Parser is Parser {
 }
 
 contract ArrayUtils {
-    function map(uint256[] memory xs, function(uint256) returns (uint256) f)
-        internal
-        returns (uint256[] memory)
-    {
-        uint256[] memory result = new uint256[](xs.length);
-        for (uint256 i = 0; i < xs.length; i++) {
-            result[i] = f(xs[i]);
-        }
-        return result;
-    }
-
-    function min(uint256[] memory xs) internal pure returns (uint256) {
-        uint256 m = xs[0];
-        for (uint256 i = 1; i < xs.length; i++) {
-            if (xs[i] < m) {
-                m = xs[i];
-            }
-        }
-        return m;
-    }
+    function min(uint256[] memory xs) internal pure returns (uint256) {}
 }
 
 contract _07 is _07Parser, ArrayUtils {
@@ -57,8 +38,19 @@ contract _07 is _07Parser, ArrayUtils {
         return c;
     }
 
+    function minFuel(uint256[] memory crabs) private pure returns (uint256) {
+        uint256 m = type(uint256).max;
+        for (uint256 i = 0; i < crabs.length; i++) {
+            uint256 f = fuel(crabs, crabs[i]);
+            if (f < m) {
+                m = f;
+            }
+        }
+        return m;
+    }
+
     function p1(uint256[] memory crabs) private pure returns (uint256) {
-        return min(map(crabs, fuel));
+        return minFuel(crabs);
     }
 
     function p2(uint256[] memory crabs) private pure returns (uint256) {
