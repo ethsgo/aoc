@@ -32,6 +32,9 @@ This allows hardhat to use more memory that the default.
 
     export NODE_OPTIONS="--max-old-space-size=4096"
 
+Unfortunately, some of the solutions still fail to run on the full input,
+running out of memory.
+
 ## Say hello
 
 [https://twitter.com/ethsgo\_](https://twitter.com/ethsgo_)
