@@ -6,10 +6,31 @@ if (!process.stdin.isTTY) {
 
 const numbers = (s) => s.split(/[^\d.]+/).map(Number)
 
-const fuel = (crabs, position, scale) =>
+function median(xs) {
+  xs = [...xs]
+  xs.sort()
+  const n = xs.length
+  if (n % 2 == 0) {
+    return (xs[n / 2] + xs[n / 2 + 1]) / 2
+  } else {
+    return xs[n / 2]
+  }
+}
+
+const fuel = (crabs, position) =>
   crabs.map((x) => Math.abs(x - position)).reduce((a, x) => a + x)
 
-const p1 = (xs) => Math.min(...crabs.map((p) => fuel(crabs, p)))
+// The median minimizes the sum of absolute deviations (l1-norm).
+//
+// The median is the middle element in case the number of elements is odd. In
+// case the number of elements is even, any number (inclusive) between the two
+// elements can be considered as the median. Generally, the arithmetic mean of
+// these two values is considered as a median, but either of these two values
+// also minimize the sum of distances, and can be considered as the median.
+//
+// https://math.stackexchange.com/questions/113270/the-median-minimizes-the-sum-of-absolute-deviations-the-ell-1-norm
+
+const p1 = (xs) => fuel(xs, xs[Math.floor(xs.length / 2)])
 
 const sumTo = (n) => (n * (n + 1)) / 2
 
@@ -25,6 +46,7 @@ function p2(xs) {
 }
 
 let crabs = numbers(input)
+crabs.sort((x, y) => x - y)
 
 console.log(p1(crabs))
 console.log(p2(crabs))

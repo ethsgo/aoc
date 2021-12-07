@@ -41,8 +41,7 @@ contract _07 is _07Parser {
     function fuel(
         uint256[] memory crabs,
         uint256 position,
-        bool shouldSumTo,
-        uint256 currentMin
+        bool shouldSumTo
     ) private pure returns (uint256) {
         uint256 c = 0;
         for (uint256 i = 0; i < crabs.length; i++) {
@@ -53,9 +52,6 @@ contract _07 is _07Parser {
                 c += (d * (d + 1)) / 2;
             } else {
                 c += d;
-            }
-            if (c >= currentMin) {
-                return c;
             }
         }
         return c;
@@ -69,9 +65,12 @@ contract _07 is _07Parser {
         (uint256 s, uint256 e) = minmax(crabs);
         uint256 m = type(uint256).max;
         for (; s <= e; s++) {
-            uint256 f = fuel(crabs, s, shouldSumTo, m);
-            if (f < m) {
+            uint256 f = fuel(crabs, s, shouldSumTo);
+            if (f <= m) {
                 m = f;
+            } else {
+                // There is only one minima.
+                return m;
             }
         }
         return m;
