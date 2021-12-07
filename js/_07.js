@@ -6,8 +6,8 @@ if (!process.stdin.isTTY) {
 
 const numbers = (s) => s.split(/[^\d.]+/).map(Number)
 
-const fuel = (crabs, position) =>
-  crabs.map((x) => Math.abs(x - position)).reduce((a, x) => a + x)
+const sum = (xs) => xs.reduce((a, x) => a + x)
+const fuel = (xs, m) => sum(xs.map((x) => Math.abs(x - m)))
 
 // The median works for part 1 because of the optimality property: it is the
 // value with the lowest absolute distance to the data.
@@ -25,16 +25,19 @@ const fuel = (crabs, position) =>
 const p1 = (xs) => fuel(xs, xs[Math.floor(xs.length / 2)])
 
 const sumTo = (n) => (n * (n + 1)) / 2
+const fuel2 = (xs, m) => sum(xs.map((x) => sumTo(Math.abs(x - m))))
 
-const fuel2 = (crabs, position) =>
-  crabs.map((x) => sumTo(Math.abs(x - position))).reduce((a, x) => a + x)
+// The arithmetic mean works for part 2 because it minimizes the sum of squared
+// deviations (x - m)^2.
+//
+// In our case, we're not minimizing the square n^2 but instead the binomial
+// coefficient (n . (n + 1)) / 2. However, because of the n^2 in there, the
+// arithmetic mean is close to optimal. Assuming the mean is less that 0.5 from
+// the best position, we try both the integers around the mean.
 
 function p2(xs) {
-  const s = Math.min(...xs)
-  const e = Math.max(...xs)
-  const range = Array.from({ length: e - s }, (x, i) => i + s)
-  const fuels = range.map((p) => fuel2(crabs, p))
-  return Math.min(...fuels)
+  const m = sum(xs) / xs.length
+  return Math.min(fuel2(xs, Math.floor(m)), fuel2(xs, Math.ceil(m)))
 }
 
 let crabs = numbers(input)
