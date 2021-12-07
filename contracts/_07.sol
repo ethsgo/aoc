@@ -34,26 +34,20 @@ contract _07 is _07Parser {
         return (min, max);
     }
 
-    // Memoize fuel.
-    mapping(uint256 => uint256) mfuel;
-
-    function fuel(uint256[] memory crabs, uint256 position)
-        private
-        returns (uint256)
-    {
-        uint256 mf = mfuel[position];
-        if (mf > 0) {
-            return mf;
-        }
-
+    function fuel(
+        uint256[] memory crabs,
+        uint256 position,
+        uint256 currentMin
+    ) private pure returns (uint256) {
         uint256 c = 0;
         for (uint256 i = 0; i < crabs.length; i++) {
             c += position < crabs[i]
                 ? crabs[i] - position
                 : position - crabs[i];
+            if (c >= currentMin) {
+                return c;
+            }
         }
-
-        mfuel[position] = c;
         return c;
     }
 
@@ -61,7 +55,7 @@ contract _07 is _07Parser {
         (uint256 s, uint256 e) = minmax(crabs);
         uint256 m = type(uint256).max;
         for (; s <= e; s++) {
-            uint256 f = fuel(crabs, s);
+            uint256 f = fuel(crabs, s, m);
             if (f < m) {
                 m = f;
             }
