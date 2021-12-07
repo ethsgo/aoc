@@ -6,10 +6,15 @@ if (!process.stdin.isTTY) {
 
 const numbers = (s) => s.split(/[^\d.]+/).map(Number)
 
-function p1(crabs) {
-  const m = crabs[crabs.length / 2]
-  const fuel = crabs.map((x) => Math.abs(x - m))
-  return fuel.reduce((a, x) => a + x)
+const fuel = (xs, m) => xs.map((x) => Math.abs(x - m)).reduce((a, x) => a + x)
+
+function p1(xs) {
+  const n = xs.length
+  if (n % 2 == 0) {
+    return fuel(xs, xs[n / 2])
+  } else {
+    return Math.min(fuel(xs, xs[n / 2]), fuel(xs, xs[n / 2 + 1]))
+  }
 }
 
 let crabs = numbers(input)
