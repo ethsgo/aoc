@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
 contract _08Parser is Parser {
     string private constant exampleInput =
@@ -77,13 +78,15 @@ contract _08 is _08Parser {
         return c;
     }
 
-    function p2(Entry[] memory entries) private pure returns (uint256) {
+    function p2(Entry[] memory entries) private returns (uint256) {
         return value(entries[0]);
     }
 
-    function value(Entry memory entry) private pure returns (uint256) {
-        //return segment("dab");
+    function value(Entry memory entry) private returns (uint256) {
         uint8[10] memory segments = deduceSegments(entry.patterns);
+        for (uint256 i = 0; i < segments.length; i++) {
+            console.log(i, segments[i], toString(segments[i]));
+        }
         return segments[1];
         // uint256 result;
         // for (uint256 i = 0; i < entry.digits.length; i++) {
@@ -170,5 +173,20 @@ contract _08 is _08Parser {
             result |= uint8(1 << (uint8(b[i]) - ascii_a));
         }
         return result;
+    }
+
+    function toString(uint8 s) private pure returns (string memory) {
+        return
+            string(
+                bytes.concat(
+                    bytes((s & (1 << 0) == 0) ? "-" : "a"),
+                    bytes((s & (1 << 1) == 0) ? "-" : "b"),
+                    bytes((s & (1 << 2) == 0) ? "-" : "c"),
+                    bytes((s & (1 << 3) == 0) ? "-" : "d"),
+                    bytes((s & (1 << 4) == 0) ? "-" : "e"),
+                    bytes((s & (1 << 5) == 0) ? "-" : "f"),
+                    bytes((s & (1 << 6) == 0) ? "-" : "g")
+                )
+            );
     }
 }
