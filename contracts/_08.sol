@@ -130,4 +130,13 @@ contract _08 is _08Parser {
         }
         return result;
     }
+
+    function intersect(uint8 a, uint8 b) private pure returns (uint8) {
+        uint8 c;
+        for (uint256 i = 0; i < 7; i++) {
+            uint8 mask = uint8(1 << i);
+            c |= (a & mask) & (b & mask);
+        }
+        return c;
+    }
 }
