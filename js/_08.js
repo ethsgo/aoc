@@ -43,8 +43,8 @@ function parse(input) {
   })
 }
 
-function p1(ps) {
-  return ps.reduce((a, { patterns, digits }) => {
+function p1(entries) {
+  return entries.reduce((a, { patterns, digits }) => {
     let c = 0
     for (const d of digits) {
       if (d.length === 2) c++ // 1
@@ -66,19 +66,20 @@ const difference = (a, b) => new Set([...a].filter((e) => !b.has(e)))
 const equal = (a, b) => [...a].sort().toString() === [...b].sort().toString()
 
 function deduceSegments(entry) {
-  // Segments of digits
-  let sofd = {}
+  // Segments, indexed by the digit
+  let sx = []
+
   // Candidates patterns of length 5 and 6
   let c5 = []
   let c6 = []
 
-  for (let p of entry.patterns) {
+  for (const p of entry.patterns) {
     const len = p.length
     const s = new Set(p)
-    if (len === 2) sofd[1] = s
-    if (len === 3) sofd[7] = s
-    if (len === 4) sofd[4] = s
-    if (len === 7) sofd[8] = s
+    if (len === 2) sx[1] = s
+    if (len === 3) sx[7] = s
+    if (len === 4) sx[4] = s
+    if (len === 7) sx[8] = s
     if (len === 5) c5.push(s)
     if (len === 6) c6.push(s)
   }
@@ -86,53 +87,45 @@ function deduceSegments(entry) {
   // Find the segments common in all patterns of length 5. These are the
   // three horizontal segments.
   const h = intersection(intersection(c5[0], c5[1]), c5[2])
-  // Digit 3 has all of these, and the two additional right vertical segments,
-  // which'll be those that are on in the digit 1.
-  sofd[3] = union(h, sofd[1])
+  // Digit 3 has all of these, and additionally has the the same two right
+  // vertical segments as digit 1.
+  sx[3] = union(h, sx[1])
 
   // Removing the segments of digit 3 from digit 4, we get the top left
   // vertical segment.
-  const vtl = [...difference(sofd[4], sofd[3])][0]
+  const vtl = [...difference(sx[4], sx[3])][0]
 
   // Of the remaining patterns of length 5, the one that has the vertical top
   // left segment on is the digit 5. The other one is digit 2.
-  for (let s5 of c5) {
-    if (equal(s5, sofd[3])) continue
-    sofd[s5.has(vtl) ? 5 : 2] = s5
+  for (const s5 of c5) {
+    if (equal(s5, sx[3])) continue
+    sx[s5.has(vtl) ? 5 : 2] = s5
   }
 
   // Digits 9 has one extra segment in addition to digit 3.
-  for (let s6 of c6) {
-    if (difference(s6, sofd[3]).size === 1) {
-      sofd[9] = s6
+  for (const s6 of c6) {
+    if (difference(s6, sx[3]).size === 1) {
+      sx[9] = s6
     } else {
       // Digit 9 has all three of the horizontal segments
-      sofd[equal(intersection(s6, h), h) ? 6 : 0] = s6
+      sx[equal(intersection(s6, h), h) ? 6 : 0] = s6
     }
   }
 
-  return sofd
+  return sx
 }
 
 function value(entry) {
-  let result = 0
   const segments = deduceSegments(entry)
-  for (const d of entry.digits.map((d) => new Set(d))) {
-    for (const k in segments) {
-      const v = segments[k]
-      if (equal(d, v)) {
-        result *= 10
-        result += Number(k)
-        break
-      }
-    }
-  }
-  return result
+  const digits = entry.digits.map((d) => new Set(d))
+  return digits.reduce((a, d) => {
+    return a * 10 + segments.findIndex((s) => equal(d, s))
+  }, 0)
 }
 
 const sum = (xs) => xs.reduce((a, x) => a + x, 0)
-const p2 = (ps) => sum(ps.map((p) => value(p)))
+const p2 = (entries) => sum(entries.map((e) => value(e)))
 
-const ps = parse(input)
-console.log(p1(ps))
-console.log(p2(ps))
+const entries = parse(input)
+console.log(p1(entries))
+console.log(p2(entries))
