@@ -84,16 +84,12 @@ contract _08 is _08Parser {
 
     function value(Entry memory entry) private returns (uint256) {
         uint8[10] memory segments = deduceSegments(entry.patterns);
-        for (uint256 i = 0; i < segments.length; i++) {
-            console.log(i, segments[i], toString(segments[i]));
+        uint256 result;
+        for (uint256 i = 0; i < entry.digits.length; i++) {
+            result *= 10;
+            result += digitValue(segments, entry.digits[i]);
         }
-        return segments[1];
-        // uint256 result;
-        // for (uint256 i = 0; i < entry.digits.length; i++) {
-        //     result *= 10;
-        //     result += digitValue(segments, entry.digits[i]);
-        // }
-        // return result;
+        return result;
     }
 
     function digitValue(uint8[10] memory segments, string memory digit)
@@ -111,7 +107,6 @@ contract _08 is _08Parser {
     /// Deduce the segments representing each digit (indexed by the digit).
     function deduceSegments(string[10] memory patterns)
         private
-        pure
         returns (uint8[10] memory)
     {
         uint8[10] memory sx;
@@ -153,7 +148,7 @@ contract _08 is _08Parser {
         }
 
         // Adding the right vertical segments to 5 gives us the segments for 9.
-        sx[9] = sx[5] | h;
+        sx[9] = sx[5] | sx[1];
 
         // Of the two remaining 6 segment candidates, digit 6 has all three of the
         // horizontal segments set. The remaining one is digit 0.
