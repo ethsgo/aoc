@@ -21,12 +21,12 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc |
 fgae cfgab fg bagce
 `.trim()
 
-// Shorter input variation, useful for p2
+// Shorter input variation, useful for testing p2.
 let inputShort = `
 acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
 cdfeb fcadb cdfeb cdbaf
 `.trim()
-input = inputShort
+// input = inputShort
 
 if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
@@ -65,12 +65,13 @@ const intersection = (a, b) => new Set([...a].filter((e) => b.has(e)))
 const difference = (a, b) => new Set([...a].filter((e) => !b.has(e)))
 const equal = (a, b) => [...a].sort().toString() === [...b].sort().toString()
 
-function p2e(entry) {
+function deduceSegments(entry) {
   // Segments of digits
   let sofd = {}
   // Candidates patterns of length 5 and 6
   let c5 = []
   let c6 = []
+
   for (let p of entry.patterns) {
     const len = p.length
     const s = new Set(p)
@@ -106,17 +107,32 @@ function p2e(entry) {
       sofd[9] = s6
     } else {
       // Digit 9 has all three of the horizontal segments
-      sofd[equal(intersection(s6, h), h) ? 9 : 0] = s6
+      sofd[equal(intersection(s6, h), h) ? 6 : 0] = s6
     }
   }
 
-  console.log(sofd)
-  return 0
-}
-function p2(ps) {
-  return p2e(ps[0])
+  return sofd
 }
 
+function value(entry) {
+  let result = 0
+  const segments = deduceSegments(entry)
+  for (const d of entry.digits.map((d) => new Set(d))) {
+    for (const k in segments) {
+      const v = segments[k]
+      if (equal(d, v)) {
+        result *= 10
+        result += Number(k)
+        break
+      }
+    }
+  }
+  return result
+}
+
+const sum = (xs) => xs.reduce((a, x) => a + x, 0)
+const p2 = (ps) => sum(ps.map((p) => value(p)))
+
 const ps = parse(input)
-// console.log(p1(ps))
+console.log(p1(ps))
 console.log(p2(ps))
