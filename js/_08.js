@@ -63,6 +63,7 @@ const union = (a, b) => {
 }
 const intersection = (a, b) => new Set([...a].filter((e) => b.has(e)))
 const difference = (a, b) => new Set([...a].filter((e) => !b.has(e)))
+const equal = (a, b) => [...a].sort().toString() === [...b].sort().toString()
 
 function p2e(entry) {
   // Segments of digits
@@ -80,7 +81,7 @@ function p2e(entry) {
     if (len === 5) c5.push(s)
     if (len === 6) c6.push(s)
   }
-  console.log(sofd, c5, c6)
+
   // Find the segments common in all patterns of length 5
   const co5 = intersection(intersection(c5[0], c5[1]), c5[2])
   // Cross these off in the segments in the pattern for 7. This eliminates
@@ -88,18 +89,23 @@ function p2e(entry) {
   const hr5 = difference(sofd[7], co5)
   // The pattern of length 5 has both the horizontal ones is the digit 3.
   sofd[3] = union(co5, hr5)
-  // Of the remaining patterns of length 5, the one that shares a horizontal
-  // segment with 3 is the digit 2.
+
+  // Removing the segments of digit 3 from digit 4, we get the top left
+  // horizontal segment.
+  const htl = [...difference(sofd[4], sofd[3])][0]
+
+  // Of the remaining patterns of length 5, the one that has the horizontal top
+  // left segment on is the digit 5. The other one is digit 2.
   for (let s5 of c5) {
-    const h = difference(s5, co5)
-    console.log(difference(h, hr5))
+    if (equal(s5, sofd[3])) continue
+    sofd[s5.has(htl) ? 5 : 2] = s5
   }
   //
   //   console.log([...union(s5, hr5)].length)
   //   if (union(s5, hr5) == s5)
   // }
   // The other
-  console.log(sofd[3])
+  // console.log(sofd[3])
   return 0
 }
 function p2(ps) {
