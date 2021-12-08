@@ -26,13 +26,17 @@ contract _08Parser is Parser {
         "gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | "
         "fgae cfgab fg bagce ";
 
+    string exampleInputShort =
+        "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | "
+        "cdfeb fcadb cdfeb cdbaf";
+
     struct Entry {
         string[10] patterns;
         string[4] digits;
     }
 
     function parse(string memory input) internal returns (Entry[] memory) {
-        string memory s = bytes(input).length == 0 ? exampleInput : input;
+        string memory s = bytes(input).length == 0 ? exampleInputShort : input;
 
         string[] memory tokens = parseTokens(s);
 
@@ -78,13 +82,15 @@ contract _08 is _08Parser {
     }
 
     function value(Entry memory entry) private pure returns (uint256) {
+        //return segment("dab");
         uint8[10] memory segments = deduceSegments(entry.patterns);
-        uint256 result;
-        for (uint256 i = 0; i < entry.digits.length; i++) {
-            result *= 10;
-            result += digitValue(segments, entry.digits[i]);
-        }
-        return result;
+        return segments[1];
+        // uint256 result;
+        // for (uint256 i = 0; i < entry.digits.length; i++) {
+        //     result *= 10;
+        //     result += digitValue(segments, entry.digits[i]);
+        // }
+        // return result;
     }
 
     function digitValue(uint8[10] memory segments, string memory digit)
