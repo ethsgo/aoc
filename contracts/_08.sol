@@ -59,6 +59,17 @@ contract _08 is _08Parser {
     }
 
     function p1(Entry[] memory entries) private pure returns (uint256) {
-        return entries.length;
+        uint256 c = 0;
+        for (uint256 i = 0; i < entries.length; i++) {
+            string[4] memory digits = entries[i].digits;
+            for (uint256 j = 0; j < digits.length; j++) {
+                uint256 len = bytes(digits[j]).length;
+                if (len == 2) c++; // 1
+                if (len == 3) c++; // 7
+                if (len == 4) c++; // 4
+                if (len == 7) c++; // 8
+            }
+        }
+        return c;
     }
 }
