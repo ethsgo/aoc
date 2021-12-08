@@ -49,6 +49,13 @@ function p1(ps) {
   }, 0)
 }
 
+const intersection = (a, b) => new Set([...a].filter((e) => b.has(e)))
+const difference = (a, b) => new Set([...a].filter((e) => !b.has(e)))
+
+function p2() {
+  return 0
+}
+
 const ps = parse(input)
 console.log(p1(ps))
-//console.log(p2(ps))
+console.log(p2(ps))
