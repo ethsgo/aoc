@@ -91,10 +91,16 @@ contract _08 is _08Parser {
         private
         pure
         returns (uint256)
-    {}
+    {
+        uint8 s = segment(digit);
+        for (uint256 i = 0; i < segments.length; i++) {
+            if (s == segments[i]) return i;
+        }
+        revert();
+    }
 
     /// Deduce the segments representing each digit (indexed by the digit).
-    function segmentsOfDigit(string[10] memory patterns)
+    function deduceSegments(string[10] memory patterns)
         private
         pure
         returns (uint8[10] memory)
@@ -134,10 +140,18 @@ contract _08 is _08Parser {
         // left vertical segment set is digit 5, and the other one is digit 2.
         for (uint256 i = 0; i < 3; i++) {
             if (c5[i] == sx[3]) continue;
-            sx[(c5[i] & tlv) ? 5 : 2] = c5[i];
+            sx[(c5[i] & tlv == tlv) ? 5 : 2] = c5[i];
         }
 
-        
+        // Adding the right vertical segments to 5 gives us the segments for 9.
+        sx[9] = sx[5] | h;
+
+        // Of the two remaining 6 segment candidates, digit 6 has all three of the
+        // horizontal segments set. The remaining one is digit 0.
+        for (uint256 i = 0; i < 3; i++) {
+            if (c6[i] == sx[9]) continue;
+            sx[(c6[i] & h == h) ? 6 : 0] = c6[i];
+        }
 
         return sx;
     }
@@ -150,13 +164,5 @@ contract _08 is _08Parser {
             result |= uint8(1 << (uint8(b[i]) - ascii_a));
         }
         return result;
-    }
-
-    function union(uint8 a, uint8 b) private pure returns (uint8) {
-        return a | b;
-    }
-
-    function intersect(uint8 a, uint8 b) private pure returns (uint8) {
-        return a & b;
     }
 }
