@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "./ArrayUtils.sol";
 
 contract _08Parser is Parser {
     string private constant exampleInput =
@@ -36,7 +37,7 @@ contract _08Parser is Parser {
     }
 
     function parse(string memory input) internal returns (Entry[] memory) {
-        string memory s = bytes(input).length == 0 ? exampleInputShort : input;
+        string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory tokens = parseTokens(s);
 
@@ -56,10 +57,10 @@ contract _08Parser is Parser {
     }
 }
 
-contract _08 is _08Parser {
+contract _08 is _08Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         Entry[] memory entries = parse(input);
-        return (p2(entries), 0);
+        return (p1(entries), p2(entries));
     }
 
     function p1(Entry[] memory entries) private pure returns (uint256) {
@@ -78,7 +79,16 @@ contract _08 is _08Parser {
     }
 
     function p2(Entry[] memory entries) private pure returns (uint256) {
-        return value(entries[0]);
+        return sum(mapEntries(entries, value));
+    }
+
+    function mapEntries(
+        Entry[] memory entries,
+        function(Entry memory) internal pure returns (uint256) f
+    ) private pure returns (uint256[] memory) {
+        uint256[] memory result = new uint256[](entries.length);
+        for (uint256 i = 0; i < entries.length; i++) result[i] = f(entries[i]);
+        return result;
     }
 
     function value(Entry memory entry) private pure returns (uint256) {

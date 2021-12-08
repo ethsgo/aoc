@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 import "./MathUtils.sol";
+import "./ArrayUtils.sol";
 
 contract _07Parser is Parser {
     string private constant exampleInput = "16,1,2,0,4,2,7,1,2,14";
@@ -11,16 +12,6 @@ contract _07Parser is Parser {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         return parseUints(s);
-    }
-}
-
-contract ArrayUtils {
-    function sum(uint256[] memory xs) internal pure returns (uint256) {
-        uint256 c = 0;
-        for (uint256 i = 0; i < xs.length; i++) {
-            c += xs[i];
-        }
-        return c;
     }
 }
 
