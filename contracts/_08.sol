@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
-import "hardhat/console.sol";
 
 contract _08Parser is Parser {
     string private constant exampleInput =
@@ -78,11 +77,11 @@ contract _08 is _08Parser {
         return c;
     }
 
-    function p2(Entry[] memory entries) private returns (uint256) {
+    function p2(Entry[] memory entries) private pure returns (uint256) {
         return value(entries[0]);
     }
 
-    function value(Entry memory entry) private returns (uint256) {
+    function value(Entry memory entry) private pure returns (uint256) {
         uint8[10] memory segments = deduceSegments(entry.patterns);
         uint256 result;
         for (uint256 i = 0; i < entry.digits.length; i++) {
@@ -107,6 +106,7 @@ contract _08 is _08Parser {
     /// Deduce the segments representing each digit (indexed by the digit).
     function deduceSegments(string[10] memory patterns)
         private
+        pure
         returns (uint8[10] memory)
     {
         uint8[10] memory sx;
