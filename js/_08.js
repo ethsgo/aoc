@@ -82,30 +82,35 @@ function p2e(entry) {
     if (len === 6) c6.push(s)
   }
 
-  // Find the segments common in all patterns of length 5
-  const co5 = intersection(intersection(c5[0], c5[1]), c5[2])
-  // Cross these off in the segments in the pattern for 7. This eliminates
-  // vertical segments, and what is left is the right horizontal segments.
-  const hr5 = difference(sofd[7], co5)
-  // The pattern of length 5 has both the horizontal ones is the digit 3.
-  sofd[3] = union(co5, hr5)
+  // Find the segments common in all patterns of length 5. These are the
+  // three horizontal segments.
+  const h = intersection(intersection(c5[0], c5[1]), c5[2])
+  // Digit 3 has all of these, and the two additional right vertical segments,
+  // which'll be those that are on in the digit 1.
+  sofd[3] = union(h, sofd[1])
 
   // Removing the segments of digit 3 from digit 4, we get the top left
-  // horizontal segment.
-  const htl = [...difference(sofd[4], sofd[3])][0]
+  // vertical segment.
+  const vtl = [...difference(sofd[4], sofd[3])][0]
 
-  // Of the remaining patterns of length 5, the one that has the horizontal top
+  // Of the remaining patterns of length 5, the one that has the vertical top
   // left segment on is the digit 5. The other one is digit 2.
   for (let s5 of c5) {
     if (equal(s5, sofd[3])) continue
-    sofd[s5.has(htl) ? 5 : 2] = s5
+    sofd[s5.has(vtl) ? 5 : 2] = s5
   }
-  //
-  //   console.log([...union(s5, hr5)].length)
-  //   if (union(s5, hr5) == s5)
-  // }
-  // The other
-  // console.log(sofd[3])
+
+  // Digits 9 has one extra segment in addition to digit 3.
+  for (let s6 of c6) {
+    if (difference(s6, sofd[3]).size === 1) {
+      sofd[9] = s6
+    } else {
+      // Digit 9 has all three of the horizontal segments
+      sofd[equal(intersection(s6, h), h) ? 9 : 0] = s6
+    }
+  }
+
+  console.log(sofd)
   return 0
 }
 function p2(ps) {
