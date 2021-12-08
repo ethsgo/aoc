@@ -78,11 +78,51 @@ contract _08 is _08Parser {
     }
 
     function value(Entry memory entry) private pure returns (uint256) {
-        return segments(entry.digits[0]);
+        uint8[10] memory segments = deduceSegments(entry.patterns);
+        uint256 result;
+        for (uint256 i = 0; i < entry.digits.length; i++) {
+            result *= 10;
+            result += digitValue(segments, entry.digits[i]);
+        }
+        return result;
+    }
+
+    function digitValue(uint8[10] memory segments, string memory digit)
+        private
+        pure
+        returns (uint256)
+    {}
+
+    /// Deduce the segments representing each digit (indexed by the digit).
+    function deduceSegments(string[10] memory patterns)
+        private
+        pure
+        returns (uint8[10] memory)
+    {
+        uint8[10] memory sx;
+
+        // Candidates for 5 and 6 segment digits
+        uint8[3] memory c5;
+        uint8[3] memory c6;
+        uint8 c5i;
+        uint8 c6i;
+
+        for (uint256 i = 0; i < patterns.length; i++) {
+            uint256 len = bytes(patterns[i]).length;
+            uint8 s = segment(patterns[i]);
+            if (len == 2) sx[1] = s;
+            if (len == 3) sx[7] = s;
+            if (len == 4) sx[4] = s;
+            if (len == 7) sx[8] = s;
+            if (len == 5) c5[c5i++] = s;
+            if (len == 6) c6[c6i++] = s;
+        }
+
+        return sx;
     }
 
     /// Return a bitmap where each bit represents which of a b c d e f g were on.
-    function segments(string memory pattern) private pure returns (uint8) {
+    function segment(string memory pattern) private pure returns (uint8) {
         bytes memory b = bytes(pattern);
         uint8 result;
         for (uint256 i = 0; i < b.length; i++) {
