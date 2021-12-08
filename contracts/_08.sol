@@ -55,7 +55,7 @@ contract _08Parser is Parser {
 contract _08 is _08Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         Entry[] memory entries = parse(input);
-        return (p1(entries), 0);
+        return (p2(entries), 0);
     }
 
     function p1(Entry[] memory entries) private pure returns (uint256) {
@@ -71,5 +71,23 @@ contract _08 is _08Parser {
             }
         }
         return c;
+    }
+
+    function p2(Entry[] memory entries) private pure returns (uint256) {
+        return value(entries[0]);
+    }
+
+    function value(Entry memory entry) private pure returns (uint256) {
+        return segments(entry.digits[0]);
+    }
+
+    /// Return a bitmap where each bit represents which of a b c d e f g were on.
+    function segments(string memory pattern) private pure returns (uint8) {
+        bytes memory b = bytes(pattern);
+        uint8 result;
+        for (uint256 i = 0; i < b.length; i++) {
+            result |= uint8(1 << (uint8(b[i]) - ascii_a));
+        }
+        return result;
     }
 }
