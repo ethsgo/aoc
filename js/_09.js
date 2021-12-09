@@ -56,7 +56,7 @@ function p2(heightmap) {
     heightmap[y][x] = -1
     let frontier = next(y, x, pt)
     while (frontier.length > 0) {
-      const { fy, fx, from } = frontier.shift()
+      const { fy, fx, from } = frontier.pop()
       const fp = at(fy, fx)
       if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
       c++

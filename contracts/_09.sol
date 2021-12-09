@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
-import "./ArrayUtils.sol";
 
 contract _09Parser is Parser {
     string private constant exampleInput =
@@ -54,13 +53,13 @@ contract _09 is _09Parser, ArrayUtils {
         int256 x
     ) private pure returns (bool) {
         uint256 pt = heightmap[uint256(y)][uint256(x)];
-        return (pt < neighbour(heightmap, y - 1, x) &&
-            pt < neighbour(heightmap, y, x + 1) &&
-            pt < neighbour(heightmap, y, x - 1) &&
-            pt < neighbour(heightmap, y + 1, x));
+        return (pt < at(heightmap, y - 1, x) &&
+            pt < at(heightmap, y, x + 1) &&
+            pt < at(heightmap, y, x - 1) &&
+            pt < at(heightmap, y + 1, x));
     }
 
-    function neighbour(
+    function at(
         uint256[][] memory heightmap,
         int256 y,
         int256 x
@@ -93,8 +92,7 @@ contract _09 is _09Parser, ArrayUtils {
                 }
             }
         }
-
-        return basinSizes[0];
+        return basinSizes[0] * basinSizes[1] * basinSizes[2];
     }
 
     uint256 private constant explored = type(uint256).max;
@@ -116,14 +114,14 @@ contract _09 is _09Parser, ArrayUtils {
         uint256 c = 1;
         pushFrontier(y, x, heightmap[uint256(y)][uint256(x)]);
         heightmap[uint256(y)][uint256(x)] = explored;
-        return c;
-        for (int256 y = 0; y < int256(heightmap.length); y++) {
-            uint256[] memory row = heightmap[uint256(y)];
-            for (int256 x = 0; x < int256(row.length); x++) {
-                if (isLowPoint(heightmap, y, x)) {
-                    c += (row[uint256(x)] + 1);
-                }
-            }
+        while (frontier.length > 0) {
+            Next memory n = frontier[frontier.length - 1];
+            frontier.pop();
+            uint256 npt = at(heightmap, n.y, n.x);
+            if (npt == explored || npt == 9 || npt < n.pt) continue;
+            c += 1;
+            pushFrontier(n.y, n.x, npt);
+            heightmap[uint256(n.y)][uint256(n.x)] = explored;
         }
         return c;
     }
