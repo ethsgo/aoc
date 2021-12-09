@@ -52,37 +52,27 @@ function p2(heightmap) {
   ]
 
   const basinSizes = []
-  const pts = lowPoints(heightmap)
-  return pts
-  for (const { x, y, pt } of pts) {
-    if (pt === -1 || pt === 9) continue
+  for (const { x, y, pt } of lowPoints(heightmap)) {
     let c = 1
     heightmap[y][x] = -1
     let frontier = next(y, x, pt)
-    console.log('initial', frontier)
     while (frontier.length > 0) {
       const { fy, fx, from } = frontier.shift()
       const fp = at(fy, fx)
       if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
       heightmap[fy][fx] = -1
-      console.log(
-        `for ${JSON.stringify({ x, y, pt })}, ${JSON.stringify({
-          fx,
-          fy,
-          fp,
-        })} is valid`
-      )
       c++
       frontier = [...frontier, ...next(fy, fx, fp)]
     }
     basinSizes.push(c)
   }
 
-  return basinSizes.sort()
-  // .slice(0, 3)
-  // .reduce((a, x) => a + x, 0)
+  return basinSizes
+    .sort((x, y) => y - x)
+    .slice(0, 3)
+    .reduce((a, x) => a * x, 1)
 }
 
 const heightmap = parse(input)
-// console.log(p1(heightmap))
+console.log(p1(heightmap))
 console.log(p2(heightmap))
