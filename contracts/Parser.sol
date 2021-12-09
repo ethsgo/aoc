@@ -137,4 +137,9 @@ contract Parser {
         }
         return x;
     }
+
+    /// Parse an ascii digit character into a integer.
+    function parseDigit(bytes1 digit) internal pure returns (uint256) {
+        return uint8(digit) - ascii_0;
+    }
 }
