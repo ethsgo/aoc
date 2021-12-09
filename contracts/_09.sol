@@ -56,10 +56,12 @@ contract _09 is _09Parser, ArrayUtils {
         int256 y,
         int256 x
     ) private pure returns (uint256) {
-        if (y < 0 || uint256(y) >= heatmap.length) return type(uint256).max;
-        if (x < 0 || uint256(x) >= heatmap[uint256(y)].length)
+        if (y < 0 || x < 0) return type(uint256).max;
+        uint256 uy = uint256(y);
+        uint256 ux = uint256(x);
+        if (uy >= heatmap.length || ux >= heatmap[uy].length)
             return type(uint256).max;
-        return heatmap[uint256(y)][uint256(x)];
+        return heatmap[uy][ux];
     }
 
     function p2(uint256[][] memory) private pure returns (uint256) {
