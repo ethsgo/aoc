@@ -28,7 +28,7 @@ contract _09Parser is Parser {
     }
 }
 
-contract _09 is _09Parser, ArrayUtils {
+contract _09 is _09Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[][] memory heightmap = parse(input);
         return (p1(heightmap), p2(heightmap));
@@ -74,7 +74,7 @@ contract _09 is _09Parser, ArrayUtils {
 
     function p2(uint256[][] memory heightmap) private returns (uint256) {
         // Basin sizes
-        uint256[3] memory basinSizes = [uint256(0), 0, 0];
+        uint256[3] memory bsz = [uint256(0), 0, 0];
         for (int256 y = 0; y < int256(heightmap.length); y++) {
             uint256[] memory row = heightmap[uint256(y)];
             for (int256 x = 0; x < int256(row.length); x++) {
@@ -82,17 +82,24 @@ contract _09 is _09Parser, ArrayUtils {
                 if (
                     row[uint256(x)] != explored && isLowPoint(heightmap, y, x)
                 ) {
-                    uint256 bsz = basinSize(heightmap, y, x);
-                    for (uint256 z = 0; z < basinSizes.length; z++) {
-                        if (basinSizes[z] < bsz) {
-                            basinSizes[z] = bsz;
+                    uint256 b = basinSize(heightmap, y, x);
+                    // Insert into the top-3
+                    for (uint256 i = 0; i < bsz.length; i++) {
+                        if (bsz[i] < b) {
+                            for (uint256 j = i + 1; j < bsz.length; j++) {
+                                if (bsz[i] > bsz[j]) {
+                                    bsz[j] = bsz[i];
+                                    break;
+                                }
+                            }
+                            bsz[i] = b;
                             break;
                         }
                     }
                 }
             }
         }
-        return basinSizes[0] * basinSizes[1] * basinSizes[2];
+        return bsz[0] * bsz[1] * bsz[2];
     }
 
     uint256 private constant explored = type(uint256).max;
