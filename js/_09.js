@@ -60,18 +60,18 @@ function p2(heightmap) {
       while (frontier.length > 0) {
         const { fy, fx, from } = frontier.shift()
         const fp = at(fy, fx)
-        if (fp === -1 || fp === 9) continue
+        if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
+        heightmap[fy][fx] = -1
         c++
-        // frontier = [...frontier, ...neighbours(fp)]
+        frontier = [...frontier, ...next(fy, fx, fp)]
       }
       basinSizes.push(c)
     }
   }
 
-  return basinSizes
-    .sort()
-    // .slice(0, 3)
-    // .reduce((a, x) => a + x, 0)
+  return basinSizes.sort()
+  // .slice(0, 3)
+  // .reduce((a, x) => a + x, 0)
 }
 
 const heightmap = parse(input)
