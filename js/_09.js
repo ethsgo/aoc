@@ -28,14 +28,8 @@ function lowPoints(heightmap) {
 
   return heightmap.flatMap((row, y) =>
     row
-      .filter((pt, x) => neighbours(y, x).every((v) => pt < v))
-      .map((pt, x) => {
-        return {
-          x,
-          y,
-          pt,
-        }
-      })
+      .map((pt, x) => ({ x, y, pt }))
+      .filter(({ x, y, pt }) => neighbours(y, x).every((v) => pt < v))
   )
 }
 
@@ -58,23 +52,30 @@ function p2(heightmap) {
   ]
 
   const basinSizes = []
-  for (let y = 0; y < heightmap.length; y++) {
-    for (let x = 0; x < heightmap[y].length; x++) {
-      const pt = heightmap[y][x]
-      if (pt === -1 || pt === 9) continue
-      let c = 1
-      heightmap[y][x] = -1
-      let frontier = next(y, x, pt)
-      while (frontier.length > 0) {
-        const { fy, fx, from } = frontier.shift()
-        const fp = at(fy, fx)
-        if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
-        heightmap[fy][fx] = -1
-        c++
-        frontier = [...frontier, ...next(fy, fx, fp)]
-      }
-      basinSizes.push(c)
+  const pts = lowPoints(heightmap)
+  return pts
+  for (const { x, y, pt } of pts) {
+    if (pt === -1 || pt === 9) continue
+    let c = 1
+    heightmap[y][x] = -1
+    let frontier = next(y, x, pt)
+    console.log('initial', frontier)
+    while (frontier.length > 0) {
+      const { fy, fx, from } = frontier.shift()
+      const fp = at(fy, fx)
+      if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
+      heightmap[fy][fx] = -1
+      console.log(
+        `for ${JSON.stringify({ x, y, pt })}, ${JSON.stringify({
+          fx,
+          fy,
+          fp,
+        })} is valid`
+      )
+      c++
+      frontier = [...frontier, ...next(fy, fx, fp)]
     }
+    basinSizes.push(c)
   }
 
   return basinSizes.sort()
@@ -83,5 +84,5 @@ function p2(heightmap) {
 }
 
 const heightmap = parse(input)
-console.log(p1(heightmap))
-// console.log(p2(heightmap))
+// console.log(p1(heightmap))
+console.log(p2(heightmap))
