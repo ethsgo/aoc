@@ -12,7 +12,7 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 
-function p1(heightmap) {
+function lowPoints(heightmap) {
   function at(y, x) {
     if (y < 0 || y >= heightmap.length) return 10
     if (x < 0 || x >= heightmap[y].length) return 10
@@ -26,13 +26,21 @@ function p1(heightmap) {
     at(y, x - 1),
   ]
 
-  return heightmap
-    .flatMap((row, y) =>
-      row.filter((pt, x) => neighbours(y, x).every((v) => pt < v))
-    )
-    .map((x) => x + 1)
-    .reduce((a, x) => a + x)
+  return heightmap.flatMap((row, y) =>
+    row
+      .filter((pt, x) => neighbours(y, x).every((v) => pt < v))
+      .map((pt, x) => {
+        return {
+          x,
+          y,
+          pt,
+        }
+      })
+  )
 }
+
+const sum = (xs) => xs.reduce((a, x) => a + x, 0)
+const p1 = (heightmap) => sum(lowPoints(heightmap).map(({ pt }) => pt + 1))
 
 function p2(heightmap) {
   function at(y, x) {
@@ -76,4 +84,4 @@ function p2(heightmap) {
 
 const heightmap = parse(input)
 console.log(p1(heightmap))
-console.log(p2(heightmap))
+// console.log(p2(heightmap))
