@@ -36,7 +36,30 @@ contract _09 is _09Parser, ArrayUtils {
     }
 
     function p1(uint256[][] memory heatmap) private pure returns (uint256) {
-        return heatmap.length;
+        uint256 c = 0;
+        for (int256 y = 0; y < int256(heatmap.length); y++) {
+            uint256[] memory row = heatmap[uint256(y)];
+            for (int256 x = 0; x < int256(row.length); x++) {
+                uint256 pt = row[uint256(x)];
+                if (pt >= neighbour(heatmap, y - 1, x)) continue;
+                if (pt >= neighbour(heatmap, y, x + 1)) continue;
+                if (pt >= neighbour(heatmap, y, x - 1)) continue;
+                if (pt >= neighbour(heatmap, y + 1, x)) continue;
+                c += (pt + 1);
+            }
+        }
+        return c;
+    }
+
+    function neighbour(
+        uint256[][] memory heatmap,
+        int256 y,
+        int256 x
+    ) private pure returns (uint256) {
+        if (y < 0 || uint256(y) >= heatmap.length) return type(uint256).max;
+        if (x < 0 || uint256(x) >= heatmap[uint256(y)].length)
+            return type(uint256).max;
+        return heatmap[uint256(y)][uint256(x)];
     }
 
     function p2(uint256[][] memory) private pure returns (uint256) {
