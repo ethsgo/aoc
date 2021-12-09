@@ -73,7 +73,69 @@ contract _09 is _09Parser, ArrayUtils {
         return heightmap[uy][ux];
     }
 
-    function p2(uint256[][] memory) private pure returns (uint256) {
-        return 0;
+    function p2(uint256[][] memory heightmap) private returns (uint256) {
+        // Basin sizes
+        uint256[3] memory basinSizes = [uint256(0), 0, 0];
+        for (int256 y = 0; y < int256(heightmap.length); y++) {
+            uint256[] memory row = heightmap[uint256(y)];
+            for (int256 x = 0; x < int256(row.length); x++) {
+                // Unexplored low point
+                if (
+                    row[uint256(x)] != explored && isLowPoint(heightmap, y, x)
+                ) {
+                    uint256 bsz = basinSize(heightmap, y, x);
+                    for (uint256 z = 0; z < basinSizes.length; z++) {
+                        if (basinSizes[z] < bsz) {
+                            basinSizes[z] = bsz;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return basinSizes[0];
+    }
+
+    uint256 private constant explored = type(uint256).max;
+    struct Next {
+        int256 x;
+        int256 y;
+        uint256 pt;
+    }
+    // In memory dynamic arrays cannot be resized, so we need to store this
+    // resizable array for use by the basinSize function.
+    Next[] private frontier;
+
+    function basinSize(
+        uint256[][] memory heightmap,
+        int256 y,
+        int256 x
+    ) private returns (uint256) {
+        delete frontier;
+        uint256 c = 1;
+        pushFrontier(y, x, heightmap[uint256(y)][uint256(x)]);
+        heightmap[uint256(y)][uint256(x)] = explored;
+        return c;
+        for (int256 y = 0; y < int256(heightmap.length); y++) {
+            uint256[] memory row = heightmap[uint256(y)];
+            for (int256 x = 0; x < int256(row.length); x++) {
+                if (isLowPoint(heightmap, y, x)) {
+                    c += (row[uint256(x)] + 1);
+                }
+            }
+        }
+        return c;
+    }
+
+    function pushFrontier(
+        int256 y,
+        int256 x,
+        uint256 pt
+    ) private {
+        frontier.push(Next({y: y - 1, x: x, pt: pt}));
+        frontier.push(Next({y: y, x: x + 1, pt: pt}));
+        frontier.push(Next({y: y + 1, x: x, pt: pt}));
+        frontier.push(Next({y: y, x: x - 1, pt: pt}));
     }
 }
