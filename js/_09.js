@@ -20,22 +20,21 @@ function p1(heightmap) {
     return row[x]
   }
 
+  const neighbours = (y, x) => [
+    at(y - 1, x),
+    at(y, x + 1),
+    at(y + 1, x),
+    at(y, x - 1),
+  ]
+
   return heightmap
-    .map((row, y) => {
-      return row.map((pt, x) => {
-        if (
-          [at(y - 1, x), at(y, x + 1), at(y + 1, x), at(y, x - 1)].every(
-            (v) => row[x] < v
-          )
-        ) {
-          // console.log(pt, [at(y - 1, x), at(y, x + 1), at(y + 1, x), at(y, x - 1)])
-          return [pt]
-        }
-        return []
-      })
-    })
+    .map((row, y) =>
+      row.filter((pt, x) => neighbours(y, x).every((v) => pt < v))
+    )
     .flat()
     .flat()
+    .map((x) => x + 1)
+    .reduce((a, x) => a + x)
 }
 
 const p2 = 0
