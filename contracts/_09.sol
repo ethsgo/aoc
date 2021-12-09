@@ -31,37 +31,46 @@ contract _09Parser is Parser {
 
 contract _09 is _09Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
-        uint256[][] memory heatmap = parse(input);
-        return (p1(heatmap), p2(heatmap));
+        uint256[][] memory heightmap = parse(input);
+        return (p1(heightmap), p2(heightmap));
     }
 
-    function p1(uint256[][] memory heatmap) private pure returns (uint256) {
+    function p1(uint256[][] memory heightmap) private pure returns (uint256) {
         uint256 c = 0;
-        for (int256 y = 0; y < int256(heatmap.length); y++) {
-            uint256[] memory row = heatmap[uint256(y)];
+        for (int256 y = 0; y < int256(heightmap.length); y++) {
+            uint256[] memory row = heightmap[uint256(y)];
             for (int256 x = 0; x < int256(row.length); x++) {
-                uint256 pt = row[uint256(x)];
-                if (pt >= neighbour(heatmap, y - 1, x)) continue;
-                if (pt >= neighbour(heatmap, y, x + 1)) continue;
-                if (pt >= neighbour(heatmap, y, x - 1)) continue;
-                if (pt >= neighbour(heatmap, y + 1, x)) continue;
-                c += (pt + 1);
+                if (isLowPoint(heightmap, y, x)) {
+                    c += (row[uint256(x)] + 1);
+                }
             }
         }
         return c;
     }
 
+    function isLowPoint(
+        uint256[][] memory heightmap,
+        int256 y,
+        int256 x
+    ) private pure returns (bool) {
+        uint256 pt = heightmap[uint256(y)][uint256(x)];
+        return (pt < neighbour(heightmap, y - 1, x) &&
+            pt < neighbour(heightmap, y, x + 1) &&
+            pt < neighbour(heightmap, y, x - 1) &&
+            pt < neighbour(heightmap, y + 1, x));
+    }
+
     function neighbour(
-        uint256[][] memory heatmap,
+        uint256[][] memory heightmap,
         int256 y,
         int256 x
     ) private pure returns (uint256) {
         if (y < 0 || x < 0) return type(uint256).max;
         uint256 uy = uint256(y);
         uint256 ux = uint256(x);
-        if (uy >= heatmap.length || ux >= heatmap[uy].length)
+        if (uy >= heightmap.length || ux >= heightmap[uy].length)
             return type(uint256).max;
-        return heatmap[uy][ux];
+        return heightmap[uy][ux];
     }
 
     function p2(uint256[][] memory) private pure returns (uint256) {
