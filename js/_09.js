@@ -15,9 +15,8 @@ const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 function p1(heightmap) {
   function at(y, x) {
     if (y < 0 || y >= heightmap.length) return 10
-    const row = heightmap[y]
-    if (x < 0 || x >= row.length) return 10
-    return row[x]
+    if (x < 0 || x >= heightmap[y].length) return 10
+    return heightmap[y][x]
   }
 
   const neighbours = (y, x) => [
@@ -28,17 +27,53 @@ function p1(heightmap) {
   ]
 
   return heightmap
-    .map((row, y) =>
+    .flatMap((row, y) =>
       row.filter((pt, x) => neighbours(y, x).every((v) => pt < v))
     )
-    .flat()
-    .flat()
     .map((x) => x + 1)
     .reduce((a, x) => a + x)
 }
 
-const p2 = 0
+function p2(heightmap) {
+  function at(y, x) {
+    if (y < 0 || y >= heightmap.length) return 10
+    if (x < 0 || x >= heightmap[y].length) return 10
+    const r = heightmap[y][x]
+    return r == -1 ? 10 : r
+  }
+
+  const next = (y, x, pt) => [
+    { fy: y - 1, fx: x, from: pt },
+    { fy: y, fx: x + 1, from: pt },
+    { fy: y + 1, fx: x, from: pt },
+    { fy: y, fx: x - 1, from: pt },
+  ]
+
+  const basinSizes = []
+  for (let y = 0; y < heightmap.length; y++) {
+    for (let x = 0; x < heightmap[y].length; x++) {
+      const pt = heightmap[y][x]
+      if (pt === -1 || pt === 9) continue
+      let c = 1
+      heightmap[y][x] = -1
+      let frontier = next(y, x, pt)
+      while (frontier.length > 0) {
+        const { fy, fx, from } = frontier.shift()
+        const fp = at(fy, fx)
+        if (fp === -1 || fp === 9) continue
+        c++
+        // frontier = [...frontier, ...neighbours(fp)]
+      }
+      basinSizes.push(c)
+    }
+  }
+
+  return basinSizes
+    .sort()
+    // .slice(0, 3)
+    // .reduce((a, x) => a + x, 0)
+}
 
 const heightmap = parse(input)
 console.log(p1(heightmap))
-// console.log(p2(entries))
+console.log(p2(heightmap))
