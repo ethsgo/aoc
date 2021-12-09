@@ -51,8 +51,7 @@ function p2(heightmap) {
     { fy: y, fx: x - 1, from: pt },
   ]
 
-  const basinSizes = []
-  for (const { x, y, pt } of lowPoints(heightmap)) {
+  const basinSizes = lowPoints(heightmap).map(({ x, y, pt }) => {
     let c = 1
     heightmap[y][x] = -1
     let frontier = next(y, x, pt)
@@ -60,12 +59,12 @@ function p2(heightmap) {
       const { fy, fx, from } = frontier.shift()
       const fp = at(fy, fx)
       if (fp === -1 || fp === 9 || fp === 10 || fp < from) continue
-      heightmap[fy][fx] = -1
       c++
+      heightmap[fy][fx] = -1
       frontier = [...frontier, ...next(fy, fx, fp)]
     }
-    basinSizes.push(c)
-  }
+    return c
+  })
 
   return basinSizes
     .sort((x, y) => y - x)
