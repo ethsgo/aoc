@@ -37,17 +37,30 @@ contract _10 is _10Parser {
         }
     }
 
-    function p1line(string memory s) private returns (uint256 score) {
+    function p1line(string memory s) private returns (uint256) {
         delete stack;
         bytes memory b = bytes(s);
         for (uint256 i = 0; i < b.length; i++) {
             bytes1 c = b[i];
-            if (c == b_a1 && pop() != b_a0) return 3;
-            if (c == b_b1 && pop() != b_b0) return 57;
-            if (c == b_c1 && pop() != b_c0) return 1197;
-            if (c == b_d1 && pop() != b_d0) return 25137;
+            if (c == b_a1) {
+                if (pop() == b_a0) continue;
+                else return 3;
+            }
+            if (c == b_b1) {
+                if (pop() == b_b0) continue;
+                else return 57;
+            }
+            if (c == b_c1) {
+                if (pop() == b_c0) continue;
+                else return 1197;
+            }
+            if (c == b_d1) {
+                if (pop() == b_d0) continue;
+                else return 25137;
+            }
             stack.push(c);
         }
+        return 0;
     }
 
     function pop() private returns (bytes1 top) {
