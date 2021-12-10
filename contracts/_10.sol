@@ -37,13 +37,13 @@ contract _10 is _10Parser {
         }
     }
 
-    function p2(string[] memory lines) private returns (uint256 score) {
+    function p2(string[] memory lines) private returns (uint256) {
         delete scores;
         for (uint256 i = 0; i < lines.length; i++) {
             uint256 s = autocompleteScore(lines[i]);
             if (s > 0) scores.push(s);
         }
-        return medianScore();
+        return scores[0]; //medianScore();
     }
 
     /// Return a non-zero score if s was corrupted. On exit the stack contains
@@ -86,10 +86,10 @@ contract _10 is _10Parser {
         while (stack.length > 0) {
             bytes1 c = pop();
             score *= 5;
-            if (c == "(") score += 1;
-            if (c == "[") score += 2;
-            if (c == "{") score += 3;
-            if (c == "<") score += 4;
+            if (c == b_a0) score += 1;
+            if (c == b_b0) score += 2;
+            if (c == b_c0) score += 3;
+            if (c == b_d0) score += 4;
         }
         return score;
     }
