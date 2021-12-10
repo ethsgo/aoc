@@ -41,10 +41,9 @@ contract _02Parser is Parser {
 
 contract _02 is _02Parser {
     function main(string calldata input) external returns (uint256, uint256) {
-        string[] memory tokens = parseTokens(input);
-        if (tokens.length == 0) {
-            tokens = parseTokens(exampleInput);
-        }
+        string[] memory tokens = parseTokens(
+            bytes(input).length == 0 ? exampleInput : input
+        );
 
         int256[2][] memory dxdy = parseDxDy(tokens);
 

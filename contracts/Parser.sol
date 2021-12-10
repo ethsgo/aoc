@@ -15,7 +15,9 @@ contract Parser {
     uint8 internal constant ascii_z = 122;
     /// Newline
     /// 10 - '\n'
+    /// 32 - ' ' (space)
     uint8 internal constant ascii_nl = 10;
+    uint8 internal constant ascii_sp = 32;
 
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
@@ -80,7 +82,7 @@ contract Parser {
 
     /// Convert the given string into an array of tokens.
     ///
-    /// Any non-lowercase-letter or non-digit character acts as a separator.
+    /// Space and newline characters act as separators.
     function parseTokens(string memory s) internal returns (string[] memory) {
         // Strings are not indexable.
         bytes memory b = bytes(s);
@@ -95,21 +97,16 @@ contract Parser {
         bool didSeeNonSeparator = false;
         for (uint256 i = 0; i < b.length; i++) {
             uint8 ascii = uint8(b[i]);
-            if (
-                // digit
-                (ascii >= ascii_0 && ascii <= ascii_9) ||
-                // lowercase letter
-                (ascii >= ascii_a && ascii <= ascii_z)
-            ) {
-                token = bytes.concat(token, bytes1(ascii));
-                didSeeNonSeparator = true;
-            } else {
+            if (ascii == ascii_nl || ascii == ascii_sp) {
                 // separator
                 if (didSeeNonSeparator) {
                     tokens.push(string(token));
                     delete token;
                 }
                 didSeeNonSeparator = false;
+            } else {
+                token = bytes.concat(token, bytes1(ascii));
+                didSeeNonSeparator = true;
             }
         }
 

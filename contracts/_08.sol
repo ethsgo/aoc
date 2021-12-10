@@ -41,17 +41,18 @@ contract _08Parser is Parser {
 
         string[] memory tokens = parseTokens(s);
 
-        Entry[] memory entries = new Entry[](tokens.length / 14);
-        for (uint256 i = 0; i < tokens.length; i += 14) {
+        Entry[] memory entries = new Entry[](tokens.length / 15);
+        for (uint256 i = 0; i < tokens.length; i += 15) {
             string[10] memory patterns;
             string[4] memory digits;
             for (uint256 j = 0; j < 10; j++) {
                 patterns[j] = tokens[i + j];
             }
+            // skip '|'
             for (uint256 j = 0; j < 4; j++) {
-                digits[j] = tokens[i + 10 + j];
+                digits[j] = tokens[i + 11 + j];
             }
-            entries[i / 14] = Entry({patterns: patterns, digits: digits});
+            entries[i / 15] = Entry({patterns: patterns, digits: digits});
         }
         return entries;
     }
