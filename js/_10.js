@@ -17,9 +17,7 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/)
 
-const p1 = (lines) => lines.map((s) => p1line(s)).reduce((a, x) => a + x)
-
-function p1line(s) {
+function score(s, tryFix) {
   let stack = []
   for (const c of s) {
     if (c === ')') {
@@ -40,8 +38,25 @@ function p1line(s) {
     }
     stack.push(c)
   }
-  return 0
+
+  if (!tryFix) return 0
+
+  let t = 0
+  while (stack.length > 0) {
+    t *= 5
+    const c = stack.pop()
+    if (c === '(') t += 1
+    if (c === '[') t += 2
+    if (c === '{') t += 3
+    if (c === '<') t += 4
+  }
+  return t
 }
+
+const sum = (xs) => xs.reduce((a, x) => a + x)
+const p1 = (lines) => sum(lines.map((s) => score(s)))
+const p2 = (lines) => sum(lines.map((s) => score(s, true)))
 
 const lines = parse(input)
 console.log(p1(lines))
+console.log(p2(lines))
