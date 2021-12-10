@@ -17,7 +17,7 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/)
 
-function score(s, tryFix) {
+function match(s) {
   let stack = []
   for (const c of s) {
     if (c === ')') {
@@ -38,8 +38,20 @@ function score(s, tryFix) {
     }
     stack.push(c)
   }
+  return stack
+}
 
-  if (!tryFix) return 0
+function corrupted(s) {
+  const m = match(s)
+  return typeof m === 'number' ? m : 0
+}
+
+function incomplete(s) {
+  const m = match(s)
+  // ignore corrupted lines
+  if (typeof m === 'number') return 0
+  // otherwise we get back the stack when parsing finished
+  const stack = m
 
   let t = 0
   while (stack.length > 0) {
@@ -54,8 +66,11 @@ function score(s, tryFix) {
 }
 
 const sum = (xs) => xs.reduce((a, x) => a + x)
-const p1 = (lines) => sum(lines.map((s) => score(s)))
-const p2 = (lines) => sum(lines.map((s) => score(s, true)))
+const median = (xs) => [...xs].sort((x, y) => x - y)[(xs.length - 1) / 2]
+
+const p1 = (lines) => sum(lines.map((s) => corrupted(s)))
+const p2 = (lines) =>
+  median(lines.map((s) => incomplete(s, true)).filter((x) => x > 0))
 
 const lines = parse(input)
 console.log(p1(lines))
