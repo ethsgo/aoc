@@ -22,11 +22,6 @@ const p1 = (lines) => lines.map((s) => p1line(s)).reduce((a, x) => a + x)
 function p1line(s) {
   let stack = []
   for (const c of s) {
-    if (stack.length === 0) {
-      stack.push(c)
-      continue
-    }
-
     if (c === ')') {
       if (stack.pop() === '(') continue
       else return 3
@@ -43,7 +38,6 @@ function p1line(s) {
       if (stack.pop() === '<') continue
       else return 25137
     }
-
     stack.push(c)
   }
   return 0
