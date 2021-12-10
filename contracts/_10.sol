@@ -28,16 +28,27 @@ contract _10Parser is Parser {
 contract _10 is _10Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         string[] memory lines = parse(input);
-        return (p1(lines), 0);
+        return (p1(lines), p2(lines));
     }
 
     function p1(string[] memory lines) private returns (uint256 score) {
         for (uint256 i = 0; i < lines.length; i++) {
-            score += p1line(lines[i]);
+            score += matchChunks(lines[i]);
         }
     }
 
-    function p1line(string memory s) private returns (uint256) {
+    function p2(string[] memory lines) private returns (uint256 score) {
+        delete scores;
+        for (uint256 i = 0; i < lines.length; i++) {
+            uint256 s = autocompleteScore(lines[i]);
+            if (s > 0) scores.push(s);
+        }
+        return medianScore();
+    }
+
+    /// Return a non-zero score if s was corrupted. On exit the stack contains
+    /// the unmatched characters that represent incomplete chunks.
+    function matchChunks(string memory s) private returns (uint256) {
         delete stack;
         bytes memory b = bytes(s);
         for (uint256 i = 0; i < b.length; i++) {
@@ -68,8 +79,43 @@ contract _10 is _10Parser {
         stack.pop();
     }
 
-    // Dynamic memory arrays cannot be resized, so store this.
+    function autocompleteScore(string memory s) private returns (uint256) {
+        uint256 score = matchChunks(s);
+        if (score == 0) return score;
+        score = 0;
+        while (stack.length > 0) {
+            bytes1 c = pop();
+            score *= 5;
+            if (c == "(") score += 1;
+            if (c == "[") score += 2;
+            if (c == "{") score += 3;
+            if (c == "<") score += 4;
+        }
+        return score;
+    }
+
+    /// Find the median score by doing a selection sort.
+    function medianScore() private returns (uint256) {
+        // alias
+        uint256[] storage xs = scores;
+        uint256 n = xs.length;
+        // We know that the number of scores is odd.
+        uint256 k = n / 2;
+        for (uint256 i = 0; i <= k; i++) {
+            for (uint256 j = i + 1; j < n; j++) {
+                if (xs[j] < xs[i]) {
+                    uint256 t = xs[i];
+                    xs[i] = xs[j];
+                    xs[j] = t;
+                }
+            }
+        }
+        return xs[k];
+    }
+
+    // Dynamic memory arrays cannot be resized, so store these.
     bytes1[] private stack;
+    uint256[] private scores;
 
     /// ASCII bytes for (), [], {} and <>
     bytes1 private constant b_a0 = bytes1(uint8(40));
