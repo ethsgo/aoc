@@ -43,7 +43,7 @@ contract _10 is _10Parser {
             uint256 s = autocompleteScore(lines[i]);
             if (s > 0) scores.push(s);
         }
-        return scores[0]; //medianScore();
+        return medianScore();
     }
 
     /// Return a non-zero score if s was corrupted. On exit the stack contains
@@ -79,19 +79,17 @@ contract _10 is _10Parser {
         stack.pop();
     }
 
-    function autocompleteScore(string memory s) private returns (uint256) {
-        uint256 score = matchChunks(s);
-        if (score == 0) return score;
-        score = 0;
+    function autocompleteScore(string memory s) private returns (uint256 t) {
+        if (matchChunks(s) > 0) return 0;
+
         while (stack.length > 0) {
             bytes1 c = pop();
-            score *= 5;
-            if (c == b_a0) score += 1;
-            if (c == b_b0) score += 2;
-            if (c == b_c0) score += 3;
-            if (c == b_d0) score += 4;
+            t *= 5;
+            if (c == b_a0) t += 1;
+            if (c == b_b0) t += 2;
+            if (c == b_c0) t += 3;
+            if (c == b_d0) t += 4;
         }
-        return score;
     }
 
     /// Find the median score by doing a selection sort.
