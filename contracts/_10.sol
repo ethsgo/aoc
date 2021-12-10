@@ -53,20 +53,20 @@ contract _10 is _10Parser {
         bytes memory b = bytes(s);
         for (uint256 i = 0; i < b.length; i++) {
             bytes1 c = b[i];
-            if (c == b_a1) {
-                if (pop() == b_a0) continue;
+            if (c == ")") {
+                if (pop() == "(") continue;
                 else return 3;
             }
-            if (c == b_b1) {
-                if (pop() == b_b0) continue;
+            if (c == "]") {
+                if (pop() == "[") continue;
                 else return 57;
             }
-            if (c == b_c1) {
-                if (pop() == b_c0) continue;
+            if (c == "}") {
+                if (pop() == "{") continue;
                 else return 1197;
             }
-            if (c == b_d1) {
-                if (pop() == b_d0) continue;
+            if (c == ">") {
+                if (pop() == "<") continue;
                 else return 25137;
             }
             stack.push(c);
@@ -85,10 +85,10 @@ contract _10 is _10Parser {
         while (stack.length > 0) {
             bytes1 c = pop();
             t *= 5;
-            if (c == b_a0) t += 1;
-            if (c == b_b0) t += 2;
-            if (c == b_c0) t += 3;
-            if (c == b_d0) t += 4;
+            if (c == "(") t += 1;
+            if (c == "[") t += 2;
+            if (c == "{") t += 3;
+            if (c == "<") t += 4;
         }
     }
 
@@ -114,14 +114,4 @@ contract _10 is _10Parser {
     // Dynamic memory arrays cannot be resized, so store these.
     bytes1[] private stack;
     uint256[] private scores;
-
-    /// ASCII bytes for (), [], {} and <>
-    bytes1 private constant b_a0 = bytes1(uint8(40));
-    bytes1 private constant b_a1 = bytes1(uint8(41));
-    bytes1 private constant b_b0 = bytes1(uint8(91));
-    bytes1 private constant b_b1 = bytes1(uint8(93));
-    bytes1 private constant b_c0 = bytes1(uint8(123));
-    bytes1 private constant b_c1 = bytes1(uint8(125));
-    bytes1 private constant b_d0 = bytes1(uint8(60));
-    bytes1 private constant b_d1 = bytes1(uint8(62));
 }
