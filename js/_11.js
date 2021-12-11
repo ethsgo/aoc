@@ -23,17 +23,11 @@ function sim(oct, steps) {
 }
 
 function step(oct) {
-  const neighbours2 = (y, x) => [
-    ...(y > 0 ? [[y - 1, x]] : []),
-    ...(y + 1 < oct.length ? [[y + 1, x]] : []),
-    ...(x > 0 ? [[y, x - 1]] : []),
-    ...(x + 1 < oct[y].length ? [[y, x + 1]] : []),
-  ]
-
   function neighbours(y, x) {
     let result = []
     for (let dy of [-1, 0, 1]) {
       for (let dx of [-1, 0, 1]) {
+        if (dy === 0 && dx === 0) continue
         let ny = y + dy
         let nx = x + dx
         if (ny > 0 && ny < oct.length && nx > 0 && nx < oct[y].length)
@@ -53,29 +47,34 @@ function step(oct) {
 
   for (let j = 0; j < oct.length; j++) {
     for (let i = 0; i < oct[j].length; i++) {
-      if (oct[j][i] <= 9) continue
-      flashes++
-      let stack = neighbours(j, i)
-      while (stack.length > 0) {
-        let [y, x] = stack.pop()
-        oct[y][x]++
-        if (oct[y][x] <= 9) continue
+      if (oct[j][i] > 9) {
         flashes++
-        stack = [...stack, ...neighbours(y, x)]
+        oct[j][i] = 0
+        let stack = neighbours(j, i)
+        while (stack.length > 0) {
+          let [y, x] = stack.pop()
+          if (oct[y][x] === 0) continue
+          oct[y][x]++
+          if (oct[y][x] > 9) {
+            flashes++
+            oct[y][x] = 0
+            stack = [...stack, ...neighbours(y, x)]
+          }
+        }
       }
     }
   }
 
-  for (let j = 0; j < oct.length; j++) {
-    for (let i = 0; i < oct[j].length; i++) {
-      if (oct[j][i] === 9) oct[j][i] = 0
-    }
-  }
+  // for (let j = 0; j < oct.length; j++) {
+  //   for (let i = 0; i < oct[j].length; i++) {
+  //     if (oct[j][i] > 9) oct[j][i] = 0
+  //   }
+  // }
 
   for (let j = 0; j < oct.length; j++) {
     console.log(oct[j].join(''))
   }
-  console.log('')
+  console.log(flashes)
 
   return flashes
 }
