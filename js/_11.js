@@ -69,23 +69,23 @@ function step(oct) {
   while (q.length > 0) {
     let [y, x] = q.shift()
     flashes++
-    oct[y][x] = 0
-    vis(oct)
+    // oct[y][x] = 0
+    // vis(oct)
     // console.log(neighbours(y, x))
     for (let [ny, nx] of neighbours(y, x)) {
-      if (oct[ny][nx] === 0) continue
+      // if (oct[ny][nx] === 0) continue
       oct[ny][nx]++
-      if (oct[ny][nx] > 9) {
+      if (oct[ny][nx] === 10) {
         q.push([ny, nx])
       }
     }
   }
 
-  // for (let j = 0; j < oct.length; j++) {
-  //   for (let i = 0; i < oct[j].length; i++) {
-  //     if (oct[j][i] > 9) oct[j][i] = 0
-  //   }
-  // }
+  for (let j = 0; j < oct.length; j++) {
+    for (let i = 0; i < oct[j].length; i++) {
+      if (oct[j][i] > 9) oct[j][i] = 0
+    }
+  }
 
   vis(oct)
   console.log(flashes)
