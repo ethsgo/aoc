@@ -11,6 +11,14 @@ let input = `
 5283751526
 `.trim()
 
+let inputShort = `
+11111
+19991
+19191
+19991
+11111
+`.trim()
+
 if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
 }
@@ -19,7 +27,16 @@ const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 
 function sim(oct, steps) {
   oct = [...oct]
+  vis(oct)
   return [...Array(steps)].map((_) => step(oct)).reduce((a, x) => a + x)
+}
+
+function vis(oct) {
+  console.log()
+  for (let j = 0; j < oct.length; j++) {
+    console.log(oct[j].map((x) => (x < 10 ? ` ${x}` : `${x}`)).join(''))
+  }
+  console.log()
 }
 
 function step(oct) {
@@ -30,7 +47,7 @@ function step(oct) {
         if (dy === 0 && dx === 0) continue
         let ny = y + dy
         let nx = x + dx
-        if (ny > 0 && ny < oct.length && nx > 0 && nx < oct[y].length)
+        if (ny >= 0 && ny < oct.length && nx >= 0 && nx < oct[ny].length)
           result.push([ny, nx])
       }
     }
@@ -38,29 +55,28 @@ function step(oct) {
   }
 
   let flashes = 0
+  let q = []
 
   for (let j = 0; j < oct.length; j++) {
     for (let i = 0; i < oct[j].length; i++) {
       oct[j][i]++
+      if (oct[j][i] > 9) {
+        q.push([j, i])
+      }
     }
   }
 
-  for (let j = 0; j < oct.length; j++) {
-    for (let i = 0; i < oct[j].length; i++) {
-      if (oct[j][i] > 9) {
-        flashes++
-        oct[j][i] = 0
-        let stack = neighbours(j, i)
-        while (stack.length > 0) {
-          let [y, x] = stack.pop()
-          if (oct[y][x] === 0) continue
-          oct[y][x]++
-          if (oct[y][x] > 9) {
-            flashes++
-            oct[y][x] = 0
-            stack = [...stack, ...neighbours(y, x)]
-          }
-        }
+  while (q.length > 0) {
+    let [y, x] = q.shift()
+    flashes++
+    oct[y][x] = 0
+    vis(oct)
+    // console.log(neighbours(y, x))
+    for (let [ny, nx] of neighbours(y, x)) {
+      if (oct[ny][nx] === 0) continue
+      oct[ny][nx]++
+      if (oct[ny][nx] > 9) {
+        q.push([ny, nx])
       }
     }
   }
@@ -71,15 +87,13 @@ function step(oct) {
   //   }
   // }
 
-  for (let j = 0; j < oct.length; j++) {
-    console.log(oct[j].join(''))
-  }
+  vis(oct)
   console.log(flashes)
 
   return flashes
 }
 
-const p1 = (oct) => sim(oct, 2)
+const p1 = (oct) => sim(oct, 1)
 
-const oct = parse(input)
+const oct = parse(inputShort)
 console.log(p1(oct))
