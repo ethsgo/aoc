@@ -28,14 +28,6 @@ const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 const sim = (oct, steps) =>
   [...Array(steps)].map((_) => step(oct)).reduce((a, x) => a + x)
 
-function vis(oct) {
-  console.log()
-  for (let j = 0; j < oct.length; j++) {
-    console.log(oct[j].map((x) => (x < 10 ? ` ${x}` : `${x}`)).join(''))
-  }
-  console.log()
-}
-
 function step(oct) {
   function neighbours(y, x) {
     let result = []
@@ -85,4 +77,15 @@ function step(oct) {
 
 const p1 = (oct) => sim(oct, 100)
 
+function p2(oct) {
+  const allZeroes = () => oct.every((row) => row.every((x) => x === 0))
+  let steps = 0
+  while (!allZeroes()) {
+    step(oct)
+    steps++
+  }
+  return steps
+}
+
 console.log(p1(parse(input)))
+console.log(p2(parse(input)))
