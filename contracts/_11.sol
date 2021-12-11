@@ -27,7 +27,7 @@ contract _11 is _11Parser {
         return (p1(parse(input)), p2(parse(input)));
     }
 
-    uint256[2][] private q;
+    uint256[2][] private stack;
 
     function p1(uint256[][] memory oct) private returns (uint256) {
         return sim(oct, 100);
@@ -41,18 +41,18 @@ contract _11 is _11Parser {
     }
 
     function step(uint256[][] memory oct) private returns (uint256 flashes) {
-        delete q;
-        uint256 qhead = 0;
+        delete stack;
 
         for (uint256 y = 0; y < oct.length; y++) {
             for (uint256 x = 0; x < oct[y].length; x++) {
                 oct[y][x]++;
-                if (oct[y][x] > 9) q.push([y, x]);
+                if (oct[y][x] > 9) stack.push([y, x]);
             }
         }
 
-        while (qhead < q.length) {
-            uint256[2] memory qn = q[qhead++];
+        while (stack.length > 0) {
+            uint256[2] memory qn = stack[stack.length - 1];
+            stack.pop();
             uint256 y = qn[0];
             uint256 x = qn[1];
             flashes++;
@@ -70,7 +70,7 @@ contract _11 is _11Parser {
 
                     oct[ny][nx]++;
                     if (oct[ny][nx] == 10) {
-                        q.push([ny, nx]);
+                        stack.push([ny, nx]);
                     }
                 }
             }

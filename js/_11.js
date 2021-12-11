@@ -44,24 +44,24 @@ function step(oct) {
   }
 
   let flashes = 0
-  let q = []
+  let stack = []
 
   for (let y = 0; y < oct.length; y++) {
     for (let x = 0; x < oct[y].length; x++) {
       oct[y][x]++
       if (oct[y][x] > 9) {
-        q.push([y, x])
+        stack.push([y, x])
       }
     }
   }
 
-  while (q.length > 0) {
-    const [y, x] = q.shift()
+  while (stack.length > 0) {
+    const [y, x] = stack.pop()
     flashes++
     for (const [ny, nx] of neighbours(y, x)) {
       oct[ny][nx]++
       if (oct[ny][nx] === 10) {
-        q.push([ny, nx])
+        stack.push([ny, nx])
       }
     }
   }
