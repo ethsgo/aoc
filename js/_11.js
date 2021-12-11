@@ -25,10 +25,8 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 
-function sim(oct, steps) {
-  oct = [...oct]
-  return [...Array(steps)].map((_) => step(oct)).reduce((a, x) => a + x)
-}
+const sim = (oct, steps) =>
+  [...Array(steps)].map((_) => step(oct)).reduce((a, x) => a + x)
 
 function vis(oct) {
   console.log()
@@ -56,11 +54,11 @@ function step(oct) {
   let flashes = 0
   let q = []
 
-  for (let j = 0; j < oct.length; j++) {
-    for (let i = 0; i < oct[j].length; i++) {
-      oct[j][i]++
-      if (oct[j][i] > 9) {
-        q.push([j, i])
+  for (let y = 0; y < oct.length; y++) {
+    for (let x = 0; x < oct[y].length; x++) {
+      oct[y][x]++
+      if (oct[y][x] > 9) {
+        q.push([y, x])
       }
     }
   }
@@ -76,9 +74,9 @@ function step(oct) {
     }
   }
 
-  for (let j = 0; j < oct.length; j++) {
-    for (let i = 0; i < oct[j].length; i++) {
-      if (oct[j][i] > 9) oct[j][i] = 0
+  for (let y = 0; y < oct.length; y++) {
+    for (let x = 0; x < oct[y].length; x++) {
+      if (oct[y][x] > 9) oct[y][x] = 0
     }
   }
 
@@ -87,5 +85,4 @@ function step(oct) {
 
 const p1 = (oct) => sim(oct, 100)
 
-const oct = parse(input)
-console.log(p1(oct))
+console.log(p1(parse(input)))

@@ -27,7 +27,61 @@ contract _11 is _11Parser {
         return (p1(parse(input)), p2(parse(input)));
     }
 
-    function p1(uint256[][] memory oct) private returns (uint256 flashes) {}
+    uint256[2][] private q;
+
+    function p1(uint256[][] memory oct) private returns (uint256) {
+        return sim(oct, 100);
+    }
+
+    function sim(uint256[][] memory oct, uint256 steps)
+        private
+        returns (uint256 flashes)
+    {
+        for (; steps > 0; steps--) flashes += step(oct);
+    }
+
+    function step(uint256[][] memory oct) private returns (uint256 flashes) {
+        delete q;
+        uint256 qhead = 0;
+
+        for (uint256 y = 0; y < oct.length; y++) {
+            for (uint256 x = 0; x < oct[y].length; x++) {
+                oct[y][x]++;
+                if (oct[y][x] > 9) q.push([y, x]);
+            }
+        }
+
+        while (qhead < q.length) {
+            uint256[2] memory qn = q[qhead++];
+            uint256 y = qn[0];
+            uint256 x = qn[1];
+            flashes++;
+            for (int256 dy = -1; dy <= 1; dy++) {
+                for (int256 dx = -1; dx <= 1; dx++) {
+                    if (dy == 0 && dx == 0) continue;
+
+                    if (int256(y) + dy < 0) continue;
+                    uint256 ny = uint256(int256(y) + dy);
+                    if (ny >= oct.length) continue;
+
+                    if (int256(x) + dx < 0) continue;
+                    uint256 nx = uint256(int256(x) + dx);
+                    if (nx >= oct[ny].length) continue;
+
+                    oct[ny][nx]++;
+                    if (oct[ny][nx] == 10) {
+                        q.push([ny, nx]);
+                    }
+                }
+            }
+        }
+
+        for (uint256 y = 0; y < oct.length; y++) {
+            for (uint256 x = 0; x < oct[y].length; x++) {
+                if (oct[y][x] > 9) oct[y][x] = 0;
+            }
+        }
+    }
 
     function p2(uint256[][] memory oct) private returns (uint256 flashes) {}
 }
