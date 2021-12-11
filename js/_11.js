@@ -31,11 +31,11 @@ const sim = (oct, steps) =>
 function step(oct) {
   function neighbours(y, x) {
     let result = []
-    for (let dy of [-1, 0, 1]) {
-      for (let dx of [-1, 0, 1]) {
+    for (const dy of [-1, 0, 1]) {
+      for (const dx of [-1, 0, 1]) {
         if (dy === 0 && dx === 0) continue
-        let ny = y + dy
-        let nx = x + dx
+        const ny = y + dy
+        const nx = x + dx
         if (ny >= 0 && ny < oct.length && nx >= 0 && nx < oct[ny].length)
           result.push([ny, nx])
       }
@@ -56,9 +56,9 @@ function step(oct) {
   }
 
   while (q.length > 0) {
-    let [y, x] = q.shift()
+    const [y, x] = q.shift()
     flashes++
-    for (let [ny, nx] of neighbours(y, x)) {
+    for (const [ny, nx] of neighbours(y, x)) {
       oct[ny][nx]++
       if (oct[ny][nx] === 10) {
         q.push([ny, nx])
