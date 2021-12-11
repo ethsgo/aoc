@@ -83,5 +83,19 @@ contract _11 is _11Parser {
         }
     }
 
-    function p2(uint256[][] memory oct) private returns (uint256 flashes) {}
+    function p2(uint256[][] memory oct) private returns (uint256 steps) {
+        while (!allZeroes(oct)) {
+            step(oct);
+            steps++;
+        }
+    }
+
+    function allZeroes(uint256[][] memory oct) private pure returns (bool) {
+        for (uint256 y = 0; y < oct.length; y++) {
+            for (uint256 x = 0; x < oct[y].length; x++) {
+                if (oct[y][x] != 0) return false;
+            }
+        }
+        return true;
+    }
 }
