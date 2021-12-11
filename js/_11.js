@@ -27,7 +27,6 @@ const parse = (input) => input.split(/\s+/).map((s) => [...s].map(Number))
 
 function sim(oct, steps) {
   oct = [...oct]
-  vis(oct)
   return [...Array(steps)].map((_) => step(oct)).reduce((a, x) => a + x)
 }
 
@@ -69,11 +68,7 @@ function step(oct) {
   while (q.length > 0) {
     let [y, x] = q.shift()
     flashes++
-    // oct[y][x] = 0
-    // vis(oct)
-    // console.log(neighbours(y, x))
     for (let [ny, nx] of neighbours(y, x)) {
-      // if (oct[ny][nx] === 0) continue
       oct[ny][nx]++
       if (oct[ny][nx] === 10) {
         q.push([ny, nx])
@@ -87,13 +82,10 @@ function step(oct) {
     }
   }
 
-  vis(oct)
-  console.log(flashes)
-
   return flashes
 }
 
-const p1 = (oct) => sim(oct, 1)
+const p1 = (oct) => sim(oct, 100)
 
-const oct = parse(inputShort)
+const oct = parse(input)
 console.log(p1(oct))
