@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Parser.sol";
+import "./GridParser.sol";
 
-contract _09Parser is Parser {
+contract _09Parser is GridParser {
     string private constant exampleInput =
         "2199943210 "
         "3987894921 "
@@ -13,18 +13,7 @@ contract _09Parser is Parser {
 
     function parse(string memory input) internal returns (uint256[][] memory) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
-
-        string[] memory tokens = parseTokens(s);
-
-        uint256[][] memory result = new uint256[][](tokens.length);
-        for (uint256 i = 0; i < tokens.length; i++) {
-            bytes memory b = bytes(tokens[i]);
-            result[i] = new uint256[](b.length);
-            for (uint256 j = 0; j < b.length; j++) {
-                result[i][j] = parseDigit(b[j]);
-            }
-        }
-        return result;
+        return parseDigitGrid(s);
     }
 }
 
