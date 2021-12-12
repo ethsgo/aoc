@@ -54,33 +54,29 @@ function paths(links, { allowOneSmallCave } = {}) {
     ...links.filter((link) => link[1] === u).map((link) => link[0]),
   ]
 
-  let frontier = [{ u: 'start', visited: [], smallCave: false, path: [] }]
+  let frontier = [{ u: 'start', visited: [], allowOneSmallCave }]
   let p = 0
 
   while (frontier.length > 0) {
-    const { u, visited, smallCave, path } = frontier.shift()
+    let { u, visited, allowOneSmallCave } = frontier.shift()
 
-    let newVisited = [...visited]
-    if (u === u.toLowerCase()) newVisited.push(u)
-
-    const newPath = [...path, u]
+    visited = [...visited]
+    if (u === u.toLowerCase()) visited.push(u)
 
     for (const v of next(u)) {
       if (v === 'end') {
-        let p2 = [...newPath, v]
-        pm = {}
-        for (const p of path) {
-          pm[p] = (pm[p] ?? 0) + 1
-        }
-        console.log(newPath.join(','), JSON.stringify(pm))
         p++
       } else {
         if (visited.includes(v)) {
-          if (allowOneSmallCave && !smallCave && v !== 'start') {
-            frontier.push({ u: v, visited: newVisited, smallCave: v, path: newPath })
+          if (allowOneSmallCave && v !== 'start') {
+            frontier.push({
+              u: v,
+              visited,
+              allowOneSmallCave: false,
+            })
           }
         } else {
-          frontier.push({ u: v, visited: newVisited, smallCave, path: newPath })
+          frontier.push({ u: v, visited, allowOneSmallCave })
         }
       }
     }
@@ -92,5 +88,5 @@ function paths(links, { allowOneSmallCave } = {}) {
 const p1 = (links) => paths(links)
 const p2 = (links) => paths(links, { allowOneSmallCave: true })
 
-// console.log(p1(parse(input)))
-console.log(p2(parse(inputM)))
+console.log(p1(parse(input)))
+console.log(p2(parse(input)))
