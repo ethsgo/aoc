@@ -92,6 +92,7 @@ contract _12 is _12Parser, ArrayUtils {
     }
 
     Link[] private allLinks;
+    Link[] private intermediateLinks;
     Link[] private links;
 
     mapping(uint256 => uint256) linkCount;
@@ -133,7 +134,7 @@ contract _12 is _12Parser, ArrayUtils {
         }
 
         console.log("compressing: --");
-        for (uint256 i = 1000; i < allLinks.length; i++) {
+        for (uint256 i = 0; i < allLinks.length; i++) {
             uint256 u = allLinks[i].a;
             uint256 v = allLinks[i].b;
             if (u == type(uint256).max || v == type(uint256).max) continue;
@@ -143,8 +144,9 @@ contract _12 is _12Parser, ArrayUtils {
             }
             // Create a new edge representing a direct connection from u to all the
             // small caves that v is connected to.
-            uint256 c = 0;
             console.log("compress", u, v);
+            allLinks[i].b = type(uint256).max;
+            console.log("  deleting", u, v);
             for (uint256 j = i + 1; j < allLinks.length; j++) {
                 // if (i == j) continue;
                 if (u == type(uint256).max || v == type(uint256).max) continue;
@@ -164,9 +166,10 @@ contract _12 is _12Parser, ArrayUtils {
                 // delete linkCount[linkId(u, v)];
                 // delete linkCount[linkId(w, v)];
                 allLinks[j].b = type(uint256).max;
+                console.log("  deleting", w, v);
+                console.log("  adding", u, w);
                 allLinks.push(Link(u, w));
             }
-            allLinks[i].b = type(uint256).max;
         }
 
         for (uint256 i = 0; i < allLinks.length; i++) {
@@ -175,10 +178,41 @@ contract _12 is _12Parser, ArrayUtils {
             if (u == type(uint256).max || v == type(uint256).max) continue;
             //if (linkCount[linkId(u, v)] == 0) continue;
             if (v < u) {
-                uint t = u;
+                uint256 t = u;
                 u = v;
                 v = t;
             }
+            intermediateLinks.push(Link(u, v));
+        }
+
+        console.log("intermediate links: --");
+        for (uint256 i = 0; i < intermediateLinks.length; i++) {
+            uint256 u = intermediateLinks[i].a;
+            uint256 v = intermediateLinks[i].b;
+            if (u > v) {
+                uint256 t = u;
+                u = v;
+                v = t;
+                intermediateLinks[i].a = u;
+                intermediateLinks[i].b = v;
+            }
+            console.log(u, v);
+        }
+
+        console.log("compressing inters: --");
+        for (uint256 i = 0; i < intermediateLinks.length; i++) {
+            uint256 u = intermediateLinks[i].a;
+            uint256 v = intermediateLinks[i].b;
+            if (linkCount[linkId(u, v)] > 0) continue;
+            uint256 c = 1;
+            for (uint256 j = i + 1; j < intermediateLinks.length; j++) {
+                if (
+                    u == intermediateLinks[j].a && v == intermediateLinks[j].b
+                ) {
+                    c++;
+                }
+            }
+            linkCount[linkId(u, v)] = c;
             links.push(Link(u, v));
         }
 
@@ -199,7 +233,7 @@ contract _12 is _12Parser, ArrayUtils {
     Route[] private frontier;
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
-        // return 0;
+        return 0;
         delete frontier;
 
         frontier.push(
