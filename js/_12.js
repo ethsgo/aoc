@@ -64,7 +64,7 @@ function p1(links) {
     console.log({ next })
     for (const v of next) {
       // Ignore places where we don't want to go to again
-      if (visited.has(v)) continue
+      if (visited.has(v) && v !== 'end') continue
       let px = parent[v] ?? []
       px.push(u)
       parent[v] = px
@@ -74,7 +74,7 @@ function p1(links) {
         if (path[path.length - 1] === u) newPaths.push([...path, v])
       }
       paths = [...paths, ...newPaths]
-      frontier.push(v)
+      if (v !== 'end') frontier.push(v)
     }
     paths = [...new Set(paths)]
     // console.log({ frontier })
