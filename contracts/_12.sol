@@ -15,20 +15,44 @@ contract _12Parser is Parser {
 
     function parse(string memory input)
         internal
-        returns (uint256[2][] memory links)
+        returns (string[2][] memory links)
     {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory tokens = parseTokens(s);
+        links = new string[2][](tokens.length);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            string[] memory uv = split(tokens[i], "-", 0);
+            links[i] = [uv[0], uv[1]];
+        }
     }
 }
 
 contract _12 is _12Parser {
     function main(string calldata input) external returns (uint256, uint256) {
-        return (p1(parse(input)), p2(parse(input)));
+        string[2][] memory links = parse(input);
+        return (p1(links), p2(links));
     }
 
-    function p1(uint256[2][] memory links) private returns (uint256 nPaths) {}
+    struct Route {
+        string u;
+        string[] visited;
+        string[][] paths;
+    }
 
-    function p2(uint256[2][] memory links) private returns (uint256 nPaths) {}
+    Route[] private frontier;
+
+    function p1(string[2][] memory links) private returns (uint256 nPaths) {
+        delete frontier;
+
+        string[][] memory paths = new string[][](1);
+        paths[0] = new string[](0);
+        frontier.push(
+            Route({u: "start", visited: new string[](0), paths: paths})
+        );
+
+        nPaths = links.length;
+    }
+
+    function p2(string[2][] memory links) private returns (uint256 nPaths) {}
 }
