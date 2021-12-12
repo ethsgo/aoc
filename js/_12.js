@@ -55,8 +55,13 @@ function p1(links) {
     console.log('visit', u)
     // If we're visiting a lowercase place, mark it as done.
     if (u === u.toLowerCase()) visited.add(u)
+    // console.log({ visited })
     // Where can we go next
-    const next = links.filter((link) => link[0] === u).map((link) => link[1])
+    const next = [
+      ...links.filter((link) => link[0] === u).map((link) => link[1]),
+      ...links.filter((link) => link[1] === u).map((link) => link[0]),
+    ]
+    console.log({ next })
     for (const v of next) {
       // Ignore places where we don't want to go to again
       if (visited.has(v)) continue
@@ -71,7 +76,11 @@ function p1(links) {
       paths = [...paths, ...newPaths]
       frontier.push(v)
     }
+    paths = [...new Set(paths)]
+    // console.log({ frontier })
+    // console.log({ paths })
   }
+  paths = paths.filter((path) => path[path.length - 1] === 'end')
   return paths
 }
 
