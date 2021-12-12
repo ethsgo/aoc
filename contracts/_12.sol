@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 import "./ArrayUtils.sol";
+import "hardhat/console.sol";
 
 contract _12Parser is Parser {
     string private constant exampleInput =
@@ -90,30 +91,103 @@ contract _12 is _12Parser, ArrayUtils {
         uint256 b;
     }
 
+    Link[] private allLinks;
     Link[] private links;
 
     mapping(uint256 => uint256) linkCount;
 
     /// Workaround since we cannot use the Link struct as a mapping key.
     function linkId(Link memory link) private pure returns (uint256) {
-        return link.a * 1000 + link.b;
+        return linkId(link.a, link.b);
+    }
+
+    function linkId(uint256 a, uint256 b) private pure returns (uint256) {
+        if (a < b) {
+            return a * 1000 + b;
+        } else {
+            return b * 1000 + a;
+        }
     }
 
     function compress(uint256[2][] memory uvs) private {
+        // Because of the way the puzzle is structured, we know there are no
+        // edges between two large caves (otherwise there would be infinite loops).
         for (uint256 i = 0; i < uvs.length; i++) {
             uint256 u = uvs[i][0];
             uint256 v = uvs[i][1];
-            if (v < u) {
-                v = uvs[i][0];
+            if (isSmallCave(v)) {
+                // Swap so that the large cave is always second.
                 u = uvs[i][1];
+                v = uvs[i][0];
             }
             Link memory link = Link(u, v);
-            links.push(link);
-            linkCount[linkId(link)]++;
+            allLinks.push(link);
+            // linkCount[linkId(link)]++;
         }
 
-        // Because of the way the puzzle is structured, we know there are no
-        // edges between two large caves (otherwise there would be infinite loops).
+        console.log("all-links: --");
+        for (uint256 i = 0; i < allLinks.length; i++) {
+            uint256 u = allLinks[i].a;
+            uint256 v = allLinks[i].b;
+            console.log(u, v);
+        }
+
+        console.log("compressing: --");
+        for (uint256 i = 1000; i < allLinks.length; i++) {
+            uint256 u = allLinks[i].a;
+            uint256 v = allLinks[i].b;
+            if (u == type(uint256).max || v == type(uint256).max) continue;
+            if (isSmallCave(v)) {
+                // Both ends are small caves, continue.
+                continue;
+            }
+            // Create a new edge representing a direct connection from u to all the
+            // small caves that v is connected to.
+            uint256 c = 0;
+            console.log("compress", u, v);
+            for (uint256 j = i + 1; j < allLinks.length; j++) {
+                // if (i == j) continue;
+                if (u == type(uint256).max || v == type(uint256).max) continue;
+                if (allLinks[j].b != v) continue;
+                uint256 w = allLinks[j].a;
+                // console.log("  ", w);
+                // console.log(
+                //     "  ",
+                //     linkCount[linkId(u, v)],
+                //     linkCount[linkId(v, w)],
+                //     linkCount[linkId(u, w)]
+                // );
+
+                // linkCount[linkId(u, w)] =
+                //     linkCount[linkId(u, w)] +
+                //     (linkCount[linkId(u, v)] * linkCount[linkId(w, v)]);
+                // delete linkCount[linkId(u, v)];
+                // delete linkCount[linkId(w, v)];
+                allLinks[j].b = type(uint256).max;
+                allLinks.push(Link(u, w));
+            }
+            allLinks[i].b = type(uint256).max;
+        }
+
+        for (uint256 i = 0; i < allLinks.length; i++) {
+            uint256 u = allLinks[i].a;
+            uint256 v = allLinks[i].b;
+            if (u == type(uint256).max || v == type(uint256).max) continue;
+            //if (linkCount[linkId(u, v)] == 0) continue;
+            if (v < u) {
+                uint t = u;
+                u = v;
+                v = t;
+            }
+            links.push(Link(u, v));
+        }
+
+        console.log("links: --");
+        for (uint256 i = 0; i < links.length; i++) {
+            uint256 u = links[i].a;
+            uint256 v = links[i].b;
+            console.log(u, v, linkCount[linkId(u, v)]);
+        }
     }
 
     struct Route {
@@ -125,6 +199,7 @@ contract _12 is _12Parser, ArrayUtils {
     Route[] private frontier;
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
+        // return 0;
         delete frontier;
 
         frontier.push(
