@@ -48,32 +48,39 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/).map((s) => s.split('-'))
 
-function p1(links) {
+function paths(links, { allowOneSmallCave } = {}) {
   const next = (u) => [
     ...links.filter((link) => link[0] === u).map((link) => link[1]),
     ...links.filter((link) => link[1] === u).map((link) => link[0]),
   ]
 
-  let frontier = [{ u: 'start', visited: [] }]
-  let nPaths = 0
+  let frontier = [{ u: 'start', visited: [], smallCave: false }]
+  let p = 0
 
   while (frontier.length > 0) {
-    let { u, visited } = frontier.shift()
+    let { u, visited, smallCave } = frontier.shift()
 
     visited = [...visited]
-    if (u === u.toLowerCase()) visited.push(u)
+    if (u === u.toLowerCase()) {
+      if (allowOneSmallCave && !smallCave) {
+        smallCave = u
+      } else {
+        visited.push(u)
+      }
+    }
 
     for (const v of next(u)) {
-      if (visited.includes(v)) continue
-      if (v === 'end') {
-        nPaths++
-      } else {
-        frontier.push({ u: v, visited: visited })
-      }
+      if (v === 'end') p++
+      else if (!visited.includes(v))
+        frontier.push({ u: v, visited: visited, smallCave: smallCave })
     }
   }
 
-  return nPaths
+  return p
 }
 
+const p1 = (links) => paths(links)
+const p2 = (links) => paths(links, { allowOneSmallCave: true })
+
 console.log(p1(parse(input)))
+console.log(p2(parse(input)))
