@@ -46,22 +46,23 @@ function p1a(links) {
 }
 
 function p1(links) {
-  let visited = new Set()
-  let frontier = ['start']
+  // let visited = new Set()
+  let frontier = [{ u: 'start', visited: new Set() }]
   let parent = {}
   let paths = [['start']]
   while (frontier.length > 0) {
-    const u = frontier.shift()
-    console.log('visit', u)
+    let { u, visited } = frontier.shift()
+    visited = new Set(visited)
+    // console.log('visit', u)
     // If we're visiting a lowercase place, mark it as done.
     if (u === u.toLowerCase()) visited.add(u)
-    // console.log({ visited })
     // Where can we go next
     const next = [
       ...links.filter((link) => link[0] === u).map((link) => link[1]),
       ...links.filter((link) => link[1] === u).map((link) => link[0]),
     ]
-    console.log({ next })
+    console.log({ u, visited, next })
+    // console.log({ next })
     for (const v of next) {
       // Ignore places where we don't want to go to again
       if (visited.has(v) && v !== 'end') continue
@@ -74,14 +75,20 @@ function p1(links) {
         if (path[path.length - 1] === u) newPaths.push([...path, v])
       }
       paths = [...paths, ...newPaths]
-      if (v !== 'end') frontier.push(v)
+      if (v !== 'end') {
+        console.log({ v })
+        frontier.push({ u: v, visited })
+      }
     }
-    paths = [...new Set(paths)]
+    console.log({ frontier })
+    // paths = [...new Set(paths)]
     // console.log({ frontier })
     // console.log({ paths })
   }
   paths = paths.filter((path) => path[path.length - 1] === 'end')
-  return paths
+
+  let spx = paths.map((path) => path.join(','))
+  return [...new Set(spx)].sort()
 }
 
 console.log(p1(parse(input)))
