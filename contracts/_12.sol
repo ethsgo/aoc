@@ -26,39 +26,74 @@ contract _12Parser is Parser {
         "kj-HN "
         "kj-dc ";
 
+    uint256 internal constant startId = 0;
+    uint256 internal constant endId = 1;
+
+    function isSmallCave(uint256 id) internal pure returns (bool) {
+        return id % 2 == 0;
+    }
+
+    function hasLowerCase(string memory s) private pure returns (bool) {
+        bytes1 c = bytes(s)[0];
+        return c >= "a" && c <= "z";
+    }
+
+    mapping(string => uint256) private seenIds;
+    uint256 private nextIdSmall = 2;
+    uint256 private nextIdLarge = 3;
+
+    bytes32 private constant kstart = keccak256(abi.encodePacked("start"));
+    bytes32 private constant kend = keccak256(abi.encodePacked("end"));
+
+    function caveId(string memory s) private returns (uint256 id) {
+        id = seenIds[s];
+        if (id == 0) {
+            bytes32 k = keccak256(abi.encodePacked(s));
+            if (k == kstart) id = startId;
+            else if (k == kend) id = endId;
+            else {
+                if (hasLowerCase(s)) {
+                    id = nextIdSmall;
+                    nextIdSmall += 2;
+                } else {
+                    id = nextIdLarge;
+                    nextIdLarge += 2;
+                }
+            }
+            seenIds[s] = id;
+        }
+    }
+
     function parse(string memory input)
         internal
-        returns (string[2][] memory links)
+        returns (uint256[2][] memory links)
     {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory tokens = parseTokens(s);
-        links = new string[2][](tokens.length);
+        links = new uint256[2][](tokens.length);
         for (uint256 i = 0; i < tokens.length; i++) {
             string[] memory uv = split(tokens[i], "-", 0);
-            links[i] = [uv[0], uv[1]];
+            links[i] = [caveId(uv[0]), caveId(uv[1])];
         }
     }
 }
 
 contract _12 is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
-        string[2][] memory links = parse(input);
+        uint256[2][] memory links = parse(input);
         return (p1(links), p2(links));
     }
 
     struct Route {
-        string u;
-        string[] visited;
+        uint256 u;
+        uint256[] visited;
         bool canSkip;
     }
 
     Route[] private frontier;
 
-    bytes32 private constant kstart = keccak256(abi.encodePacked("start"));
-    bytes32 private constant kend = keccak256(abi.encodePacked("end"));
-
-    function pathCount(string[2][] memory links, bool allowOneSmallCave)
+    function pathCount(uint256[2][] memory links, bool allowOneSmallCave)
         private
         returns (uint256 p)
     {
@@ -66,8 +101,8 @@ contract _12 is _12Parser, ArrayUtils {
 
         frontier.push(
             Route({
-                u: "start",
-                visited: new string[](0),
+                u: startId,
+                visited: new uint256[](0),
                 canSkip: allowOneSmallCave
             })
         );
@@ -76,21 +111,23 @@ contract _12 is _12Parser, ArrayUtils {
             Route memory route = frontier[frontier.length - 1];
             frontier.pop();
 
-            string[] memory visited = cloneVisited(
+            uint256[] memory visited = cloneVisited(
                 route.visited,
-                hasLowerCase(route.u) ? route.u : ""
+                isSmallCave(route.u) ? route.u : 0
             );
 
             for (uint256 i = 0; i < links.length; i++) {
-                string memory v = nextEdge(links[i], route.u);
-                if (bytes(v).length == 0) continue;
-                bytes32 kv = keccak256(abi.encodePacked(v));
-                if (kv == kend) {
+                (uint256 v, bool exists) = nextEdge(links[i], route.u);
+                if (!exists) continue;
+                if (v == startId) {
+                    continue;
+                }
+                if (v == endId) {
                     p++;
                     continue;
                 }
-                if (containsString(visited, v)) {
-                    if (route.canSkip && kv != kstart) {
+                if (containsUint(visited, v)) {
+                    if (route.canSkip) {
                         frontier.push(
                             Route({u: v, visited: visited, canSkip: false})
                         );
@@ -104,44 +141,38 @@ contract _12 is _12Parser, ArrayUtils {
         }
     }
 
-    function hasLowerCase(string memory s) private pure returns (bool) {
-        bytes1 c = bytes(s)[0];
-        return c >= "a" && c <= "z";
-    }
-
-    function cloneVisited(string[] memory strings, string memory optionalSuffix)
+    function cloneVisited(uint256[] memory visited, uint256 optionalSuffix)
         private
         pure
-        returns (string[] memory copy)
+        returns (uint256[] memory copy)
     {
-        uint256 n = strings.length;
-        if (bytes(optionalSuffix).length == 0) {
-            copy = new string[](n);
+        uint256 n = visited.length;
+        if (optionalSuffix == 0) {
+            copy = new uint256[](n);
         } else {
-            copy = new string[](n + 1);
+            copy = new uint256[](n + 1);
             copy[n] = optionalSuffix;
         }
         for (uint256 i = 0; i < n; i++) {
-            copy[i] = strings[i];
+            copy[i] = visited[i];
         }
     }
 
-    function nextEdge(string[2] memory link, string memory u)
+    function nextEdge(uint256[2] memory link, uint256 u)
         private
         pure
-        returns (string memory)
+        returns (uint256, bool)
     {
-        bytes32 ku = keccak256(abi.encodePacked(u));
-        if (keccak256(abi.encodePacked(link[0])) == ku) return link[1];
-        if (keccak256(abi.encodePacked(link[1])) == ku) return link[0];
-        return "";
+        if (link[0] == u) return (link[1], true);
+        if (link[1] == u) return (link[0], true);
+        return (0, false);
     }
 
-    function p1(string[2][] memory links) private returns (uint256) {
+    function p1(uint256[2][] memory links) private returns (uint256) {
         return pathCount(links, false);
     }
 
-    function p2(string[2][] memory links) private returns (uint256) {
+    function p2(uint256[2][] memory links) private returns (uint256) {
         return pathCount(links, true);
     }
 }

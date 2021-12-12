@@ -21,4 +21,15 @@ contract ArrayUtils {
         }
         return false;
     }
+
+    function containsUint(uint256[] memory strings, uint256 u)
+        internal
+        pure
+        returns (bool)
+    {
+        for (uint256 i = 0; i < strings.length; i++) {
+            if (strings[i] == u) return true;
+        }
+        return false;
+    }
 }
