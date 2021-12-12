@@ -48,7 +48,8 @@ function p1a(links) {
 function p1(links) {
   let visited = new Set()
   let frontier = ['start']
-  let parent = {};
+  let parent = {}
+  let paths = [['start']]
   while (frontier.length > 0) {
     const u = frontier.shift()
     console.log('visit', u)
@@ -59,13 +60,19 @@ function p1(links) {
     for (const v of next) {
       // Ignore places where we don't want to go to again
       if (visited.has(v)) continue
-      let px = (parent[v] ?? [])
+      let px = parent[v] ?? []
       px.push(u)
       parent[v] = px
+      let newPaths = []
+      for (const path of paths) {
+        // console.log({ path, u })
+        if (path[path.length - 1] === u) newPaths.push([...path, v])
+      }
+      paths = [...paths, ...newPaths]
       frontier.push(v)
     }
   }
-  return parent
+  return paths
 }
 
 console.log(p1(parse(input)))
