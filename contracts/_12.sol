@@ -51,7 +51,39 @@ contract _12 is _12Parser {
             Route({u: "start", visited: new string[](0), paths: paths})
         );
 
+        while (frontier.length > 0) {
+            Route memory route = frontier[frontier.length - 1];
+            frontier.pop();
+
+            string[] memory visited = copyWithOptionalSuffix(
+                route.visited,
+                hasLowerCase(route.u) ? route.u : ""
+            );
+        }
+
         nPaths = links.length;
+    }
+
+    function hasLowerCase(string memory s) private pure returns (bool) {
+        bytes1 c = bytes(s)[0];
+        return c >= "a" && c <= "z";
+    }
+
+    function copyWithOptionalSuffix(string[] memory strings, string memory s)
+        private
+        pure
+        returns (string[] memory copy)
+    {
+        uint256 n = strings.length;
+        if (bytes(s).length == 0) {
+            copy = new string[](n);
+        } else {
+            copy = new string[](n + 1);
+            copy[n] = s;
+        }
+        for (uint256 i = 0; i < n; i++) {
+            copy[i] = strings[i];
+        }
     }
 
     function p2(string[2][] memory links) private returns (uint256 nPaths) {}
