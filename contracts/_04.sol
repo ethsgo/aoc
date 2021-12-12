@@ -39,7 +39,7 @@ contract _04Parser is Parser, StringUtils {
     }
 
     function parseBingo(string memory input) internal returns (Bingo memory) {
-        int256 firstNewlineIndex = indexOf(input, ascii_nl);
+        int256 firstNewlineIndex = indexOf(input, "\n");
         require(firstNewlineIndex >= 0);
         uint256 drawEndIndex = uint256(firstNewlineIndex);
 

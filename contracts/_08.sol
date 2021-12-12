@@ -175,8 +175,9 @@ contract _08 is _08Parser, ArrayUtils {
     function segment(string memory pattern) private pure returns (uint8) {
         bytes memory b = bytes(pattern);
         uint8 result;
+        uint8 a = uint8(bytes1("a"));
         for (uint256 i = 0; i < b.length; i++) {
-            result |= uint8(1 << (uint8(b[i]) - ascii_a));
+            result |= uint8(1 << (uint8(b[i]) - a));
         }
         return result;
     }

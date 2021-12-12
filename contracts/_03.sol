@@ -28,7 +28,7 @@ contract _03Parser is Parser {
         bytes memory bits = bytes(s);
         for (uint256 i = 0; i < bits.length; i++) {
             result <<= 1;
-            result += (bits[i] == bytes1(ascii_0)) ? 0 : 1;
+            result += (bits[i] == "0") ? 0 : 1;
         }
         return result;
     }

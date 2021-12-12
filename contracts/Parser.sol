@@ -3,21 +3,15 @@ pragma solidity ^0.8.0;
 
 /// Parse simple types, like arrays of integers, or string tokens.
 contract Parser {
-    /// ASCII constants
-    ///
-    /// 48  - '0'
-    /// 57  - '9'
-    uint8 internal constant ascii_0 = 48;
-    uint8 internal constant ascii_9 = 57;
-    /// 97  - 'a'
-    /// 122 - 'z'
-    uint8 internal constant ascii_a = 97;
-    uint8 internal constant ascii_z = 122;
-    /// Newline
-    /// 10 - '\n'
-    /// 32 - ' ' (space)
-    uint8 internal constant ascii_nl = 10;
-    uint8 internal constant ascii_sp = 32;
+    /// Some pre-typecasted ASCII constants for convenience.
+    uint8 internal constant ascii_0 = uint8(bytes1("0"));
+    uint8 internal constant ascii_9 = uint8(bytes1("9"));
+    uint8 internal constant ascii_A = uint8(bytes1("A"));
+    uint8 internal constant ascii_Z = uint8(bytes1("Z"));
+    uint8 internal constant ascii_a = uint8(bytes1("a"));
+    uint8 internal constant ascii_z = uint8(bytes1("z"));
+    uint8 internal constant ascii_nl = uint8(bytes1("\n"));
+    uint8 internal constant ascii_sp = uint8(bytes1(" "));
 
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
