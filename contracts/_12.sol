@@ -37,7 +37,7 @@ contract _12 is _12Parser {
     struct Route {
         string u;
         string[] visited;
-        string[][] paths;
+        string[] path;
     }
 
     Route[] private frontier;
@@ -45,20 +45,20 @@ contract _12 is _12Parser {
     function p1(string[2][] memory links) private returns (uint256 nPaths) {
         delete frontier;
 
-        string[][] memory paths = new string[][](1);
-        paths[0] = new string[](0);
         frontier.push(
-            Route({u: "start", visited: new string[](0), paths: paths})
+            Route({u: "start", visited: new string[](0), path: new string[](0)})
         );
 
         while (frontier.length > 0) {
             Route memory route = frontier[frontier.length - 1];
             frontier.pop();
 
-            string[] memory visited = copyWithOptionalSuffix(
+            string[] memory visited = cloneVisited(
                 route.visited,
                 hasLowerCase(route.u) ? route.u : ""
             );
+
+            // string[][] memory paths =
         }
 
         nPaths = links.length;
@@ -69,22 +69,23 @@ contract _12 is _12Parser {
         return c >= "a" && c <= "z";
     }
 
-    function copyWithOptionalSuffix(string[] memory strings, string memory s)
+    function cloneVisited(string[] memory strings, string memory optionalSuffix)
         private
         pure
         returns (string[] memory copy)
     {
         uint256 n = strings.length;
-        if (bytes(s).length == 0) {
+        if (bytes(optionalSuffix).length == 0) {
             copy = new string[](n);
         } else {
             copy = new string[](n + 1);
-            copy[n] = s;
+            copy[n] = optionalSuffix;
         }
         for (uint256 i = 0; i < n; i++) {
             copy[i] = strings[i];
         }
     }
+
 
     function p2(string[2][] memory links) private returns (uint256 nPaths) {}
 }

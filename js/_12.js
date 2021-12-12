@@ -54,23 +54,23 @@ function p1(links) {
     ...links.filter((link) => link[1] === u).map((link) => link[0]),
   ]
 
-  let frontier = [{ u: 'start', visited: [], paths: [[]] }]
+  let frontier = [{ u: 'start', visited: [], path: [] }]
   let endedPaths = []
 
   while (frontier.length > 0) {
-    let { u, visited, paths } = frontier.shift()
+    let { u, visited, path } = frontier.shift()
 
     visited = [...visited]
     if (u === u.toLowerCase()) visited.push(u)
 
-    paths = [...paths].map((path) => [...path, u])
+    path = [...path, u]
 
     for (const v of next(u)) {
       if (visited.includes(v)) continue
       if (v === 'end') {
-        endedPaths = [...endedPaths, ...paths.map((path) => [...path, 'end'])]
+        endedPaths = [...endedPaths, [...path, 'end']]
       } else {
-        frontier.push({ u: v, visited: visited, paths: paths })
+        frontier.push({ u: v, visited: visited, path: path })
       }
     }
   }
