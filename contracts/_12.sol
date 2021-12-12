@@ -30,7 +30,7 @@ contract _12Parser is Parser {
     uint256 internal constant endId = 1;
 
     function isSmallCave(uint256 id) internal pure returns (bool) {
-        return id % 2 == 0;
+        return id % 2 == 0 || id == endId;
     }
 
     function hasLowerCase(string memory s) private pure returns (bool) {
@@ -88,15 +88,32 @@ contract _12 is _12Parser, ArrayUtils {
     struct Link {
         uint256 a;
         uint256 b;
-        uint256 count;
     }
 
     Link[] private links;
 
+    mapping(uint256 => uint256) linkCount;
+
+    /// Workaround since we cannot use the Link struct as a mapping key.
+    function linkId(Link memory link) private pure returns (uint256) {
+        return link.a * 1000 + link.b;
+    }
+
     function compress(uint256[2][] memory uvs) private {
         for (uint256 i = 0; i < uvs.length; i++) {
-            links.push(Link({a: uvs[i][0], b: uvs[i][1], count: 1}));
+            uint256 u = uvs[i][0];
+            uint256 v = uvs[i][1];
+            if (v < u) {
+                v = uvs[i][0];
+                u = uvs[i][1];
+            }
+            Link memory link = Link(u, v);
+            links.push(link);
+            linkCount[linkId(link)]++;
         }
+
+        // Because of the way the puzzle is structured, we know there are no
+        // edges between two large caves (otherwise there would be infinite loops).
     }
 
     struct Route {
