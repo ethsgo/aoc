@@ -54,11 +54,11 @@ function paths(links, { allowOneSmallCave } = {}) {
     ...links.filter((link) => link[1] === u).map((link) => link[0]),
   ]
 
-  let frontier = [{ u: 'start', visited: [], canSmall: allowOneSmallCave }]
+  let frontier = [{ u: 'start', visited: [], canSkip: allowOneSmallCave }]
   let p = 0
 
   while (frontier.length > 0) {
-    let { u, visited, canSmall } = frontier.pop()
+    let { u, visited, canSkip } = frontier.pop()
 
     visited = [...visited]
     if (u === u.toLowerCase()) visited.push(u)
@@ -68,11 +68,11 @@ function paths(links, { allowOneSmallCave } = {}) {
         p++
       } else {
         if (visited.includes(v)) {
-          if (canSmall && v !== 'start') {
-            frontier.push({ u: v, visited, canSmall: false })
+          if (canSkip && v !== 'start') {
+            frontier.push({ u: v, visited, canSkip: false })
           }
         } else {
-          frontier.push({ u: v, visited, canSmall })
+          frontier.push({ u: v, visited, canSkip })
         }
       }
     }

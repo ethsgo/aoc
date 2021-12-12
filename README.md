@@ -32,6 +32,9 @@ This allows hardhat to use more memory than the default.
 
     export NODE_OPTIONS="--max-old-space-size=4096"
 
+Unfortunately, even that is not enough to run the Solidity solution for problem 12
+on the full input (it works on the smaller example).
+
 ## Say hello
 
 [https://twitter.com/ethsgo\_](https://twitter.com/ethsgo_)

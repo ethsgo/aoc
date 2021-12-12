@@ -50,7 +50,7 @@ contract _12 is _12Parser, ArrayUtils {
     struct Route {
         string u;
         string[] visited;
-        bool allowOneSmallCave;
+        bool canSkip;
     }
 
     Route[] private frontier;
@@ -68,7 +68,7 @@ contract _12 is _12Parser, ArrayUtils {
             Route({
                 u: "start",
                 visited: new string[](0),
-                allowOneSmallCave: allowOneSmallCave
+                canSkip: allowOneSmallCave
             })
         );
 
@@ -90,22 +90,14 @@ contract _12 is _12Parser, ArrayUtils {
                     continue;
                 }
                 if (containsString(visited, v)) {
-                    if (allowOneSmallCave && kv != kstart) {
+                    if (route.canSkip && kv != kstart) {
                         frontier.push(
-                            Route({
-                                u: v,
-                                visited: visited,
-                                allowOneSmallCave: false
-                            })
+                            Route({u: v, visited: visited, canSkip: false})
                         );
                     }
                 } else {
                     frontier.push(
-                        Route({
-                            u: v,
-                            visited: visited,
-                            allowOneSmallCave: route.allowOneSmallCave
-                        })
+                        Route({u: v, visited: visited, canSkip: route.canSkip})
                     );
                 }
             }
