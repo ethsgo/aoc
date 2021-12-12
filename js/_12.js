@@ -58,7 +58,7 @@ function paths(links, { allowOneSmallCave } = {}) {
   let p = 0
 
   while (frontier.length > 0) {
-    let { u, visited, allowOneSmallCave } = frontier.shift()
+    let { u, visited, allowOneSmallCave } = frontier.pop()
 
     visited = [...visited]
     if (u === u.toLowerCase()) visited.push(u)
