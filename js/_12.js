@@ -54,31 +54,26 @@ function p1(links) {
     ...links.filter((link) => link[1] === u).map((link) => link[0]),
   ]
 
-  let frontier = [{ u: 'start', visited: [], path: [] }]
-  let endedPaths = []
+  let frontier = [{ u: 'start', visited: [] }]
+  let nPaths = 0
 
   while (frontier.length > 0) {
-    let { u, visited, path } = frontier.shift()
+    let { u, visited } = frontier.shift()
 
     visited = [...visited]
     if (u === u.toLowerCase()) visited.push(u)
 
-    path = [...path, u]
-
     for (const v of next(u)) {
       if (visited.includes(v)) continue
       if (v === 'end') {
-        endedPaths = [...endedPaths, [...path, 'end']]
+        nPaths++
       } else {
-        frontier.push({ u: v, visited: visited, path: path })
+        frontier.push({ u: v, visited: visited })
       }
     }
   }
 
-  let paths = endedPaths.map((path) => path.join(','))
-  let uniqPaths = [...new Set(paths)]
-  // console.log(uniqPaths)
-  return uniqPaths.length
+  return nPaths
 }
 
 console.log(p1(parse(input)))
