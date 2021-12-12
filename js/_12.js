@@ -60,14 +60,8 @@ function paths(links, { allowOneSmallCave } = {}) {
   while (frontier.length > 0) {
     let { u, visited, smallCave, path } = frontier.shift()
 
-    visited = [...visited]
-    if (u === u.toLowerCase()) {
-      if (allowOneSmallCave && !smallCave && u !== 'start') {
-        smallCave = u
-      } else {
-        visited.push(u)
-      }
-    }
+    let newVisited = [...visited]
+    if (u === u.toLowerCase()) newVisited.push(u)
 
     path = [...path, u]
 
@@ -75,8 +69,19 @@ function paths(links, { allowOneSmallCave } = {}) {
       if (v === 'end') {
         console.log([...path, v].join(','))
         p++
-      } else if (!visited.includes(v)) {
-        frontier.push({ u: v, visited, smallCave, path })
+      } else {
+        if (visited.includes(v)) {
+          if (
+            allowOneSmallCave &&
+            v === v.toLowerCase() &&
+            !smallCave &&
+            v !== 'start'
+          ) {
+            frontier.push({ u: v, visited, smallCave: v, path })
+          }
+        } else {
+          frontier.push({ u: v, visited: newVisited, smallCave, path })
+        }
       }
     }
   }
