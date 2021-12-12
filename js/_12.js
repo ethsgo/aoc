@@ -67,16 +67,11 @@ function paths(links, { allowOneSmallCave } = {}) {
 
     for (const v of next(u)) {
       if (v === 'end') {
-        console.log([...path, v].join(','))
+        // console.log([...path, v].join(','))
         p++
       } else {
         if (visited.includes(v)) {
-          if (
-            allowOneSmallCave &&
-            v === v.toLowerCase() &&
-            !smallCave &&
-            v !== 'start'
-          ) {
+          if (allowOneSmallCave && !smallCave && v !== 'start') {
             frontier.push({ u: v, visited, smallCave: v, path })
           }
         } else {
@@ -93,4 +88,4 @@ const p1 = (links) => paths(links)
 const p2 = (links) => paths(links, { allowOneSmallCave: true })
 
 // console.log(p1(parse(input)))
-console.log(p2(parse(input)))
+console.log(p2(parse(inputM)))
