@@ -47,12 +47,18 @@ function p1a(links) {
 
 function p1(links) {
   // let visited = new Set()
-  let frontier = [{ u: 'start', visited: new Set() }]
+  let frontier = [{ u: 'start', visited: new Set(), paths: [[]] }]
   let parent = {}
-  let paths = [['start']]
+  // let paths = [['start']]
+  let endedPaths = []
+  let allPaths = []
   while (frontier.length > 0) {
-    let { u, visited } = frontier.shift()
+    let { u, visited, paths } = frontier.shift()
     visited = new Set(visited)
+    paths = [...paths].map((path) => [...path, u])
+    allPaths = [...allPaths, ...paths]
+    // console.log({ allPaths })
+
     // console.log('visit', u)
     // If we're visiting a lowercase place, mark it as done.
     if (u === u.toLowerCase()) visited.add(u)
@@ -61,7 +67,7 @@ function p1(links) {
       ...links.filter((link) => link[0] === u).map((link) => link[1]),
       ...links.filter((link) => link[1] === u).map((link) => link[0]),
     ]
-    console.log({ u, visited, next })
+    // console.log({ u, visited, next, paths })
     // console.log({ next })
     for (const v of next) {
       // Ignore places where we don't want to go to again
@@ -70,25 +76,28 @@ function p1(links) {
       px.push(u)
       parent[v] = px
       let newPaths = []
-      for (const path of paths) {
-        // console.log({ path, u })
-        if (path[path.length - 1] === u) newPaths.push([...path, v])
-      }
-      paths = [...paths, ...newPaths]
-      if (v !== 'end') {
-        console.log({ v })
-        frontier.push({ u: v, visited })
+      // for (const path of paths) {
+      //   console.log({ path: path.join(','), u })
+      //   if (path[path.length - 1] === u) newPaths.push([...path, v])
+      // }
+      // paths = [...paths, ...newPaths]
+      if (v === 'end') {
+        endedPaths = [...endedPaths, ...paths.map((path) => [...path, 'end'])]
+      } else {
+        // console.log({ v })
+        frontier.push({ u: v, visited: new Set(visited), paths: [...paths] })
       }
     }
-    console.log({ frontier })
+    // console.log({ frontier })
     // paths = [...new Set(paths)]
     // console.log({ frontier })
     // console.log({ paths })
   }
-  paths = paths.filter((path) => path[path.length - 1] === 'end')
+  let paths = endedPaths
+  // paths = paths.filter((path) => path[path.length - 1] === 'end')
 
   let spx = paths.map((path) => path.join(','))
-  return [...new Set(spx)].sort()
+  return [...new Set(spx)].sort().join('\n')
 }
 
 console.log(p1(parse(input)))
