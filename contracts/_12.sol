@@ -14,11 +14,23 @@ contract _12Parser is Parser {
         "A-end "
         "b-end ";
 
+    string private constant exampleInputM =
+        "dc-end "
+        "HN-start "
+        "start-kj "
+        "dc-start "
+        "dc-HN "
+        "LN-dc "
+        "HN-end "
+        "kj-sa "
+        "kj-HN "
+        "kj-dc ";
+
     function parse(string memory input)
         internal
         returns (string[2][] memory links)
     {
-        string memory s = bytes(input).length == 0 ? exampleInput : input;
+        string memory s = bytes(input).length == 0 ? exampleInputM : input;
 
         string[] memory tokens = parseTokens(s);
         links = new string[2][](tokens.length);
@@ -55,7 +67,9 @@ contract _12 is _12Parser, ArrayUtils {
 
             string[] memory visited = cloneVisited(
                 route.visited,
-                hasLowerCase(route.u) ? route.u : ""
+                hasLowerCase(route.u) && !containsString(route.visited, route.u)
+                    ? route.u
+                    : ""
             );
 
             for (uint256 i = 0; i < links.length; i++) {
