@@ -81,8 +81,22 @@ contract _12Parser is Parser {
 
 contract _12 is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
-        uint256[2][] memory links = parse(input);
-        return (p1(links), p2(links));
+        compress(parse(input));
+        return (p1(), p2());
+    }
+
+    struct Link {
+        uint256 a;
+        uint256 b;
+        uint256 count;
+    }
+
+    Link[] private links;
+
+    function compress(uint256[2][] memory uvs) private {
+        for (uint256 i = 0; i < uvs.length; i++) {
+            links.push(Link({a: uvs[i][0], b: uvs[i][1], count: 1}));
+        }
     }
 
     struct Route {
@@ -93,10 +107,7 @@ contract _12 is _12Parser, ArrayUtils {
 
     Route[] private frontier;
 
-    function pathCount(uint256[2][] memory links, bool allowOneSmallCave)
-        private
-        returns (uint256 p)
-    {
+    function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
         delete frontier;
 
         frontier.push(
@@ -158,21 +169,21 @@ contract _12 is _12Parser, ArrayUtils {
         }
     }
 
-    function nextEdge(uint256[2] memory link, uint256 u)
+    function nextEdge(Link storage link, uint256 u)
         private
-        pure
+        view
         returns (uint256, bool)
     {
-        if (link[0] == u) return (link[1], true);
-        if (link[1] == u) return (link[0], true);
+        if (link.a == u) return (link.b, true);
+        if (link.b == u) return (link.a, true);
         return (0, false);
     }
 
-    function p1(uint256[2][] memory links) private returns (uint256) {
-        return pathCount(links, false);
+    function p1() private returns (uint256) {
+        return pathCount(false);
     }
 
-    function p2(uint256[2][] memory links) private returns (uint256) {
-        return pathCount(links, true);
+    function p2() private returns (uint256) {
+        return pathCount(true);
     }
 }
