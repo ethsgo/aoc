@@ -14,7 +14,7 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split(/\s+/).map((s) => s.split('-'))
 
-function p1(links) {
+function p1a(links) {
   let paths = new Set([['start']])
   let c = 0
   while (links.length > 0 && c++ < 5) {
@@ -43,6 +43,24 @@ function p1(links) {
     }
   }
   return paths
+}
+
+function p1(links) {
+  let visited = new Set()
+  let frontier = ['start']
+  while (frontier.length > 0) {
+    const u = frontier.shift()
+    console.log('visit', u)
+    // If we're visiting a lowercase place, mark it as done.
+    if (u === u.toLowerCase()) visited.add(u)
+    // Where can we go next
+    const next = links.filter((link) => link[0] === u).map((link) => link[1])
+    for (const v of next) {
+      // Ignore places where we don't want to go to again
+      if (visited.has(v)) continue
+      frontier.push(v)
+    }
+  }
 }
 
 console.log(p1(parse(input)))
