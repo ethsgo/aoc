@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "./ArrayUtils.sol";
 
 contract _12Parser is Parser {
     string private constant exampleInput =
@@ -28,7 +29,7 @@ contract _12Parser is Parser {
     }
 }
 
-contract _12 is _12Parser {
+contract _12 is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         string[2][] memory links = parse(input);
         return (p1(links), p2(links));
@@ -37,17 +38,16 @@ contract _12 is _12Parser {
     struct Route {
         string u;
         string[] visited;
-        string[] path;
     }
 
     Route[] private frontier;
 
+    bytes32 private constant kend = keccak256(abi.encodePacked("end"));
+
     function p1(string[2][] memory links) private returns (uint256 nPaths) {
         delete frontier;
 
-        frontier.push(
-            Route({u: "start", visited: new string[](0), path: new string[](0)})
-        );
+        frontier.push(Route({u: "start", visited: new string[](0)}));
 
         while (frontier.length > 0) {
             Route memory route = frontier[frontier.length - 1];
@@ -58,10 +58,17 @@ contract _12 is _12Parser {
                 hasLowerCase(route.u) ? route.u : ""
             );
 
-            // string[][] memory paths =
+            for (uint256 i = 0; i < links.length; i++) {
+                string memory v = nextEdge(links[i], route.u);
+                if (bytes(v).length == 0) continue;
+                if (containsString(visited, v)) continue;
+                if (keccak256(abi.encodePacked(v)) == kend) {
+                    nPaths++;
+                } else {
+                    frontier.push(Route({u: v, visited: visited}));
+                }
+            }
         }
-
-        nPaths = links.length;
     }
 
     function hasLowerCase(string memory s) private pure returns (bool) {
@@ -86,6 +93,16 @@ contract _12 is _12Parser {
         }
     }
 
+    function nextEdge(string[2] memory link, string memory u)
+        private
+        pure
+        returns (string memory)
+    {
+        bytes32 ku = keccak256(abi.encodePacked(u));
+        if (keccak256(abi.encodePacked(link[0])) == ku) return link[1];
+        if (keccak256(abi.encodePacked(link[1])) == ku) return link[0];
+        return "";
+    }
 
     function p2(string[2][] memory links) private returns (uint256 nPaths) {}
 }

@@ -9,4 +9,16 @@ contract ArrayUtils {
         }
         return c;
     }
+
+    function containsString(string[] memory strings, string memory s)
+        internal
+        pure
+        returns (bool)
+    {
+        bytes32 ks = keccak256(abi.encodePacked(s));
+        for (uint256 i = 0; i < strings.length; i++) {
+            if (keccak256(abi.encodePacked(strings[i])) == ks) return true;
+        }
+        return false;
+    }
 }
