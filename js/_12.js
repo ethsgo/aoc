@@ -49,36 +49,34 @@ if (!process.stdin.isTTY) {
 const parse = (input) => input.split(/\s+/).map((s) => s.split('-'))
 
 function p1(links) {
-  let frontier = [{ u: 'start', visited: new Set(), paths: [[]] }]
+  const next = (u) => [
+    ...links.filter((link) => link[0] === u).map((link) => link[1]),
+    ...links.filter((link) => link[1] === u).map((link) => link[0]),
+  ]
+
+  let frontier = [{ u: 'start', visited: [], paths: [[]] }]
   let endedPaths = []
+
   while (frontier.length > 0) {
     let { u, visited, paths } = frontier.shift()
 
-    visited = new Set(visited)
-    if (u === u.toLowerCase()) visited.add(u)
+    visited = [...visited]
+    if (u === u.toLowerCase()) visited.push(u)
 
     paths = [...paths].map((path) => [...path, u])
 
-    const next = [
-      ...links.filter((link) => link[0] === u).map((link) => link[1]),
-      ...links.filter((link) => link[1] === u).map((link) => link[0]),
-    ]
-
-    // console.log({ u, visited, next, paths })
-    for (const v of next) {
-      if (visited.has(v) && v !== 'end') continue
+    for (const v of next(u)) {
+      if (visited.includes(v)) continue
       if (v === 'end') {
         endedPaths = [...endedPaths, ...paths.map((path) => [...path, 'end'])]
       } else {
-        frontier.push({ u: v, visited: new Set(visited), paths: [...paths] })
+        frontier.push({ u: v, visited: visited, paths: paths })
       }
     }
   }
-  let paths = endedPaths
-  // paths = paths.filter((path) => path[path.length - 1] === 'end')
 
-  let spx = paths.map((path) => path.join(','))
-  let uniqPaths = [...new Set(spx)].sort()
+  let paths = endedPaths.map((path) => path.join(','))
+  let uniqPaths = [...new Set(paths)]
   // console.log(uniqPaths)
   return uniqPaths.length
 }
