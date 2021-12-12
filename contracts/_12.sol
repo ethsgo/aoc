@@ -30,7 +30,7 @@ contract _12Parser is Parser {
         internal
         returns (string[2][] memory links)
     {
-        string memory s = bytes(input).length == 0 ? exampleInputM : input;
+        string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory tokens = parseTokens(s);
         links = new string[2][](tokens.length);
@@ -50,16 +50,27 @@ contract _12 is _12Parser, ArrayUtils {
     struct Route {
         string u;
         string[] visited;
+        bool allowOneSmallCave;
     }
 
     Route[] private frontier;
 
+    bytes32 private constant kstart = keccak256(abi.encodePacked("start"));
     bytes32 private constant kend = keccak256(abi.encodePacked("end"));
 
-    function p1(string[2][] memory links) private returns (uint256 nPaths) {
+    function pathCount(string[2][] memory links, bool allowOneSmallCave)
+        private
+        returns (uint256 p)
+    {
         delete frontier;
 
-        frontier.push(Route({u: "start", visited: new string[](0)}));
+        frontier.push(
+            Route({
+                u: "start",
+                visited: new string[](0),
+                allowOneSmallCave: allowOneSmallCave
+            })
+        );
 
         while (frontier.length > 0) {
             Route memory route = frontier[frontier.length - 1];
@@ -67,19 +78,35 @@ contract _12 is _12Parser, ArrayUtils {
 
             string[] memory visited = cloneVisited(
                 route.visited,
-                hasLowerCase(route.u) && !containsString(route.visited, route.u)
-                    ? route.u
-                    : ""
+                hasLowerCase(route.u) ? route.u : ""
             );
 
             for (uint256 i = 0; i < links.length; i++) {
                 string memory v = nextEdge(links[i], route.u);
                 if (bytes(v).length == 0) continue;
-                if (containsString(visited, v)) continue;
-                if (keccak256(abi.encodePacked(v)) == kend) {
-                    nPaths++;
+                bytes32 kv = keccak256(abi.encodePacked(v));
+                if (kv == kend) {
+                    p++;
+                    continue;
+                }
+                if (containsString(visited, v)) {
+                    if (allowOneSmallCave && kv != kstart) {
+                        frontier.push(
+                            Route({
+                                u: v,
+                                visited: visited,
+                                allowOneSmallCave: false
+                            })
+                        );
+                    }
                 } else {
-                    frontier.push(Route({u: v, visited: visited}));
+                    frontier.push(
+                        Route({
+                            u: v,
+                            visited: visited,
+                            allowOneSmallCave: route.allowOneSmallCave
+                        })
+                    );
                 }
             }
         }
@@ -118,5 +145,11 @@ contract _12 is _12Parser, ArrayUtils {
         return "";
     }
 
-    function p2(string[2][] memory links) private returns (uint256 nPaths) {}
+    function p1(string[2][] memory links) private returns (uint256) {
+        return pathCount(links, false);
+    }
+
+    function p2(string[2][] memory links) private returns (uint256) {
+        return pathCount(links, true);
+    }
 }
