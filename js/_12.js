@@ -8,6 +8,40 @@ A-end
 b-end
 `.trim()
 
+let inputM = `
+dc-end
+HN-start
+start-kj
+dc-start
+dc-HN
+LN-dc
+HN-end
+kj-sa
+kj-HN
+kj-dc
+`.trim()
+
+let inputL = `
+fs-end
+he-DX
+fs-he
+start-DX
+pj-DX
+end-zg
+zg-sl
+zg-pj
+pj-he
+RW-he
+fs-DX
+pj-RW
+zg-RW
+start-pj
+he-WI
+zg-he
+pj-fs
+start-RW
+`.trim()
+
 if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
 }
@@ -97,7 +131,9 @@ function p1(links) {
   // paths = paths.filter((path) => path[path.length - 1] === 'end')
 
   let spx = paths.map((path) => path.join(','))
-  return [...new Set(spx)].sort().join('\n')
+  let uniqPaths = [...new Set(spx)].sort()
+  // console.log(uniqPaths)
+  return uniqPaths.length
 }
 
 console.log(p1(parse(input)))
