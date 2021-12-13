@@ -45,6 +45,8 @@ function parse(input) {
   return { dots, folds }
 }
 
+const contains = (dots, p) => dots.find((e) => e[0] === p[0] && e[1] === p[1])
+
 function viz(dots) {
   const mx = Math.max(...dots.map((p) => p[0]))
   const my = Math.max(...dots.map((p) => p[1]))
@@ -52,7 +54,7 @@ function viz(dots) {
   for (let y = 0; y <= my; y++) {
     let cx = []
     for (let x = 0; x <= mx; x++) {
-      if (dots.find((e) => e[0] === x && e[1] === y)) {
+      if (contains(dots, [x, y])) {
         cx.push('#')
       } else {
         cx.push('.')
@@ -83,7 +85,7 @@ function fold1(dots, f) {
   })
 
   return result.reduce((a, p) => {
-    if (!a.find((e) => e[0] === p[0] && e[1] === p[1])) a.push(p)
+    if (!contains(a, p)) a.push(p)
     return a
   }, [])
 }
