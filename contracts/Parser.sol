@@ -79,6 +79,14 @@ contract Parser {
         return split(s, "\n", " ");
     }
 
+    /// Split the given string into an array of tokens using the given separator.
+    function split(string memory s, bytes1 sep1)
+        internal
+        returns (string[] memory)
+    {
+        return split(s, sep1, 0);
+    }
+
     /// Split the given string into an array of tokens using the given separators.
     function split(
         string memory s,

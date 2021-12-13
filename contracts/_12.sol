@@ -35,7 +35,7 @@ contract _12Parser is Parser {
         string[] memory tokens = parseTokens(s);
         links = new string[2][](tokens.length);
         for (uint256 i = 0; i < tokens.length; i++) {
-            string[] memory uv = split(tokens[i], "-", 0);
+            string[] memory uv = split(tokens[i], "-");
             links[i] = [uv[0], uv[1]];
         }
     }
