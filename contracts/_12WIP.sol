@@ -70,7 +70,7 @@ contract _12Parser is Parser {
         internal
         returns (uint256[2][] memory links)
     {
-        string memory s = bytes(input).length == 0 ? exampleInput : input;
+        string memory s = bytes(input).length == 0 ? exampleInputM : input;
 
         string[] memory tokens = parseTokens(s);
         links = new uint256[2][](tokens.length);
@@ -86,6 +86,8 @@ contract _12Parser is Parser {
 /// References:
 /// - https://old.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho8pbd6/
 /// - https://www.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho7ojrt/
+///
+/// - https://github.com/rogierhans/AOC/blob/master/AOC2/Day12DFS.cs
 contract _12WIP is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         compress(parse(input));
@@ -131,7 +133,6 @@ contract _12WIP is _12Parser, ArrayUtils {
             Link memory link = Link(u, v, 0);
             allLinks.push(link);
             // linkCount[linkId(link)]++;
-
             // links.push(Link(u, v));
         }
         // return;
@@ -147,52 +148,22 @@ contract _12WIP is _12Parser, ArrayUtils {
         for (uint256 i = 0; i < allLinks.length; i++) {
             uint256 u = allLinks[i].a;
             uint256 v = allLinks[i].b;
-            if (u == type(uint256).max || v == type(uint256).max) continue;
+
             if (isSmallCave(v)) {
                 // Both ends are small caves, continue.
+                intermediateLinks.push(Link(u, v, 0));
                 continue;
             }
+
             // Create a new edge representing a direct connection from u to all the
             // small caves that v is connected to.
             console.log("compress", u, v);
-            allLinks[i].b = type(uint256).max;
-            console.log("  deleting", u, v);
             for (uint256 j = i + 1; j < allLinks.length; j++) {
-                // if (i == j) continue;
-                if (u == type(uint256).max || v == type(uint256).max) continue;
                 if (allLinks[j].b != v) continue;
                 uint256 w = allLinks[j].a;
-                // console.log("  ", w);
-                // console.log(
-                //     "  ",
-                //     linkCount[linkId(u, v)],
-                //     linkCount[linkId(v, w)],
-                //     linkCount[linkId(u, w)]
-                // );
-
-                // linkCount[linkId(u, w)] =
-                //     linkCount[linkId(u, w)] +
-                //     (linkCount[linkId(u, v)] * linkCount[linkId(w, v)]);
-                // delete linkCount[linkId(u, v)];
-                // delete linkCount[linkId(w, v)];
-                allLinks[j].b = type(uint256).max;
-                console.log("  deleting", w, v);
                 console.log("  adding", u, w);
-                allLinks.push(Link(u, w, 0));
+                intermediateLinks.push(Link(u, w, 0));
             }
-        }
-
-        for (uint256 i = 0; i < allLinks.length; i++) {
-            uint256 u = allLinks[i].a;
-            uint256 v = allLinks[i].b;
-            if (u == type(uint256).max || v == type(uint256).max) continue;
-            //if (linkCount[linkId(u, v)] == 0) continue;
-            if (v < u) {
-                uint256 t = u;
-                u = v;
-                v = t;
-            }
-            intermediateLinks.push(Link(u, v, 0));
         }
 
         console.log("intermediate links: --");
