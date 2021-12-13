@@ -76,33 +76,30 @@ contract _13 is _13Parser {
         external
         returns (uint256, string memory)
     {
-        return (p1(parse(input)), p2(parse(input)));
+        Sheet memory sheet = parse(input);
+        // Parsing the sheet is quite expensive, so share it between parts even
+        // when the folding happens in place. The modifications made by p1 have
+        // no functional impact on the result of p2.
+        return (p1(sheet), p2(sheet));
     }
 
     function p1(Sheet memory sheet) private pure returns (uint256) {
-        foldInPlace(sheet.dots, sheet.folds[0]);
+        fold(sheet.dots, sheet.folds[0]);
         return unique(sheet.dots).length;
     }
 
     function p2(Sheet memory sheet) private pure returns (string memory) {
         for (uint256 i = 0; i < sheet.folds.length; i++)
-            foldInPlace(sheet.dots, sheet.folds[i]);
+            fold(sheet.dots, sheet.folds[i]);
         return pretty(viz(unique(sheet.dots)));
     }
 
-    function foldInPlace(uint256[2][] memory dots, uint256[2] memory f)
-        private
-        pure
-    {
+    function fold(uint256[2][] memory dots, uint256[2] memory f) private pure {
         for (uint256 i = 0; i < dots.length; i++) {
-            if (f[0] == 0) {
-                if (dots[i][1] < f[1]) {} else {
-                    dots[i] = [dots[i][0], f[1] - (dots[i][1] - f[1])];
-                }
-            } else {
-                if (dots[i][0] < f[0]) {} else {
-                    dots[i] = [f[0] - (dots[i][0] - f[0]), dots[i][1]];
-                }
+            if (f[0] == 0 && dots[i][1] > f[1]) {
+                dots[i] = [dots[i][0], f[1] - (dots[i][1] - f[1])];
+            } else if (f[1] == 0 && dots[i][0] > f[0]) {
+                dots[i] = [f[0] - (dots[i][0] - f[0]), dots[i][1]];
             }
         }
     }
