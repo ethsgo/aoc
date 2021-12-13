@@ -45,8 +45,44 @@ function parse(input) {
   return { dots, folds }
 }
 
-function p1(sheet) {
-  return sheet
+function viz(dots) {
+  const mx = Math.max(...dots.map((p) => p[0]))
+  const my = Math.max(...dots.map((p) => p[1]))
+  for (let y = 0; y < my; y++) {
+    let cx = []
+    for (let x = 0; x < mx; x++) {
+      if (dots.find((e) => e[0] === x && e[1] === y)) {
+        cx.push('#')
+      } else {
+        cx.push('.')
+      }
+    }
+    console.log(cx.join(''))
+  }
+}
+
+function fold(dots, foldY) {
+  let result = []
+  for (const [x, y] of dots) {
+    if (y < foldY) {
+      result.push([x, y])
+    } else {
+      const f = [x, y] //foldY - (y - foldY)]
+      result.push(f)
+    }
+  }
+
+  return result.reduce((a, p) => {
+    if (!a.find((e) => e[0] === p[0] && e[1] === p[1])) a.push(p)
+    return a
+  }, [])
+}
+
+function p1({ dots, folds }) {
+  viz(dots)
+  const d1 = fold(dots, folds[0][1])
+  console.log()
+  viz(d1)
 }
 
 console.log(p1(parse(input)))
