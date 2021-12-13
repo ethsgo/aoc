@@ -61,7 +61,7 @@ function viz(dots) {
   }
 }
 
-function fold(dots, f) {
+function fold1(dots, f) {
   let result = []
 
   let [fx, fy] = f
@@ -87,15 +87,16 @@ function fold(dots, f) {
   }, [])
 }
 
+const fold = (dots, folds) => folds.reduce((a, f) => fold1(a, f), dots)
+
 function p1({ dots, folds }) {
-  console.log(dots)
-  viz(dots)
-  for (const f of folds.slice(0, 2)) {
-    dots = fold(dots, f)
-    console.log()
-    viz(dots)
-  }
-  return dots.length
+  return fold(dots, folds.slice(0, 1)).length
 }
 
-console.log(p1(parse(input)))
+function p2({ dots, folds }) {
+  viz(fold(dots, folds))
+}
+
+const sheet = parse(input)
+console.log(p1(sheet))
+p2(sheet)
