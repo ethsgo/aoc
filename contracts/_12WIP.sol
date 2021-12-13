@@ -130,9 +130,9 @@ contract _12WIP is _12Parser, ArrayUtils {
             allLinks.push(link);
             // linkCount[linkId(link)]++;
 
-            links.push(Link(u, v));
+            // links.push(Link(u, v));
         }
-        return;
+        // return;
 
         console.log("all-links: --");
         for (uint256 i = 0; i < allLinks.length; i++) {
@@ -251,7 +251,7 @@ contract _12WIP is _12Parser, ArrayUtils {
         private
         returns (uint256)
     {
-        if (u == endId) return 1;
+        // if (u == endId) return 1;
 
         uint256 c = 0;
         uint256[] memory visitedU = cloneVisited(
@@ -265,7 +265,11 @@ contract _12WIP is _12Parser, ArrayUtils {
             if (u == endId) return 1;
             if (containsUint(visited, v)) continue;
 
-            c += dfs(v, visitedU);
+            uint256 m = linkCount[linkId(link)];
+            console.log(u, v, ">", m);
+            uint256 paths = dfs(v, visitedU);
+            console.log(u, v, "<", paths);
+            c += (paths * m);
         }
         return c;
     }
