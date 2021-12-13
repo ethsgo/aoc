@@ -61,6 +61,7 @@ contract _12Parser is Parser {
                     nextIdLarge += 2;
                 }
             }
+            console.log(s, id);
             seenIds[s] = id;
         }
     }
@@ -94,6 +95,7 @@ contract _12WIP is _12Parser, ArrayUtils {
     struct Link {
         uint256 a;
         uint256 b;
+        uint256 count;
     }
 
     Link[] private allLinks;
@@ -126,7 +128,7 @@ contract _12WIP is _12Parser, ArrayUtils {
                 u = uvs[i][1];
                 v = uvs[i][0];
             }
-            Link memory link = Link(u, v);
+            Link memory link = Link(u, v, 0);
             allLinks.push(link);
             // linkCount[linkId(link)]++;
 
@@ -176,7 +178,7 @@ contract _12WIP is _12Parser, ArrayUtils {
                 allLinks[j].b = type(uint256).max;
                 console.log("  deleting", w, v);
                 console.log("  adding", u, w);
-                allLinks.push(Link(u, w));
+                allLinks.push(Link(u, w, 0));
             }
         }
 
@@ -190,7 +192,7 @@ contract _12WIP is _12Parser, ArrayUtils {
                 u = v;
                 v = t;
             }
-            intermediateLinks.push(Link(u, v));
+            intermediateLinks.push(Link(u, v, 0));
         }
 
         console.log("intermediate links: --");
@@ -221,15 +223,17 @@ contract _12WIP is _12Parser, ArrayUtils {
                 }
             }
             linkCount[linkId(u, v)] = c;
-            links.push(Link(u, v));
+            links.push(Link(u, v, c));
         }
 
         console.log("links: --");
         for (uint256 i = 0; i < links.length; i++) {
             uint256 u = links[i].a;
             uint256 v = links[i].b;
-            console.log(u, v, linkCount[linkId(u, v)]);
+            uint256 c = links[i].count;
+            console.log(u, v, c, linkCount[linkId(u, v)]);
         }
+        console.log("--");
     }
 
     struct Route {
@@ -262,10 +266,10 @@ contract _12WIP is _12Parser, ArrayUtils {
             Link memory link = links[i];
             uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
-            if (u == endId) return 1;
+            uint256 m = linkCount[linkId(link)];
+            if (u == endId) return m;
             if (containsUint(visited, v)) continue;
 
-            uint256 m = linkCount[linkId(link)];
             console.log(u, v, ">", m);
             uint256 paths = dfs(v, visitedU);
             console.log(u, v, "<", paths);
