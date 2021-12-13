@@ -80,15 +80,16 @@ contract _13 is _13Parser {
         return (p1(sheet), p2(sheet));
     }
 
-    function p1(Sheet memory sheet) private returns (uint256) {
+    function p1(Sheet memory sheet) private pure returns (uint256) {
         uint256[2][] memory dots = fold(sheet.dots, sheet.folds[0]);
-        console.log(viz(dots));
         return dots.length;
     }
 
     function p2(Sheet memory sheet) private pure returns (string memory) {
-        // Prefix with a "\n" to have nicer printing in JS.
-        return string(bytes.concat("\n", bytes(viz(sheet.dots))));
+        uint256[2][] memory dots = sheet.dots;
+        for (uint256 i = 0; i < sheet.folds.length; i++)
+            dots = fold(dots, sheet.folds[i]);
+        return pretty(viz(dots));
     }
 
     function fold(uint256[2][] memory dots, uint256[2] memory f)
@@ -114,6 +115,11 @@ contract _13 is _13Parser {
             }
             folded = appendIfNew(folded, dot);
         }
+    }
+
+    /// Prefix with a "\n" to have nicer printing in JS.
+    function pretty(string memory s) private pure returns (string memory) {
+        return string(bytes.concat("\n", bytes(s)));
     }
 
     function viz(uint256[2][] memory dots)
