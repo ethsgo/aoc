@@ -40,10 +40,7 @@ contract _13Parser is Parser {
         // Find the first empty line. This lets us determine the size of the
         // arrays.
         uint256 dotCount = 0;
-        while (bytes(lines[dotCount]).length > 0) {
-            console.log(lines[dotCount]);
-            dotCount++;
-        }
+        while (bytes(lines[dotCount]).length > 0) dotCount++;
         uint256[2][] memory dots = new uint256[2][](dotCount);
         uint256[2][] memory folds = new uint256[2][](
             lines.length - dotCount - 1
@@ -80,6 +77,42 @@ contract _13 is _13Parser {
     }
 
     function p1(Sheet memory sheet) private returns (uint256) {
+        viz(sheet.dots);
         return sheet.dots.length;
+    }
+
+    function viz(uint256[2][] memory dots) private {
+        (uint256 mx, uint256 my) = mxmy(dots);
+        for (uint256 y = 0; y <= my; y++) {
+            bytes memory line = bytes.concat();
+            for (uint256 x = 0; x <= mx; x++) {
+                line = bytes.concat(
+                    line,
+                    bytes(contains(dots, [x, y]) ? "#" : ".")
+                );
+            }
+            console.log(string(line));
+        }
+    }
+
+    function contains(uint256[2][] memory dots, uint256[2] memory dot)
+        private
+        pure
+        returns (bool)
+    {
+        for (uint256 i = 0; i < dots.length; i++)
+            if (dots[i][0] == dot[0] && dots[i][1] == dot[1]) return true;
+        return false;
+    }
+
+    function mxmy(uint256[2][] memory dots)
+        private
+        pure
+        returns (uint256 mx, uint256 my)
+    {
+        for (uint256 i = 0; i < dots.length; i++) {
+            if (dots[i][0] > mx) mx = dots[i][0];
+            if (dots[i][1] > my) my = dots[i][1];
+        }
     }
 }
