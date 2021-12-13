@@ -48,9 +48,9 @@ function parse(input) {
 function viz(dots) {
   const mx = Math.max(...dots.map((p) => p[0]))
   const my = Math.max(...dots.map((p) => p[1]))
-  for (let y = 0; y < my; y++) {
+  for (let y = 0; y <= my; y++) {
     let cx = []
-    for (let x = 0; x < mx; x++) {
+    for (let x = 0; x <= mx; x++) {
       if (dots.find((e) => e[0] === x && e[1] === y)) {
         cx.push('#')
       } else {
@@ -61,14 +61,23 @@ function viz(dots) {
   }
 }
 
-function fold(dots, foldY) {
+function fold(dots, f) {
   let result = []
+
+  let [fx, fy] = f
   for (const [x, y] of dots) {
-    if (y < foldY) {
-      result.push([x, y])
+    if (fy > 0) {
+      if (y < fy) {
+        result.push([x, y])
+      } else {
+        result.push([x, fy - (y - fy)])
+      }
     } else {
-      const f = [x, y] //foldY - (y - foldY)]
-      result.push(f)
+      if (x < fx) {
+        result.push([x, y])
+      } else {
+        result.push([fx - (x - fx), y])
+      }
     }
   }
 
@@ -79,10 +88,14 @@ function fold(dots, foldY) {
 }
 
 function p1({ dots, folds }) {
+  console.log(dots)
   viz(dots)
-  const d1 = fold(dots, folds[0][1])
-  console.log()
-  viz(d1)
+  for (const f of folds.slice(0, 2)) {
+    dots = fold(dots, f)
+    console.log()
+    viz(dots)
+  }
+  return dots.length
 }
 
 console.log(p1(parse(input)))
