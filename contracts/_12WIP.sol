@@ -82,12 +82,8 @@ contract _12Parser is Parser {
 }
 
 /// WIP - Does not work right now
-/// Try to compress the graph by combining all edges that go via a large cave.
-/// References:
-/// - https://old.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho8pbd6/
-/// - https://www.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho7ojrt/
-///
-/// - https://github.com/rogierhans/AOC/blob/master/AOC2/Day12DFS.cs
+/// https://old.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho8pbd6/
+/// https://gist.github.com/zootos/148f1097027c66849b7bf1c02a711bf4
 contract _12WIP is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         compress(parse(input));
@@ -99,7 +95,7 @@ contract _12WIP is _12Parser, ArrayUtils {
     }
 
     function p2() private returns (uint256) {
-        return pathCount(true);
+        return 0; //pathCount(true);
     }
 
     struct Link {
@@ -112,89 +108,75 @@ contract _12WIP is _12Parser, ArrayUtils {
     Link[] private intermediateLinks;
     Link[] private links;
 
+    mapping(uint256 => uint256[]) edges;
+    mapping(uint256 => mapping(uint256 => uint256)) edges2;
+
+    function appendIfNew(uint256[] memory xs, uint256 x)
+        private
+        pure
+        returns (uint256[] memory copy)
+    {
+        if (containsUint(xs, x)) {
+            copy = new uint256[](xs.length);
+        } else {
+            copy = new uint256[](xs.length + 1);
+            copy[xs.length] = x;
+        }
+        for (uint256 i = 0; i < xs.length; i++) copy[i] = xs[i];
+    }
+
+    uint256[] private vertices;
+
     function compress(uint256[2][] memory uvs) private {
         // Because of the way the puzzle is structured, we know there are no
-        // edges between two large caves (otherwise there would be infinite loops).
+        // edges between two large caves (otherwise there would be infinite
+        // loops).
+
+        uint256[] memory keys = new uint256[](0);
         for (uint256 i = 0; i < uvs.length; i++) {
             uint256 u = uvs[i][0];
             uint256 v = uvs[i][1];
-            if (isSmallCave(v)) {
-                // Swap so that the large cave is always second.
-                u = uvs[i][1];
-                v = uvs[i][0];
-            }
-            Link memory link = Link(u, v, 0);
-            allLinks.push(link);
-            links.push(Link(u, v, 1));
-        }
-        return;
 
-        console.log("all-links: --");
-        for (uint256 i = 0; i < allLinks.length; i++) {
-            uint256 u = allLinks[i].a;
-            uint256 v = allLinks[i].b;
-            console.log(u, v);
-        }
-
-        console.log("compressing: --");
-        for (uint256 i = 0; i < allLinks.length; i++) {
-            uint256 u = allLinks[i].a;
-            uint256 v = allLinks[i].b;
-
-            if (isSmallCave(v)) {
-                // Both ends are small caves, continue.
-                intermediateLinks.push(Link(u, v, 0));
-                continue;
+            if (v != 0) {
+                edges[u].push(v);
             }
 
-            // Create a new edge representing a direct connection from u to all the
-            // small caves that v is connected to.
-            console.log("compress", u, v);
-            for (uint256 j = i + 1; j < allLinks.length; j++) {
-                if (allLinks[j].b != v) continue;
-                uint256 w = allLinks[j].a;
-                console.log("  adding", u, w);
-                intermediateLinks.push(Link(u, w, 0));
+            if (u != 0) {
+                edges[v].push(u);
             }
+
+            keys = appendIfNew(keys, u);
+            keys = appendIfNew(keys, v);
         }
 
-        console.log("intermediate links: --");
-        for (uint256 i = 0; i < intermediateLinks.length; i++) {
-            uint256 u = intermediateLinks[i].a;
-            uint256 v = intermediateLinks[i].b;
-            if (u > v) {
-                uint256 t = u;
-                u = v;
-                v = t;
-                intermediateLinks[i].a = u;
-                intermediateLinks[i].b = v;
-            }
-            console.log(u, v);
-        }
+        for (uint256 i = 0; i < keys.length; i++) {
+            uint256 u = keys[i];
+            if (!isSmallCave(u)) continue;
+            vertices.push(u);
 
-        console.log("compressing inters: --");
-        for (uint256 i = 0; i < intermediateLinks.length; i++) {
-            uint256 u = intermediateLinks[i].a;
-            uint256 v = intermediateLinks[i].b;
-            uint256 c = 1;
-            for (uint256 j = i + 1; j < intermediateLinks.length; j++) {
-                if (
-                    u == intermediateLinks[j].a && v == intermediateLinks[j].b
-                ) {
-                    c++;
+            uint256[] memory eu = edges[u];
+            for (uint256 j = 0; j < eu.length; j++) {
+                uint256 v = eu[j];
+                if (!isSmallCave(v)) {
+                    uint256[] memory ev = edges[v];
+                    for (uint256 k = 0; k < ev.length; k++) {
+                        uint256 w = ev[k];
+                        edges2[u][w]++;
+                    }
+                } else {
+                    edges2[u][v]++;
                 }
             }
-            links.push(Link(u, v, c));
         }
 
-        console.log("links: --");
-        for (uint256 i = 0; i < links.length; i++) {
-            uint256 u = links[i].a;
-            uint256 v = links[i].b;
-            uint256 c = links[i].count;
-            console.log(u, v, c);
-        }
-        console.log("--");
+        // for (uint256 i = 0; i < keys.length; i++) {
+        //     uint256 u = keys[i];
+        //     if (!isSmallCave(u)) continue;
+
+        //     uint256[] memory eu = edges[u];
+        //     for (uint256 j = 0; j < eu.length; j++) {
+
+        // }
     }
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
@@ -216,11 +198,15 @@ contract _12WIP is _12Parser, ArrayUtils {
         );
         path = cloneAndAppend(path, u);
 
-        for (uint256 i = 0; i < links.length; i++) {
-            Link memory link = links[i];
-            uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
+        for (uint256 i = 0; i < vertices.length; i++) {
+            // Link memory link = links[i];
+            uint256 v = vertices[i];
+            if (u == v) continue;
+            // uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
-            uint256 m = link.count;
+            // uint256 m = link.count;
+            uint256 m = edges2[u][v];
+            if (m == 0) continue;
             if (v == endId) {
                 printPath(cloneAndAppend(path, v), m);
                 c += m;
@@ -239,6 +225,7 @@ contract _12WIP is _12Parser, ArrayUtils {
     }
 
     function printPath(uint256[] memory path, uint256 count) private view {
+        return;
         bytes memory b;
         for (uint256 i = 0; i < path.length; i++) {
             b = bytes.concat(
