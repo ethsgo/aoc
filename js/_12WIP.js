@@ -53,62 +53,63 @@ const data = input.split('\n').map((s) => s.split('-'))
 // From https://gist.github.com/zootos/148f1097027c66849b7bf1c02a711bf4
 function solve(data) {
   let large = new Set()
-  let edges = {}
+  let edges = new Map()
 
   let k = 2
-  let z = {}
-  z['start'] = 0
-  z['end'] = 1
+  let z = new Map()
+  z.set('start', 0)
+  z.set('end', 1)
   for (let [u, v] of data) {
-    if (!(u in z)) {
-      if (u.toUpperCase() === u) large.add(u)
-      z[u] = k
+    if (!z.has(u)) {
+      if (u.toUpperCase() === u) large.add(k)
+      z.set(u, k)
       u = k
       k++
     } else {
-      u = z[u]
+      u = z.get(u)
     }
 
-    if (!(v in z)) {
-      if (v.toUpperCase() === v) large.add(v)
-      z[v] = k
+    if (!z.has(v)) {
+      if (v.toUpperCase() === v) large.add(k)
+      z.set(v, k)
       v = k
       k++
     } else {
-      v = z[v]
+      v = z.get(v)
     }
 
-    if (!(u in edges)) edges[u] = []
-    if (v !== 0) edges[u].push(v)
+    if (!edges.has(u)) edges.set(u, [])
+    if (v !== 0) edges.get(u).push(v)
 
-    if (!(v in edges)) edges[v] = []
-    if (u !== 0) edges[v].push(u)
+    if (!edges.has(v)) edges.set(v, [])
+    if (u !== 0) edges.get(v).push(u)
   }
 
-  let edges2 = {}
-  for (const u in edges) {
+  console.log(z)
+  // console.log(edges)
+  // console.log(large)
+
+  let edges2 = new Map()
+
+  for (const u of edges.keys()) {
     if (large.has(u)) continue
-    edges2[u] = {}
-    for (const v in edges[u]) {
+    edges2.set(u, new Map())
+    for (const v of edges.get(u)) {
       if (large.has(v)) {
-        for (const w in edges[v]) {
-          if (w in edges2[u]) {
-            edges2[u][w]++
-          } else {
-            edges2[u][w] = 1
-          }
+        for (const w of edges.get(v)) {
+          edges2.get(u).set(w, (edges2.get(u).get(w) ?? 0) + 1)
         }
       } else {
-        if (v in edges2[u]) {
-          edges2[u][v]++
-        } else {
-          edges2[u][v] = 1
+        for (const v of edges.get(u)) {
+          edges2.get(u).set(v, (edges2.get(u).get(v) ?? 0) + 1)
         }
       }
     }
   }
 
   edges = edges2
+
+  return edges
 
   total = 0
   s = [{ u: 0, k: 1, path: [], twice: false }]
