@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
 contract _13Parser is Parser {
     string private constant exampleInput =
@@ -35,11 +36,14 @@ contract _13Parser is Parser {
     function parse(string memory input) internal returns (Sheet memory) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
-        string[] memory lines = split(s, "\n");
+        string[] memory lines = split(s, "\n", true);
         // Find the first empty line. This lets us determine the size of the
         // arrays.
         uint256 dotCount = 0;
-        while (bytes(lines[dotCount]).length > 0) dotCount++;
+        while (bytes(lines[dotCount]).length > 0) {
+            console.log(lines[dotCount]);
+            dotCount++;
+        }
         uint256[2][] memory dots = new uint256[2][](dotCount);
         uint256[2][] memory folds = new uint256[2][](
             lines.length - dotCount - 1

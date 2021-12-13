@@ -76,22 +76,39 @@ contract Parser {
     ///
     /// Space and newline characters act as separators.
     function parseTokens(string memory s) internal returns (string[] memory) {
-        return split(s, "\n", " ");
+        return split(s, "\n", " ", false);
     }
 
-    /// Split the given string into an array of tokens using the given separator.
+    /// Split the given string into an array of tokens using the given
+    /// separator. Empty splits are ignored.
     function split(string memory s, bytes1 sep1)
         internal
         returns (string[] memory)
     {
-        return split(s, sep1, 0);
+        return split(s, sep1, 0, false);
     }
 
-    /// Split the given string into an array of tokens using the given separators.
+    /// Split the given string into an array of tokens using the given
+    /// separator.
+    ///
+    /// Retain empty splits if keepEmpty is true.
     function split(
         string memory s,
         bytes1 sep1,
-        bytes1 sep2
+        bool keepEmpty
+    ) internal returns (string[] memory) {
+        return split(s, sep1, 0, keepEmpty);
+    }
+
+    /// Split the given string into an array of tokens using the given
+    /// separators.
+    ///
+    /// Retain empty splits if keepEmpty is true.
+    function split(
+        string memory s,
+        bytes1 sep1,
+        bytes1 sep2,
+        bool keepEmpty
     ) internal returns (string[] memory) {
         // Strings are not indexable.
         bytes memory b = bytes(s);
@@ -110,6 +127,8 @@ contract Parser {
                 if (didSeeNonSeparator) {
                     tokens.push(string(token));
                     delete token;
+                } else if (keepEmpty) {
+                    tokens.push("");
                 }
                 didSeeNonSeparator = false;
             } else {
