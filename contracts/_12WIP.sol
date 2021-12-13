@@ -129,7 +129,10 @@ contract _12WIP is _12Parser, ArrayUtils {
             Link memory link = Link(u, v);
             allLinks.push(link);
             // linkCount[linkId(link)]++;
+
+            links.push(Link(u, v));
         }
+        return;
 
         console.log("all-links: --");
         for (uint256 i = 0; i < allLinks.length; i++) {
@@ -241,6 +244,33 @@ contract _12WIP is _12Parser, ArrayUtils {
     Route[] private frontier;
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
+        return dfs(startId, new uint256[](0));
+    }
+
+    function dfs(uint256 u, uint256[] memory visited)
+        private
+        returns (uint256)
+    {
+        if (u == endId) return 1;
+
+        uint256 c = 0;
+        uint256[] memory visitedU = cloneVisited(
+            visited,
+            isSmallCave(u) ? u : 0
+        );
+        for (uint256 i = 0; i < links.length; i++) {
+            Link memory link = links[i];
+            uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
+            if (v == startId) continue;
+            if (u == endId) return 1;
+            if (containsUint(visited, v)) continue;
+
+            c += dfs(v, visitedU);
+        }
+        return c;
+    }
+
+    function pathCount2(bool allowOneSmallCave) private returns (uint256 p) {
         console.log("---");
         // return 0;
         delete frontier;
