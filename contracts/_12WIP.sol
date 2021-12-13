@@ -94,6 +94,14 @@ contract _12WIP is _12Parser, ArrayUtils {
         return (p1(), p2());
     }
 
+    function p1() private returns (uint256) {
+        return pathCount(false);
+    }
+
+    function p2() private returns (uint256) {
+        return pathCount(true);
+    }
+
     struct Link {
         uint256 a;
         uint256 b;
@@ -103,21 +111,6 @@ contract _12WIP is _12Parser, ArrayUtils {
     Link[] private allLinks;
     Link[] private intermediateLinks;
     Link[] private links;
-
-    mapping(uint256 => uint256) linkCount;
-
-    /// Workaround since we cannot use the Link struct as a mapping key.
-    function linkId(Link memory link) private pure returns (uint256) {
-        return linkId(link.a, link.b);
-    }
-
-    function linkId(uint256 a, uint256 b) private pure returns (uint256) {
-        if (a < b) {
-            return a * 1000 + b;
-        } else {
-            return b * 1000 + a;
-        }
-    }
 
     function compress(uint256[2][] memory uvs) private {
         // Because of the way the puzzle is structured, we know there are no
@@ -132,7 +125,6 @@ contract _12WIP is _12Parser, ArrayUtils {
             }
             Link memory link = Link(u, v, 0);
             allLinks.push(link);
-            linkCount[linkId(link)]++;
             links.push(Link(u, v, 1));
         }
         return;
@@ -184,7 +176,6 @@ contract _12WIP is _12Parser, ArrayUtils {
         for (uint256 i = 0; i < intermediateLinks.length; i++) {
             uint256 u = intermediateLinks[i].a;
             uint256 v = intermediateLinks[i].b;
-            if (linkCount[linkId(u, v)] > 0) continue;
             uint256 c = 1;
             for (uint256 j = i + 1; j < intermediateLinks.length; j++) {
                 if (
@@ -193,7 +184,6 @@ contract _12WIP is _12Parser, ArrayUtils {
                     c++;
                 }
             }
-            linkCount[linkId(u, v)] = c;
             links.push(Link(u, v, c));
         }
 
@@ -202,23 +192,13 @@ contract _12WIP is _12Parser, ArrayUtils {
             uint256 u = links[i].a;
             uint256 v = links[i].b;
             uint256 c = links[i].count;
-            console.log(u, v, c, linkCount[linkId(u, v)]);
+            console.log(u, v, c);
         }
         console.log("--");
     }
 
-    struct Route {
-        uint256 u;
-        uint256[] visited;
-        uint256 multiplier;
-        uint256 sum;
-        uint256 c;
-        bool canSkip;
-    }
-
-    Route[] private frontier;
-
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
+        console.log("--");
         return
             dfs(startId, new uint256[](0), new uint256[](0), allowOneSmallCave);
     }
@@ -229,13 +209,10 @@ contract _12WIP is _12Parser, ArrayUtils {
         uint256[] memory path,
         bool allowOneSmallCave
     ) private returns (uint256) {
-        // if (u == endId) return 1;
-
         uint256 c = 0;
         uint256[] memory visitedU = cloneVisited(
             visited,
             isSmallCave(u) ? u : 0
-            //            u //(u) ? u : 0
         );
         path = cloneAndAppend(path, u);
 
@@ -243,32 +220,25 @@ contract _12WIP is _12Parser, ArrayUtils {
             Link memory link = links[i];
             uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
-            uint256 m = linkCount[linkId(link)];
+            uint256 m = link.count;
             if (v == endId) {
-                // printVisited(visited);
-                // console.log(m);
                 printPath(cloneAndAppend(path, v), m);
                 c += m;
                 continue;
             }
 
-            uint256 paths;
-            // console.log(u, v, ">", m);
             if (containsUint(visited, v)) {
                 if (allowOneSmallCave) {
-                    paths = dfs(v, visitedU, path, false);
+                    c += m * dfs(v, visitedU, path, false);
                 }
             } else {
-                paths = dfs(v, visitedU, path, allowOneSmallCave);
+                c += m * dfs(v, visitedU, path, allowOneSmallCave);
             }
-            // console.log(u, v, "<", paths);
-
-            c += (paths * m);
         }
         return c;
     }
 
-    function printPath(uint256[] memory path, uint256 count) private {
+    function printPath(uint256[] memory path, uint256 count) private view {
         bytes memory b;
         for (uint256 i = 0; i < path.length; i++) {
             b = bytes.concat(
@@ -278,89 +248,6 @@ contract _12WIP is _12Parser, ArrayUtils {
             );
         }
         console.log(count, string(b));
-    }
-
-    function printVisited(uint256[] memory visited) private {
-        bytes memory b;
-        for (uint256 i = 0; i < visited.length; i++) {
-            b = bytes.concat(
-                b,
-                bytes1("-"),
-                bytes1(uint8(bytes1("0")) + uint8(visited[i]))
-            );
-        }
-        console.log(string(b));
-    }
-
-    function pathCount2(bool allowOneSmallCave) private returns (uint256 p) {
-        console.log("---");
-        // return 0;
-        delete frontier;
-
-        frontier.push(
-            Route({
-                u: startId,
-                visited: new uint256[](0),
-                multiplier: 1,
-                sum: 0,
-                c: 0,
-                canSkip: allowOneSmallCave
-            })
-        );
-
-        while (frontier.length > 0) {
-            Route memory route = frontier[frontier.length - 1];
-            frontier.pop();
-
-            uint256 u = route.u;
-
-            uint256[] memory visited = cloneVisited(
-                route.visited,
-                isSmallCave(u) ? u : 0
-            );
-
-            for (uint256 i = 0; i < links.length; i++) {
-                (uint256 v, bool exists) = nextEdge(links[i], route.u);
-                if (!exists) continue;
-                if (v == startId) {
-                    continue;
-                }
-                uint256 m = linkCount[linkId(u, v)] * route.multiplier;
-                uint256 c = linkCount[linkId(u, v)] * (route.c + 1);
-                console.log("edge", u, v, linkCount[linkId(u, v)]);
-                if (v == endId) {
-                    // console.log("p +=", (route.sum + 1) * m);
-                    console.log("p +=", c);
-                    p += c; //((route.sum + 1) * m);
-                    continue;
-                }
-                if (containsUint(visited, v)) {
-                    if (route.canSkip) {
-                        frontier.push(
-                            Route({
-                                u: v,
-                                visited: visited,
-                                multiplier: m,
-                                sum: 0,
-                                c: c,
-                                canSkip: false
-                            })
-                        );
-                    }
-                } else {
-                    frontier.push(
-                        Route({
-                            u: v,
-                            visited: visited,
-                            multiplier: m,
-                            sum: route.sum + m,
-                            c: c,
-                            canSkip: route.canSkip
-                        })
-                    );
-                }
-            }
-        }
     }
 
     function cloneAndAppend(uint256[] memory xs, uint256 x)
@@ -391,23 +278,5 @@ contract _12WIP is _12Parser, ArrayUtils {
         for (uint256 i = 0; i < n; i++) {
             copy[i] = visited[i];
         }
-    }
-
-    function nextEdge(Link storage link, uint256 u)
-        private
-        view
-        returns (uint256, bool)
-    {
-        if (link.a == u) return (link.b, true);
-        if (link.b == u) return (link.a, true);
-        return (0, false);
-    }
-
-    function p1() private returns (uint256) {
-        return pathCount(false);
-    }
-
-    function p2() private returns (uint256) {
-        return 0; //pathCount(true);
     }
 }
