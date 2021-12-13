@@ -80,9 +80,11 @@ contract _13 is _13Parser {
         return (p1(sheet), p2(sheet));
     }
 
-    function p1(Sheet memory sheet) private pure returns (uint256) {
-        uint256[2][] memory dots = fold(sheet.dots, sheet.folds[0]);
-        return dots.length;
+    function p1(Sheet memory sheet) private returns (uint256) {
+        foldInPlace(sheet.dots, sheet.folds[0]);
+        uint256[2][] memory uniq = unique(sheet.dots);
+        console.log(viz(uniq));
+        return uniq.length;
     }
 
     function p2(Sheet memory sheet) private pure returns (string memory) {
@@ -114,6 +116,23 @@ contract _13 is _13Parser {
                 }
             }
             folded = appendIfNew(folded, dot);
+        }
+    }
+
+    function foldInPlace(uint256[2][] memory dots, uint256[2] memory f)
+        private
+        pure
+    {
+        for (uint256 i = 0; i < dots.length; i++) {
+            if (f[0] == 0) {
+                if (dots[i][1] < f[1]) {} else {
+                    dots[i] = [dots[i][0], f[1] - (dots[i][1] - f[1])];
+                }
+            } else {
+                if (dots[i][0] < f[0]) {} else {
+                    dots[i] = [f[0] - (dots[i][0] - f[0]), dots[i][1]];
+                }
+            }
         }
     }
 
@@ -152,6 +171,31 @@ contract _13 is _13Parser {
             copy[dots.length] = dot;
         }
         for (uint256 i = 0; i < dots.length; i++) copy[i] = dots[i];
+    }
+
+    function equal(uint256[2] memory p1, uint256[2] memory p2)
+        private
+        pure
+        returns (bool)
+    {
+        return p1[0] == p2[0] && p1[1] == p2[1];
+    }
+
+    function unique(uint256[2][] memory xs)
+        private
+        pure
+        returns (uint256[2][] memory copy)
+    {
+        uint256 end = xs.length;
+        for (uint256 i = 0; i <= end; i++) {
+            for (uint256 j = i + 1; j <= end; j++) {
+                if (equal(xs[i], xs[j])) {
+                    xs[j] = xs[end--];
+                }
+            }
+        }
+        copy = new uint256[2][](end);
+        for (uint256 i = 0; i < end; i++) copy[i] = xs[i];
     }
 
     function contains(uint256[2][] memory dots, uint256[2] memory dot)
