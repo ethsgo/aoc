@@ -72,27 +72,38 @@ contract _13Parser is Parser {
 }
 
 contract _13 is _13Parser {
-    function main(string calldata input) external returns (uint256, uint256) {
-        return (p1(parse(input)), 0);
+    function main(string calldata input)
+        external
+        returns (uint256, string memory)
+    {
+        Sheet memory sheet = parse(input);
+        return (p1(sheet), p2(sheet));
     }
 
-    function p1(Sheet memory sheet) private returns (uint256) {
-        viz(sheet.dots);
+    function p1(Sheet memory sheet) private pure returns (uint256) {
         return sheet.dots.length;
     }
 
-    function viz(uint256[2][] memory dots) private {
+    function p2(Sheet memory sheet) private pure returns (string memory) {
+        // Prefix with a "\n" to have nicer printing in JS.
+        return string(bytes.concat("\n", bytes(viz(sheet.dots))));
+    }
+
+    function viz(uint256[2][] memory dots)
+        private
+        pure
+        returns (string memory)
+    {
+        bytes memory lines;
         (uint256 mx, uint256 my) = mxmy(dots);
         for (uint256 y = 0; y <= my; y++) {
-            bytes memory line = bytes.concat();
+            bytes memory s;
             for (uint256 x = 0; x <= mx; x++) {
-                line = bytes.concat(
-                    line,
-                    bytes(contains(dots, [x, y]) ? "#" : ".")
-                );
+                s = bytes.concat(s, bytes(contains(dots, [x, y]) ? "#" : "."));
             }
-            console.log(string(line));
+            lines = bytes.concat(lines, s, bytes("\n"));
         }
+        return string(lines);
     }
 
     function contains(uint256[2][] memory dots, uint256[2] memory dot)
