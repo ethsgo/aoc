@@ -48,6 +48,7 @@ function parse(input) {
 function viz(dots) {
   const mx = Math.max(...dots.map((p) => p[0]))
   const my = Math.max(...dots.map((p) => p[1]))
+  const cy = []
   for (let y = 0; y <= my; y++) {
     let cx = []
     for (let x = 0; x <= mx; x++) {
@@ -57,29 +58,29 @@ function viz(dots) {
         cx.push('.')
       }
     }
-    console.log(cx.join(''))
+    cy.push(cx.join(''))
   }
+  return cy.join('\n')
 }
 
 function fold1(dots, f) {
-  let result = []
-
   let [fx, fy] = f
-  for (const [x, y] of dots) {
+
+  let result = dots.map(([x, y]) => {
     if (fy > 0) {
       if (y < fy) {
-        result.push([x, y])
+        return [x, y]
       } else {
-        result.push([x, fy - (y - fy)])
+        return [x, fy - (y - fy)]
       }
     } else {
       if (x < fx) {
-        result.push([x, y])
+        return [x, y]
       } else {
-        result.push([fx - (x - fx), y])
+        return [fx - (x - fx), y]
       }
     }
-  }
+  })
 
   return result.reduce((a, p) => {
     if (!a.find((e) => e[0] === p[0] && e[1] === p[1])) a.push(p)
@@ -89,14 +90,9 @@ function fold1(dots, f) {
 
 const fold = (dots, folds) => folds.reduce((a, f) => fold1(a, f), dots)
 
-function p1({ dots, folds }) {
-  return fold(dots, folds.slice(0, 1)).length
-}
-
-function p2({ dots, folds }) {
-  viz(fold(dots, folds))
-}
+const p1 = ({ dots, folds }) => fold(dots, folds.slice(0, 1)).length
+const p2 = ({ dots, folds }) => viz(fold(dots, folds))
 
 const sheet = parse(input)
 console.log(p1(sheet))
-p2(sheet)
+console.log(p2(sheet))
