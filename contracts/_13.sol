@@ -80,13 +80,40 @@ contract _13 is _13Parser {
         return (p1(sheet), p2(sheet));
     }
 
-    function p1(Sheet memory sheet) private pure returns (uint256) {
-        return sheet.dots.length;
+    function p1(Sheet memory sheet) private returns (uint256) {
+        uint256[2][] memory dots = fold(sheet.dots, sheet.folds[0]);
+        console.log(viz(dots));
+        return dots.length;
     }
 
     function p2(Sheet memory sheet) private pure returns (string memory) {
         // Prefix with a "\n" to have nicer printing in JS.
         return string(bytes.concat("\n", bytes(viz(sheet.dots))));
+    }
+
+    function fold(uint256[2][] memory dots, uint256[2] memory f)
+        private
+        pure
+        returns (uint256[2][] memory folded)
+    {
+        folded = new uint256[2][](0);
+        for (uint256 i = 0; i < dots.length; i++) {
+            uint256[2] memory dot;
+            if (f[0] == 0) {
+                if (dots[i][1] < f[1]) {
+                    dot = dots[i];
+                } else {
+                    dot = [dots[i][0], f[1] - (dots[i][1] - f[1])];
+                }
+            } else {
+                if (dots[i][0] < f[0]) {
+                    dot = dots[i];
+                } else {
+                    dot = [f[0] - (dots[i][0] - f[0]), dots[i][1]];
+                }
+            }
+            folded = appendIfNew(folded, dot);
+        }
     }
 
     function viz(uint256[2][] memory dots)
@@ -104,6 +131,21 @@ contract _13 is _13Parser {
             lines = bytes.concat(lines, s, bytes("\n"));
         }
         return string(lines);
+    }
+
+    /// Return a copy of dots, appending the given dot if it is not already there.
+    function appendIfNew(uint256[2][] memory dots, uint256[2] memory dot)
+        private
+        pure
+        returns (uint256[2][] memory copy)
+    {
+        if (contains(dots, dot)) {
+            copy = new uint256[2][](dots.length);
+        } else {
+            copy = new uint256[2][](dots.length + 1);
+            copy[dots.length] = dot;
+        }
+        for (uint256 i = 0; i < dots.length; i++) copy[i] = dots[i];
     }
 
     function contains(uint256[2][] memory dots, uint256[2] memory dot)
