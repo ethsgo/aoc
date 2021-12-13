@@ -95,7 +95,7 @@ contract _12WIP is _12Parser, ArrayUtils {
     }
 
     function p2() private returns (uint256) {
-        return 0; //pathCount(true);
+        return pathCount(true);
     }
 
     struct Link {
