@@ -238,7 +238,10 @@ contract _12WIP is _12Parser, ArrayUtils {
             uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
             uint256 m = linkCount[linkId(link)];
-            if (u == endId) return m;
+            if (v == endId) {
+                c += m;
+                continue;
+            }
             if (containsUint(visited, v)) continue;
 
             console.log(u, v, ">", m);
