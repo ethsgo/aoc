@@ -70,7 +70,7 @@ contract _12Parser is Parser {
         internal
         returns (uint256[2][] memory links)
     {
-        string memory s = bytes(input).length == 0 ? exampleInputM : input;
+        string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory tokens = parseTokens(s);
         links = new uint256[2][](tokens.length);
@@ -219,19 +219,20 @@ contract _12WIP is _12Parser, ArrayUtils {
     Route[] private frontier;
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
-        return dfs(startId, new uint256[](0));
+        return dfs(startId, new uint256[](0), allowOneSmallCave);
     }
 
-    function dfs(uint256 u, uint256[] memory visited)
-        private
-        returns (uint256)
-    {
+    function dfs(
+        uint256 u,
+        uint256[] memory visited,
+        bool allowOneSmallCave
+    ) private returns (uint256) {
         // if (u == endId) return 1;
 
         uint256 c = 0;
         uint256[] memory visitedU = cloneVisited(
             visited,
-            isSmallCave(u) ? u : 0
+            u //(u) ? u : 0
         );
         for (uint256 i = 0; i < links.length; i++) {
             Link memory link = links[i];
@@ -242,10 +243,16 @@ contract _12WIP is _12Parser, ArrayUtils {
                 c += m;
                 continue;
             }
-            if (containsUint(visited, v)) continue;
 
+            uint256 paths;
             console.log(u, v, ">", m);
-            uint256 paths = dfs(v, visitedU);
+            if (containsUint(visited, v)) {
+                if (allowOneSmallCave) {
+                    paths = dfs(v, visited, false);
+                }
+            } else {
+                paths = dfs(v, visitedU, allowOneSmallCave);
+            }
             console.log(u, v, "<", paths);
             c += (paths * m);
         }
@@ -351,10 +358,10 @@ contract _12WIP is _12Parser, ArrayUtils {
     }
 
     function p1() private returns (uint256) {
-        return pathCount(false);
+        return 0; //pathCount(false);
     }
 
-    function p2() private pure returns (uint256) {
-        return 0; //pathCount(true);
+    function p2() private returns (uint256) {
+        return pathCount(true);
     }
 }
