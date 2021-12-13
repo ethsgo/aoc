@@ -132,10 +132,10 @@ contract _12WIP is _12Parser, ArrayUtils {
             }
             Link memory link = Link(u, v, 0);
             allLinks.push(link);
-            // linkCount[linkId(link)]++;
-            // links.push(Link(u, v));
+            linkCount[linkId(link)]++;
+            links.push(Link(u, v, 1));
         }
-        // return;
+        return;
 
         console.log("all-links: --");
         for (uint256 i = 0; i < allLinks.length; i++) {
@@ -219,12 +219,14 @@ contract _12WIP is _12Parser, ArrayUtils {
     Route[] private frontier;
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
-        return dfs(startId, new uint256[](0), allowOneSmallCave);
+        return
+            dfs(startId, new uint256[](0), new uint256[](0), allowOneSmallCave);
     }
 
     function dfs(
         uint256 u,
         uint256[] memory visited,
+        uint256[] memory path,
         bool allowOneSmallCave
     ) private returns (uint256) {
         // if (u == endId) return 1;
@@ -232,31 +234,62 @@ contract _12WIP is _12Parser, ArrayUtils {
         uint256 c = 0;
         uint256[] memory visitedU = cloneVisited(
             visited,
-            u //(u) ? u : 0
+            isSmallCave(u) ? u : 0
+            //            u //(u) ? u : 0
         );
+        path = cloneAndAppend(path, u);
+
         for (uint256 i = 0; i < links.length; i++) {
             Link memory link = links[i];
             uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
             uint256 m = linkCount[linkId(link)];
             if (v == endId) {
+                // printVisited(visited);
+                // console.log(m);
+                printPath(cloneAndAppend(path, v), m);
                 c += m;
                 continue;
             }
 
             uint256 paths;
-            console.log(u, v, ">", m);
+            // console.log(u, v, ">", m);
             if (containsUint(visited, v)) {
                 if (allowOneSmallCave) {
-                    paths = dfs(v, visited, false);
+                    paths = dfs(v, visitedU, path, false);
                 }
             } else {
-                paths = dfs(v, visitedU, allowOneSmallCave);
+                paths = dfs(v, visitedU, path, allowOneSmallCave);
             }
-            console.log(u, v, "<", paths);
+            // console.log(u, v, "<", paths);
+
             c += (paths * m);
         }
         return c;
+    }
+
+    function printPath(uint256[] memory path, uint256 count) private {
+        bytes memory b;
+        for (uint256 i = 0; i < path.length; i++) {
+            b = bytes.concat(
+                b,
+                bytes1(uint8(bytes1("0")) + uint8(path[i])),
+                " "
+            );
+        }
+        console.log(count, string(b));
+    }
+
+    function printVisited(uint256[] memory visited) private {
+        bytes memory b;
+        for (uint256 i = 0; i < visited.length; i++) {
+            b = bytes.concat(
+                b,
+                bytes1("-"),
+                bytes1(uint8(bytes1("0")) + uint8(visited[i]))
+            );
+        }
+        console.log(string(b));
     }
 
     function pathCount2(bool allowOneSmallCave) private returns (uint256 p) {
@@ -330,6 +363,19 @@ contract _12WIP is _12Parser, ArrayUtils {
         }
     }
 
+    function cloneAndAppend(uint256[] memory xs, uint256 x)
+        private
+        pure
+        returns (uint256[] memory copy)
+    {
+        uint256 n = xs.length;
+        copy = new uint256[](n + 1);
+        copy[n] = x;
+        for (uint256 i = 0; i < n; i++) {
+            copy[i] = xs[i];
+        }
+    }
+
     function cloneVisited(uint256[] memory visited, uint256 optionalSuffix)
         private
         pure
@@ -358,10 +404,10 @@ contract _12WIP is _12Parser, ArrayUtils {
     }
 
     function p1() private returns (uint256) {
-        return 0; //pathCount(false);
+        return pathCount(false);
     }
 
     function p2() private returns (uint256) {
-        return pathCount(true);
+        return 0; //pathCount(true);
     }
 }
