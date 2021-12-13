@@ -27,11 +27,46 @@ contract _13Parser is Parser {
         "fold along y=7\n"
         "fold along x=5\n";
 
-    function parse(string memory input) internal returns (string[] memory r) {
+    struct Sheet {
+        uint256[2][] dots;
+        uint256[2][] folds;
+    }
+
+    function parse(string memory input) internal returns (Sheet memory) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory lines = split(s, "\n");
-        return lines;
+        // Find the first empty line. This lets us determine the size of the
+        // arrays.
+        uint256 dotCount = 0;
+        while (bytes(lines[dotCount]).length > 0) dotCount++;
+        uint256[2][] memory dots = new uint256[2][](dotCount);
+        uint256[2][] memory folds = new uint256[2][](
+            lines.length - dotCount - 1
+        );
+
+        bool parseDot = true;
+        for (uint256 i = 0; i < lines.length; i++) {
+            if (bytes(lines[i]).length == 0) {
+                parseDot = false;
+                continue;
+            }
+            if (parseDot) {
+                string[] memory ab = split(lines[i], ",");
+                dots[i] = [parseUint(ab[0]), parseUint(ab[1])];
+            } else {
+                string[] memory ab = split(lines[i], "=");
+                bytes memory b = bytes(ab[0]);
+                uint256 v = parseUint(ab[1]);
+                if (b[b.length - 1] == "y") {
+                    folds[i - dotCount - 1] = [0, v];
+                } else {
+                    folds[i - dotCount - 1] = [v, 0];
+                }
+            }
+        }
+
+        return Sheet({dots: dots, folds: folds});
     }
 }
 
@@ -40,7 +75,7 @@ contract _13 is _13Parser {
         return (p1(parse(input)), 0);
     }
 
-    function p1(string[] memory lines) private returns (uint256) {
-        return lines.length;
+    function p1(Sheet memory sheet) private returns (uint256) {
+        return sheet.dots.length;
     }
 }
