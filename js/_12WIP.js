@@ -125,7 +125,12 @@ function solve(data) {
         continue
       }
       if (twice || !z.includes(v)) {
-        s.push({ u: v, i: i + 1, k: k * edges.get(u).get(v), twice })
+        s.push({
+          u: v,
+          i: i + 1,
+          k: k * edges.get(u).get(v),
+          twice: twice && !z.includes(v),
+        })
       }
     }
   }

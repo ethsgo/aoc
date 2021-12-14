@@ -98,16 +98,6 @@ contract _12WIP is _12Parser, ArrayUtils {
         return pathCount(true);
     }
 
-    struct Link {
-        uint256 a;
-        uint256 b;
-        uint256 count;
-    }
-
-    Link[] private allLinks;
-    Link[] private intermediateLinks;
-    Link[] private links;
-
     mapping(uint256 => uint256[]) edges;
     mapping(uint256 => mapping(uint256 => uint256)) edges2;
 
@@ -154,57 +144,39 @@ contract _12WIP is _12Parser, ArrayUtils {
                 }
             }
         }
-
-        // for (uint256 i = 0; i < keys.length; i++) {
-        //     uint256 u = keys[i];
-        //     if (!isSmallCave(u)) continue;
-
-        //     uint256[] memory eu = edges[u];
-        //     for (uint256 j = 0; j < eu.length; j++) {
-
-        // }
     }
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
         console.log("--");
-        return
-            dfs(startId, new uint256[](0), new uint256[](0), allowOneSmallCave);
+        return dfs(startId, new uint256[](0), allowOneSmallCave);
     }
 
     function dfs(
         uint256 u,
         uint256[] memory visited,
-        uint256[] memory path,
         bool allowOneSmallCave
     ) private returns (uint256) {
         uint256 c = 0;
-        uint256[] memory visitedU = cloneVisited(
-            visited,
-            isSmallCave(u) ? u : 0
-        );
-        path = cloneAndAppend(path, u);
+        visited = cloneAndAppend(visited, u);
 
         for (uint256 i = 0; i < vertices.length; i++) {
-            // Link memory link = links[i];
             uint256 v = vertices[i];
             if (u == v) continue;
-            // uint256 v = link.a == u ? link.b : link.b == u ? link.a : 0;
             if (v == startId) continue;
-            // uint256 m = link.count;
             uint256 m = edges2[u][v];
             if (m == 0) continue;
             if (v == endId) {
-                printPath(cloneAndAppend(path, v), m);
+                printPath(cloneAndAppend(visited, v), m);
                 c += m;
                 continue;
             }
 
             if (containsUint(visited, v)) {
                 if (allowOneSmallCave) {
-                    c += m * dfs(v, visitedU, path, false);
+                    c += (m * dfs(v, visited, false));
                 }
             } else {
-                c += m * dfs(v, visitedU, path, allowOneSmallCave);
+                c += (m * dfs(v, visited, allowOneSmallCave));
             }
         }
         return c;
@@ -233,23 +205,6 @@ contract _12WIP is _12Parser, ArrayUtils {
         copy[n] = x;
         for (uint256 i = 0; i < n; i++) {
             copy[i] = xs[i];
-        }
-    }
-
-    function cloneVisited(uint256[] memory visited, uint256 optionalSuffix)
-        private
-        pure
-        returns (uint256[] memory copy)
-    {
-        uint256 n = visited.length;
-        if (optionalSuffix == 0) {
-            copy = new uint256[](n);
-        } else {
-            copy = new uint256[](n + 1);
-            copy[n] = optionalSuffix;
-        }
-        for (uint256 i = 0; i < n; i++) {
-            copy[i] = visited[i];
         }
     }
 }
