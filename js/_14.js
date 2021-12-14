@@ -25,32 +25,33 @@ if (!process.stdin.isTTY) {
 
 function parse(input) {
   const lines = input.split('\n')
-  const template = lines[0]
+  const template = lines[0].split('')
   const rulesKV = lines.slice(2, lines.length).map((s) => s.split(/[ ->]+/))
   const rules = new Map(rulesKV)
   return { template, rules }
 }
 
 function p1({ template, rules }) {
-  return step({ s: template, rules })
+  return step(template, rules)
 }
 
-function step({ s, rules }) {
+function step(t, rules) {
   let next = []
   let residue
-  for (let i = 0; i < s.length - 1; i++) {
-    const key = [s[i], s[i + 1]].join('')
+  for (let i = 0; i < t.length - 1; i++) {
+    const key = [t[i], t[i + 1]].join('')
     const value = rules.get(key)
+    next.push(t[i])
     if (value) {
-      next.push([s[i], value].join(''))
-      residue = s[i + 1]
+      next.push(value)
+      residue = t[i + 1]
     } else {
-      next.push(key)
+      next.push(t[i + 1])
       residue = null
     }
   }
   if (residue) next.push(residue)
-  return next.join('')
+  return next
 }
 
 console.log(p1(parse(input)))
