@@ -46,4 +46,13 @@ contract ArrayUtils {
         for (uint256 i = 0; i < xs.length; i++) copy[i] = xs[i];
         return copy;
     }
+
+    function copyUints(uint256[] memory xs)
+        internal
+        pure
+        returns (uint256[] memory copy)
+    {
+        copy = new uint256[](xs.length);
+        for (uint256 i = 0; i < xs.length; i++) copy[i] = xs[i];
+    }
 }

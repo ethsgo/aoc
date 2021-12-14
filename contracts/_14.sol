@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "./ArrayUtils.sol";
 import "hardhat/console.sol";
 
 contract _14Parser is Parser {
@@ -96,18 +97,19 @@ contract _14Parser is Parser {
     }
 }
 
-contract _14 is _14Parser {
+contract _14 is _14Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         Puzzle memory puzzle = parse(input);
-        return (p1(puzzle), 0);
+        return (p1(puzzle), p2(puzzle));
     }
 
-    function p1(Puzzle memory puzzle) private returns (uint256) {
-        return sim(puzzle, 1);
+    function p1(Puzzle memory puzzle) private view returns (uint256) {
+        return sim(puzzle, 10);
     }
 
-    // mapping(bytes1 => uint256) private c1;
-    // mapping(bytes2 => uint256) private c2;
+    function p2(Puzzle memory puzzle) private view returns (uint256) {
+        return sim(puzzle, 40);
+    }
 
     function elementId(Puzzle memory puzzle, bytes1 e)
         private
@@ -128,6 +130,7 @@ contract _14 is _14Parser {
 
     function sim(Puzzle memory puzzle, uint256 steps)
         private
+        view
         returns (uint256)
     {
         bytes1[] memory t = puzzle.template;
@@ -146,9 +149,10 @@ contract _14 is _14Parser {
         }
 
         for (; steps > 0; steps--) {
+            uint256[] memory c2copy = copyUints(c2);
             for (uint256 i = 0; i < pairs.length; i++) {
                 bytes2 p = pairs[i];
-                uint256 v = c2[pairId(puzzle, p)];
+                uint256 v = c2copy[pairId(puzzle, p)];
                 if (v == 0) continue;
                 bytes1 n = rules[p];
                 c1[elementId(puzzle, n)] += v;
