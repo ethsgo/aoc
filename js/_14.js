@@ -37,8 +37,7 @@ const count = (xs) =>
 const pairs = (xs) =>
   [...Array(xs.length - 1)].map((_, i) => [xs[i], xs[i + 1]].join(''))
 
-const incr = (m, k) => m.set(k, (m.get(k) ?? 0) + 1)
-const decr = (m, k) => m.set(k, m.get(k) - 1)
+const incr = (m, k, d) => m.set(k, (m.get(k) ?? 0) + d)
 const minMax = (xs) => [Math.min(...xs), Math.max(...xs)]
 
 function sim({ template, rules }, steps) {
@@ -48,12 +47,10 @@ function sim({ template, rules }, steps) {
     const kv = [...c2.entries()].filter((e) => e[1] > 0)
     for (let [p, v] of kv) {
       const n = rules.get(p)
-      for (; v > 0; v--) {
-        incr(c1, n)
-        decr(c2, p)
-        incr(c2, [p[0], n].join(''))
-        incr(c2, [n, p[1]].join(''))
-      }
+      incr(c1, n, v)
+      incr(c2, p, -v)
+      incr(c2, [p[0], n].join(''), v)
+      incr(c2, [n, p[1]].join(''), v)
     }
   }
   const [min, max] = minMax([...c1.values()])
@@ -61,7 +58,7 @@ function sim({ template, rules }, steps) {
 }
 
 const p1 = (puzzle) => sim(puzzle, 10)
-const p2 = (puzzle) => sim(puzzle, 10)
+const p2 = (puzzle) => sim(puzzle, 40)
 
 const puzzle = parse(input)
 console.log(p1(puzzle))
