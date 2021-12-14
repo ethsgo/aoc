@@ -31,8 +31,8 @@ function parse(input) {
   return { template, rules }
 }
 
-function p1({ template, rules }) {
-  return step(template, rules)
+function sim({ template, rules }, steps) {
+  return [...Array(steps)].reduce((a, _) => step(a, rules), template)
 }
 
 function step(t, rules) {
@@ -54,4 +54,18 @@ function step(t, rules) {
   return next
 }
 
-console.log(p1(parse(input)))
+const count = (xs) =>
+  xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map())
+
+const minMax = (xs) => [Math.min(...xs), Math.max(...xs)]
+
+function diff(polymer) {
+  const counts = count(polymer)
+  const [min, max] = minMax([...counts.values()])
+  return max - min
+}
+
+const p1 = (puzzle) => diff(sim(puzzle, 10))
+
+const puzzle = parse(input)
+console.log(p1(puzzle))
