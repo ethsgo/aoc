@@ -111,20 +111,6 @@ contract _12WIP is _12Parser, ArrayUtils {
     mapping(uint256 => uint256[]) edges;
     mapping(uint256 => mapping(uint256 => uint256)) edges2;
 
-    function appendIfNew(uint256[] memory xs, uint256 x)
-        private
-        pure
-        returns (uint256[] memory copy)
-    {
-        if (containsUint(xs, x)) {
-            copy = new uint256[](xs.length);
-        } else {
-            copy = new uint256[](xs.length + 1);
-            copy[xs.length] = x;
-        }
-        for (uint256 i = 0; i < xs.length; i++) copy[i] = xs[i];
-    }
-
     uint256[] private vertices;
 
     function compress(uint256[2][] memory uvs) private {

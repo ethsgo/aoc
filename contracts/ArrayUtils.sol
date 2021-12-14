@@ -22,14 +22,28 @@ contract ArrayUtils {
         return false;
     }
 
-    function containsUint(uint256[] memory strings, uint256 u)
+    function containsUint(uint256[] memory xs, uint256 u)
         internal
         pure
         returns (bool)
     {
-        for (uint256 i = 0; i < strings.length; i++) {
-            if (strings[i] == u) return true;
+        for (uint256 i = 0; i < xs.length; i++) {
+            if (xs[i] == u) return true;
         }
         return false;
+    }
+
+    function appendIfNew(uint256[] memory xs, uint256 x)
+        internal
+        pure
+        returns (uint256[] memory)
+    {
+        if (containsUint(xs, x)) {
+            return xs;
+        }
+        uint256[] memory copy = new uint256[](xs.length + 1);
+        copy[xs.length] = x;
+        for (uint256 i = 0; i < xs.length; i++) copy[i] = xs[i];
+        return copy;
     }
 }
