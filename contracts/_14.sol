@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./Parser.sol";
 import "hardhat/console.sol";
 
-contract _13Parser is Parser {
+contract _14Parser is Parser {
     string private constant exampleInput =
         "NNCB\n"
         "\n"
@@ -72,19 +72,48 @@ contract _13Parser is Parser {
         return e1 * 100 + e2;
     }
 
-    function rule(uint256 e1, uint256 e2) private view returns (uint256) {
+    function rule(uint256 e1, uint256 e2) internal view returns (uint256) {
         return rules[ruleKey(e1, e2)];
     }
 }
 
-contract _13 is _13Parser {
+contract _14 is _14Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[] memory template = parse(input);
         return (p1(template), 0);
     }
 
-    function p1(uint256[] memory template) private pure returns (uint256) {
-        return 0;
+    function p1(uint256[] memory template) private returns (uint256) {
+        return sim(template, 0).length;
+    }
+
+    // We cannot resize in memory arrays, so use this as a scratch pad.
+    uint256[] private next;
+
+    function step(uint256[] memory t) private returns (uint256[] memory) {
+        delete next;
+        uint256 residue;
+        for (uint256 i = 0; i < t.length - 1; i++) {
+            next.push(t[i]);
+            uint256 v = rule(t[i], t[i + 1]);
+            if (v > 0) {
+                next.push(v);
+                residue = t[i + 1];
+            } else {
+                next.push(t[i + 1]);
+                residue = 0;
+            }
+        }
+        if (residue > 0) next.push(residue);
+        return next;
+    }
+
+    function sim(uint256[] memory template, uint256 steps)
+        private
+        returns (uint256[] memory polymer)
+    {
+        polymer = template;
+        for (; steps > 0; steps--) polymer = step(polymer);
     }
 
     function minMax(uint256[] memory xs)
