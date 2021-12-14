@@ -103,45 +103,65 @@ contract _14 is _14Parser {
     }
 
     function p1(Puzzle memory puzzle) private returns (uint256) {
-        return sim(puzzle, 0);
+        return sim(puzzle, 1);
     }
 
-    mapping(bytes1 => uint256) private c1;
-    mapping(bytes2 => uint256) private c2;
+    // mapping(bytes1 => uint256) private c1;
+    // mapping(bytes2 => uint256) private c2;
+
+    function elementId(Puzzle memory puzzle, bytes1 e)
+        private
+        pure
+        returns (uint256 i)
+    {
+        for (; i < puzzle.elements.length; i++)
+            if (e == puzzle.elements[i]) break;
+    }
+
+    function pairId(Puzzle memory puzzle, bytes2 p)
+        private
+        pure
+        returns (uint256 i)
+    {
+        for (; i < puzzle.pairs.length; i++) if (p == puzzle.pairs[i]) break;
+    }
 
     function sim(Puzzle memory puzzle, uint256 steps)
         private
         returns (uint256)
     {
         bytes1[] memory t = puzzle.template;
+        bytes1[] memory elements = puzzle.elements;
+        bytes2[] memory pairs = puzzle.pairs;
+
+        uint256[] memory c1 = new uint256[](elements.length);
         for (uint256 i = 0; i < t.length; i++) {
-            c1[t[i]]++;
-        }
-        for (uint256 i = 0; i < t.length - 1; i++) {
-            c2[pair(t[i], t[i + 1])]++;
+            c1[elementId(puzzle, t[i])]++;
         }
 
-        bytes2[] memory pairs = puzzle.pairs;
+        uint256[] memory c2 = new uint256[](pairs.length);
+        for (uint256 i = 0; i < t.length - 1; i++) {
+            bytes2 p = pair(t[i], t[i + 1]);
+            c2[pairId(puzzle, p)]++;
+        }
+
         for (; steps > 0; steps--) {
-            console.log("step", steps);
             for (uint256 i = 0; i < pairs.length; i++) {
                 bytes2 p = pairs[i];
-                uint256 v = c2[p];
+                uint256 v = c2[pairId(puzzle, p)];
                 if (v == 0) continue;
                 bytes1 n = rules[p];
-                console.log(string(bytes.concat(p, " ", n)), v);
-                c1[n] += v;
-                c2[p] -= v;
-                c2[pair(p[0], n)] += v;
-                c2[pair(n, p[1])] += v;
+                c1[elementId(puzzle, n)] += v;
+                c2[pairId(puzzle, p)] -= v;
+                c2[pairId(puzzle, pair(p[0], n))] += v;
+                c2[pairId(puzzle, pair(n, p[1]))] += v;
             }
         }
 
-        bytes1[] memory c1Keys = puzzle.elements;
         uint256 min = type(uint256).max;
         uint256 max = 0;
-        for (uint256 i = 0; i < c1Keys.length; i++) {
-            uint256 c = c1[c1Keys[i]];
+        for (uint256 i = 0; i < elements.length; i++) {
+            uint256 c = c1[elementId(puzzle, elements[i])];
             if (c > 0) {
                 if (c < min) min = c;
                 if (c > max) max = c;
