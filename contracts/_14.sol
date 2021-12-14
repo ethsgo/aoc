@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
-import "hardhat/console.sol";
 
 contract _14Parser is Parser {
     string private constant exampleInput =
@@ -25,9 +24,9 @@ contract _14Parser is Parser {
         "CC -> N\n"
         "CN -> C\n";
 
-    mapping(bytes1 => uint256) knownIds;
-    uint256 nextId;
-    mapping(uint256 => uint256) rules;
+    mapping(bytes1 => uint256) private knownIds;
+    uint256 private nextId;
+    mapping(uint256 => uint256) private rules;
 
     /// Parse the rules into the `rules` mapping, and return the template.
     ///
@@ -75,6 +74,10 @@ contract _14Parser is Parser {
     function rule(uint256 e1, uint256 e2) internal view returns (uint256) {
         return rules[ruleKey(e1, e2)];
     }
+
+    function maxId() internal view returns (uint256) {
+        return nextId;
+    }
 }
 
 contract _14 is _14Parser {
@@ -84,7 +87,7 @@ contract _14 is _14Parser {
     }
 
     function p1(uint256[] memory template) private returns (uint256) {
-        return sim(template, 0).length;
+        return diff(sim(template, 0));
     }
 
     // We cannot resize in memory arrays, so use this as a scratch pad.
@@ -116,16 +119,15 @@ contract _14 is _14Parser {
         for (; steps > 0; steps--) polymer = step(polymer);
     }
 
-    function minMax(uint256[] memory xs)
-        private
-        pure
-        returns (uint256 min, uint256 max)
-    {
-        min = xs[0];
-        max = xs[0];
-        for (uint256 i = 1; i < xs.length; i++) {
-            if (xs[i] < min) min = xs[i];
-            if (xs[i] > max) max = xs[i];
+    function diff(uint256[] memory polymer) private view returns (uint256) {
+        uint256[] memory counts = new uint256[](maxId() + 1);
+        uint256 min = type(uint256).max;
+        uint256 max = 0;
+        for (uint256 i = 0; i < polymer.length; i++) {
+            uint256 c = ++counts[polymer[i]];
+            if (c < min) min = c;
+            if (c > max) max = c;
         }
+        return max - min;
     }
 }
