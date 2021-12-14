@@ -144,6 +144,40 @@ contract _12WIP is _12Parser, ArrayUtils {
                 }
             }
         }
+
+        console.log("edges");
+        for (uint256 i = 0; i < keys.length; i++) {
+            uint256 u = keys[i];
+            uint256[] memory eu = edges[u];
+            bytes memory b = bytes.concat(bytes("=> "));
+            for (uint256 j = 0; j < eu.length; j++) {
+                b = bytes.concat(
+                    b,
+                    bytes1(uint8(bytes1("0")) + uint8(eu[j])),
+                    ", "
+                );
+            }
+            console.log(u, string(b));
+        }
+
+        console.log("edges2");
+        for (uint256 i = 0; i < vertices.length; i++) {
+            uint256 u = vertices[i];
+            bytes memory b = bytes.concat(bytes("=> "));
+            for (uint256 j = 0; j < vertices.length; j++) {
+                uint256 v = vertices[j];
+                if (u == v) continue;
+                if (edges2[u][v] == 0) continue;
+                b = bytes.concat(
+                    b,
+                    bytes1(uint8(bytes1("0")) + uint8(v)),
+                    "/",
+                    bytes1(uint8(bytes1("0")) + uint8(edges2[u][v])),
+                    ", "
+                );
+            }
+            console.log(u, string(b));
+        }
     }
 
     function pathCount(bool allowOneSmallCave) private returns (uint256 p) {

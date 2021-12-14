@@ -22,13 +22,13 @@ contract ArrayUtils {
         return false;
     }
 
-    function containsUint(uint256[] memory xs, uint256 u)
+    function containsUint(uint256[] memory xs, uint256 x)
         internal
         pure
         returns (bool)
     {
         for (uint256 i = 0; i < xs.length; i++) {
-            if (xs[i] == u) return true;
+            if (xs[i] == x) return true;
         }
         return false;
     }
