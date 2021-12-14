@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
 contract _14Parser is Parser {
     string private constant exampleInput =
@@ -25,6 +26,7 @@ contract _14Parser is Parser {
         "CN -> C\n";
 
     mapping(bytes1 => uint256) private knownIds;
+    mapping(uint256 => bytes1) private idChar;
     uint256 private nextId;
     mapping(uint256 => uint256) private rules;
 
@@ -62,6 +64,7 @@ contract _14Parser is Parser {
         if (r == 0) {
             knownIds[s] = ++nextId;
             r = nextId;
+            idChar[r] = s;
         }
     }
 
@@ -78,6 +81,18 @@ contract _14Parser is Parser {
     function maxId() internal view returns (uint256) {
         return nextId;
     }
+
+    function polymerString(uint256[] memory polymer)
+        internal
+        view
+        returns (string memory)
+    {
+        bytes memory b;
+        for (uint256 i = 0; i < polymer.length; i++) {
+            b = bytes.concat(b, idChar[polymer[i]]);
+        }
+        return string(b);
+    }
 }
 
 contract _14 is _14Parser {
@@ -87,7 +102,7 @@ contract _14 is _14Parser {
     }
 
     function p1(uint256[] memory template) private returns (uint256) {
-        return diff(sim(template, 0));
+        return diff(sim(template, 3));
     }
 
     // We cannot resize in memory arrays, so use this as a scratch pad.
@@ -120,6 +135,8 @@ contract _14 is _14Parser {
     }
 
     function diff(uint256[] memory polymer) private view returns (uint256) {
+        console.log(polymerString(polymer));
+
         uint256[] memory counts = new uint256[](maxId() + 1);
         uint256 min = type(uint256).max;
         uint256 max = 0;
