@@ -77,24 +77,27 @@ function sim2({ template, rules }, steps) {
   let c2 = count(pairs(template))
   for (; steps > 0; steps--) {
     // console.log('step', steps)
-    const keys = [...c2.entries()].filter((e) => e[1] > 0).map((e) => e[0])
-    for (const p of keys) {
+    const kv = [...c2.entries()].filter((e) => e[1] > 0)
+    for (let [p, v] of kv) {
       const n = rules.get(p)
-      incr(c1, n)
-      decr(c2, p)
-      incr(c2, [p[0], n].join(''))
-      incr(c2, [n, p[1]].join(''))
-      // console.log(n)
+      // console.log(p, n)
+      for (; v > 0; v--) {
+        incr(c1, n)
+        decr(c2, p)
+        incr(c2, [p[0], n].join(''))
+        incr(c2, [n, p[1]].join(''))
+      }
     }
     // console.log(c2)
   }
-  console.log(c1)
+  // console.log(c1)
   const [min, max] = minMax([...c1.values()])
   return max - min
 }
 
-const p1 = (puzzle) => diff(sim(puzzle, 3))
-const p2 = (puzzle) => sim2(puzzle, 3)
+console.log('--')
+const p1 = (puzzle) => diff(sim(puzzle, 4))
+const p2 = (puzzle) => sim2(puzzle, 4)
 
 const puzzle = parse(input)
 console.log(p1(puzzle))
