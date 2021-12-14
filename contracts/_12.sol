@@ -145,23 +145,19 @@ contract _12 is _12Parser, ArrayUtils {
     }
 
     function pathCount(bool skipOnce) private returns (uint256 p) {
-        return dfs(startId, new uint256[](0), skipOnce);
+        delete visited;
+        visited = new uint256[](vertices.length * 2);
+        return dfs(startId, 0, skipOnce);
     }
 
-    mapping(bytes32 => uint256) private dfsCache;
+    uint256[] private visited;
 
     function dfs(
         uint256 u,
-        uint256[] memory visited,
+        uint256 iv,
         bool skipOnce
-    ) private returns (uint256) {
-        bytes32 key = keccak256(abi.encodePacked(u, visited, skipOnce));
-        uint256 memo = dfsCache[key];
-        if (memo > 0) return memo;
-
-        uint256 c = 0;
-        visited = cloneAndAppend(visited, u);
-
+    ) private returns (uint256 c) {
+        visited[iv] = u;
         for (uint256 i = 0; i < vertices.length; i++) {
             uint256 v = vertices[i];
             if (v == startId) continue;
@@ -173,17 +169,14 @@ contract _12 is _12Parser, ArrayUtils {
                 continue;
             }
 
-            if (containsUint(visited, v)) {
+            if (containsUintUpto(visited, iv, v)) {
                 if (skipOnce) {
-                    c += (m * dfs(v, visited, false));
+                    c += (m * dfs(v, iv + 1, false));
                 }
             } else {
-                c += (m * dfs(v, visited, skipOnce));
+                c += (m * dfs(v, iv + 1, skipOnce));
             }
         }
-
-        dfsCache[key] = c;
-        return c;
     }
 
     function cloneAndAppend(uint256[] memory xs, uint256 x)
@@ -197,5 +190,16 @@ contract _12 is _12Parser, ArrayUtils {
         for (uint256 i = 0; i < n; i++) {
             copy[i] = xs[i];
         }
+    }
+
+    function containsUintUpto(
+        uint256[] memory xs,
+        uint256 maxI,
+        uint256 x
+    ) internal pure returns (bool) {
+        for (uint256 i = 0; i <= maxI; i++) {
+            if (xs[i] == x) return true;
+        }
+        return false;
     }
 }
