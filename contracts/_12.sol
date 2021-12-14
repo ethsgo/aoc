@@ -148,11 +148,17 @@ contract _12 is _12Parser, ArrayUtils {
         return dfs(startId, new uint256[](0), skipOnce);
     }
 
+    mapping(bytes32 => uint256) private dfsCache;
+
     function dfs(
         uint256 u,
         uint256[] memory visited,
         bool skipOnce
     ) private returns (uint256) {
+        bytes32 key = keccak256(abi.encodePacked(u, visited, skipOnce));
+        uint256 memo = dfsCache[key];
+        if (memo > 0) return memo;
+
         uint256 c = 0;
         visited = cloneAndAppend(visited, u);
 
@@ -175,6 +181,8 @@ contract _12 is _12Parser, ArrayUtils {
                 c += (m * dfs(v, visited, skipOnce));
             }
         }
+
+        dfsCache[key] = c;
         return c;
     }
 
