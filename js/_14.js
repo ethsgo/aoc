@@ -31,56 +31,23 @@ function parse(input) {
   return { template, rules }
 }
 
-function sim({ template, rules }, steps) {
-  return [...Array(steps)].reduce((a, _) => step(a, rules), template)
-}
-
-function step(t, rules) {
-  let next = []
-  let residue
-  for (let i = 0; i < t.length - 1; i++) {
-    const key = [t[i], t[i + 1]].join('')
-    const value = rules.get(key)
-    next.push(t[i])
-    if (value) {
-      next.push(value)
-      residue = t[i + 1]
-    } else {
-      next.push(t[i + 1])
-      residue = null
-    }
-  }
-  if (residue) next.push(residue)
-  return next
-}
-
 const count = (xs) =>
   xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map())
-
-const minMax = (xs) => [Math.min(...xs), Math.max(...xs)]
-
-function diff(polymer) {
-  const counts = count(polymer)
-  console.log(counts)
-  const [min, max] = minMax([...counts.values()])
-  return max - min
-}
 
 const pairs = (xs) =>
   [...Array(xs.length - 1)].map((_, i) => [xs[i], xs[i + 1]].join(''))
 
 const incr = (m, k) => m.set(k, (m.get(k) ?? 0) + 1)
 const decr = (m, k) => m.set(k, m.get(k) - 1)
+const minMax = (xs) => [Math.min(...xs), Math.max(...xs)]
 
-function sim2({ template, rules }, steps) {
+function sim({ template, rules }, steps) {
   let c1 = count(template)
   let c2 = count(pairs(template))
   for (; steps > 0; steps--) {
-    // console.log('step', steps)
     const kv = [...c2.entries()].filter((e) => e[1] > 0)
     for (let [p, v] of kv) {
       const n = rules.get(p)
-      // console.log(p, n)
       for (; v > 0; v--) {
         incr(c1, n)
         decr(c2, p)
@@ -88,16 +55,13 @@ function sim2({ template, rules }, steps) {
         incr(c2, [n, p[1]].join(''))
       }
     }
-    // console.log(c2)
   }
-  // console.log(c1)
   const [min, max] = minMax([...c1.values()])
   return max - min
 }
 
-console.log('--')
-const p1 = (puzzle) => diff(sim(puzzle, 4))
-const p2 = (puzzle) => sim2(puzzle, 4)
+const p1 = (puzzle) => sim(puzzle, 10)
+const p2 = (puzzle) => sim(puzzle, 10)
 
 const puzzle = parse(input)
 console.log(p1(puzzle))
