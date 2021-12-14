@@ -84,6 +84,7 @@ contract _12Parser is Parser {
 /// WIP - Does not work right now
 /// https://old.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho8pbd6/
 /// https://gist.github.com/zootos/148f1097027c66849b7bf1c02a711bf4
+/// https://old.reddit.com/r/adventofcode/comments/rfhtc9/2021_day_12_part_2_cany_logic_for_part_2_isnt/
 contract _12WIP is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         compress(parse(input));
@@ -166,7 +167,7 @@ contract _12WIP is _12Parser, ArrayUtils {
             bytes memory b = bytes.concat(bytes("=> "));
             for (uint256 j = 0; j < vertices.length; j++) {
                 uint256 v = vertices[j];
-                if (u == v) continue;
+                // if (u == v) continue;
                 if (edges2[u][v] == 0) continue;
                 b = bytes.concat(
                     b,
@@ -195,7 +196,7 @@ contract _12WIP is _12Parser, ArrayUtils {
 
         for (uint256 i = 0; i < vertices.length; i++) {
             uint256 v = vertices[i];
-            if (u == v) continue;
+            // if (u == v) continue;
             if (v == startId) continue;
             uint256 m = edges2[u][v];
             if (m == 0) continue;
