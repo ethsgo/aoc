@@ -85,7 +85,7 @@ function solve(data) {
     if (u !== 0) edges.get(v).push(u)
   }
 
-  console.log(z)
+  // console.log(z)
   // console.log(edges)
   // console.log(large)
 
@@ -109,24 +109,23 @@ function solve(data) {
 
   edges = edges2
 
-  return edges
-
+  let path = [...Array(2 * edges.size)].map(() => 0)
   total = 0
-  s = [{ u: 0, k: 1, path: [], twice: false }]
+  s = [{ u: 0, k: 1, i: 0, twice: false }]
 
-  console.log(edges)
   while (s.length > 0) {
-    let { u, k, path, twice } = s.pop()
-    console.log({ u, k, path, twice })
-    path = [...path, u]
-    for (const v in edges[u]) {
-      console.log(v)
+    let { u, i, k, twice } = s.pop()
+    // console.log({ u, k, path, twice })
+    // path = [...path, u]
+    path[i] = u
+    const z = [...path.slice(0, i + 1)]
+    for (const v of (edges.get(u) ?? new Map()).keys()) {
       if (v === 1) {
-        total += k * edges[u][v]
+        total += k * edges.get(u).get(v)
         continue
       }
-      if (twice || !path.includes(v)) {
-        s.push({ u: v, k: k * edges[u][v], path, twice })
+      if (twice || !z.includes(v)) {
+        s.push({ u: v, i: i + 1, k: k * edges.get(u).get(v), twice })
       }
     }
   }
