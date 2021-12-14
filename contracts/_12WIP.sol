@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 import "./ArrayUtils.sol";
-import "hardhat/console.sol";
 
 contract _12Parser is Parser {
     string private constant exampleInput =
@@ -30,8 +29,8 @@ contract _12Parser is Parser {
     uint256 internal constant startId = 0;
     uint256 internal constant endId = 1;
 
-    function isSmallCave(uint256 id) internal pure returns (bool) {
-        return id % 2 == 0 || id == endId;
+    function isLargeCave(uint256 id) internal pure returns (bool) {
+        return id % 2 == 1 && id != endId;
     }
 
     function hasLowerCase(string memory s) private pure returns (bool) {
@@ -61,7 +60,6 @@ contract _12Parser is Parser {
                     nextIdLarge += 2;
                 }
             }
-            console.log(s, id);
             seenIds[s] = id;
         }
     }
@@ -81,13 +79,9 @@ contract _12Parser is Parser {
     }
 }
 
-/// WIP - Does not work right now
-/// https://old.reddit.com/r/adventofcode/comments/rehj2r/2021_day_12_solutions/ho8pbd6/
-/// https://gist.github.com/zootos/148f1097027c66849b7bf1c02a711bf4
-/// https://old.reddit.com/r/adventofcode/comments/rfhtc9/2021_day_12_part_2_cany_logic_for_part_2_isnt/
 contract _12WIP is _12Parser, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
-        compress(parse(input));
+        compact(parse(input));
         return (p1(), p2());
     }
 
@@ -99,28 +93,29 @@ contract _12WIP is _12Parser, ArrayUtils {
         return pathCount(true);
     }
 
-    mapping(uint256 => uint256[]) edges;
-    mapping(uint256 => mapping(uint256 => uint256)) edges2;
+    mapping(uint256 => uint256[]) private edges;
+    mapping(uint256 => mapping(uint256 => uint256)) private edgeCount;
 
     uint256[] private vertices;
 
-    function compress(uint256[2][] memory uvs) private {
-        // Because of the way the puzzle is structured, we know there are no
-        // edges between two large caves (otherwise there would be infinite
-        // loops).
-
+    // Reduce the size of the graph by replacing all large caves by direct edges
+    // between the small caves that connect via the cave (we know there are no
+    // edges between two large caves otherwise there would be infinite
+    // loops in the normal puzzle solution too).
+    //
+    // This can result in multiple edges between the same pair of small caves,
+    // so we additionally keep count of the number of edges between two caves.
+    //
+    // Note that there can be valid self edges in this compacted graph.
+    function compact(uint256[2][] memory links) private {
         uint256[] memory keys = new uint256[](0);
-        for (uint256 i = 0; i < uvs.length; i++) {
-            uint256 u = uvs[i][0];
-            uint256 v = uvs[i][1];
 
-            if (v != 0) {
-                edges[u].push(v);
-            }
+        for (uint256 i = 0; i < links.length; i++) {
+            uint256 u = links[i][0];
+            uint256 v = links[i][1];
 
-            if (u != 0) {
-                edges[v].push(u);
-            }
+            if (v != 0) edges[u].push(v);
+            if (u != 0) edges[v].push(u);
 
             keys = appendIfNew(keys, u);
             keys = appendIfNew(keys, v);
@@ -128,106 +123,59 @@ contract _12WIP is _12Parser, ArrayUtils {
 
         for (uint256 i = 0; i < keys.length; i++) {
             uint256 u = keys[i];
-            if (!isSmallCave(u)) continue;
+
+            if (isLargeCave(u)) continue;
+
             vertices.push(u);
 
             uint256[] memory eu = edges[u];
             for (uint256 j = 0; j < eu.length; j++) {
                 uint256 v = eu[j];
-                if (!isSmallCave(v)) {
+                if (isLargeCave(v)) {
                     uint256[] memory ev = edges[v];
                     for (uint256 k = 0; k < ev.length; k++) {
                         uint256 w = ev[k];
-                        edges2[u][w]++;
+                        edgeCount[u][w]++;
                     }
                 } else {
-                    edges2[u][v]++;
+                    edgeCount[u][v]++;
                 }
             }
         }
-
-        console.log("edges");
-        for (uint256 i = 0; i < keys.length; i++) {
-            uint256 u = keys[i];
-            uint256[] memory eu = edges[u];
-            bytes memory b = bytes.concat(bytes("=> "));
-            for (uint256 j = 0; j < eu.length; j++) {
-                b = bytes.concat(
-                    b,
-                    bytes1(uint8(bytes1("0")) + uint8(eu[j])),
-                    ", "
-                );
-            }
-            console.log(u, string(b));
-        }
-
-        console.log("edges2");
-        for (uint256 i = 0; i < vertices.length; i++) {
-            uint256 u = vertices[i];
-            bytes memory b = bytes.concat(bytes("=> "));
-            for (uint256 j = 0; j < vertices.length; j++) {
-                uint256 v = vertices[j];
-                // if (u == v) continue;
-                if (edges2[u][v] == 0) continue;
-                b = bytes.concat(
-                    b,
-                    bytes1(uint8(bytes1("0")) + uint8(v)),
-                    "/",
-                    bytes1(uint8(bytes1("0")) + uint8(edges2[u][v])),
-                    ", "
-                );
-            }
-            console.log(u, string(b));
-        }
     }
 
-    function pathCount(bool allowOneSmallCave) private returns (uint256 p) {
-        console.log("--");
-        return dfs(startId, new uint256[](0), allowOneSmallCave);
+    function pathCount(bool skipOnce) private returns (uint256 p) {
+        return dfs(startId, new uint256[](0), skipOnce);
     }
 
     function dfs(
         uint256 u,
         uint256[] memory visited,
-        bool allowOneSmallCave
+        bool skipOnce
     ) private returns (uint256) {
         uint256 c = 0;
         visited = cloneAndAppend(visited, u);
 
         for (uint256 i = 0; i < vertices.length; i++) {
             uint256 v = vertices[i];
-            // if (u == v) continue;
             if (v == startId) continue;
-            uint256 m = edges2[u][v];
+            uint256 m = edgeCount[u][v];
             if (m == 0) continue;
+
             if (v == endId) {
-                printPath(cloneAndAppend(visited, v), m);
                 c += m;
                 continue;
             }
 
             if (containsUint(visited, v)) {
-                if (allowOneSmallCave) {
+                if (skipOnce) {
                     c += (m * dfs(v, visited, false));
                 }
             } else {
-                c += (m * dfs(v, visited, allowOneSmallCave));
+                c += (m * dfs(v, visited, skipOnce));
             }
         }
         return c;
-    }
-
-    function printPath(uint256[] memory path, uint256 count) private view {
-        return;
-        bytes memory b;
-        for (uint256 i = 0; i < path.length; i++) {
-            b = bytes.concat(
-                b,
-                bytes1(uint8(bytes1("0")) + uint8(path[i])),
-                " "
-            );
-        }
-        console.log(count, string(b));
     }
 
     function cloneAndAppend(uint256[] memory xs, uint256 x)
