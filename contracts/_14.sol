@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
 
 contract _14Parser is Parser {
     string private constant exampleInput =
@@ -66,7 +67,7 @@ contract _14Parser is Parser {
     }
 
     function pair(bytes1 a, bytes1 b) internal pure returns (bytes2) {
-        return (bytes2(a) << 8) | b;
+        return a | (bytes2(b) >> 8);
     }
 
     function containsB1(bytes1[] memory xs, bytes1 u)
@@ -102,7 +103,7 @@ contract _14 is _14Parser {
     }
 
     function p1(Puzzle memory puzzle) private returns (uint256) {
-        return sim(puzzle, 10);
+        return sim(puzzle, 0);
     }
 
     mapping(bytes1 => uint256) private c1;
@@ -122,15 +123,17 @@ contract _14 is _14Parser {
 
         bytes2[] memory pairs = puzzle.pairs;
         for (; steps > 0; steps--) {
+            console.log("step", steps);
             for (uint256 i = 0; i < pairs.length; i++) {
                 bytes2 p = pairs[i];
                 uint256 v = c2[p];
                 if (v == 0) continue;
                 bytes1 n = rules[p];
+                console.log(string(bytes.concat(p, " ", n)), v);
                 c1[n] += v;
                 c2[p] -= v;
-                c2[pair(bytes1(p >> 8), n)] += v;
-                c2[pair(n, bytes1(p))] += v;
+                c2[pair(p[0], n)] += v;
+                c2[pair(n, p[1])] += v;
             }
         }
 
