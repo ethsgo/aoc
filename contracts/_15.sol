@@ -37,6 +37,12 @@ contract _15Parser is Parser {
 
 contract Heap {
     uint256[3][] internal heap;
+    uint private lastIndex;
+
+    function heapReset(uint256 maxSize) internal {
+        delete heap;
+        heap = new uint256[3][](maxSize);
+    }
 
     function lessThan(uint256 i, uint256 j) private view returns (bool) {
         return heap[i][2] < heap[j][2];
@@ -71,13 +77,13 @@ contract Heap {
     function heapPopMin() internal returns (uint256[3] memory r) {
         r = heap[0];
         uint256 i = 0;
-        heap[0] = heap[heap.length - 1];
-        heap.pop();
-        while (i < heap.length) {
+        heap[0] = heap[lastIndex];
+        lastIndex--;
+        while (i <= lastIndex) {
             uint256 li = lix(i);
-            if (li >= heap.length) break;
+            if (li > lastIndex) break;
             uint256 ri = rix(i);
-            if (ri >= heap.length || lessThan(li, ri)) {
+            if (ri > lastIndex || lessThan(li, ri)) {
                 if (lessThan(i, li)) break;
                 swap(i, li);
                 i = li;
@@ -91,14 +97,14 @@ contract Heap {
 
     function heapInsertOrUpdate(uint256[3] memory e) internal {
         uint256 i = 0;
-        while (i < heap.length) {
+        while (i <= lastIndex) {
             if (equal(e, heap[i])) {
                 heap[i] = e;
                 break;
             }
             i++;
         }
-        if (i == heap.length) heap.push(e);
+        if (i > lastIndex) heap[++lastIndex] = e;
         while (i > 0 && lessThan(i, pix(i))) {
             swap(i, pix(i));
             i = pix(i);
@@ -127,10 +133,10 @@ contract _15 is _15Parser, Heap {
     }
 
     function shortestPath(uint256[][] memory g) private returns (uint256) {
-        delete heap;
-
         uint256 ymax = g.length - 1;
         uint256 xmax = g[ymax].length - 1;
+
+        heapReset(ymax * xmax);
 
         uint256[3][] memory nx = neighbours(g, 0, 0, 0);
         for (uint256 i = 0; i < nx.length; i++) heapInsertOrUpdate(nx[i]);
