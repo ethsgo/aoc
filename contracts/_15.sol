@@ -44,6 +44,7 @@ contract Heap {
     function heapReset(uint256 maxSize) internal {
         delete heap;
         heap = new uint256[3][](maxSize);
+        lastIndex = 0;
     }
 
     function lessThan(uint256 i, uint256 j) private view returns (bool) {
@@ -126,6 +127,7 @@ contract _15 is _15Parser, Heap, ArrayUtils {
 
     function expand(uint256[][] memory g)
         private
+        pure
         returns (uint256[][] memory r)
     {
         uint256 nrow = g.length;
@@ -148,17 +150,6 @@ contract _15 is _15Parser, Heap, ArrayUtils {
                 }
             }
         }
-
-        for (uint256 i = 0; i < r.length; i++) {
-            bytes memory s;
-            for (uint256 j = 0; j < r[i].length; j++) {
-                s = bytes.concat(
-                    s,
-                    bytes1(uint8(bytes1("0")) + uint8(r[i][j]))
-                );
-            }
-            console.log(string(s));
-        }
     }
 
     function inc(uint256 w, uint256 i) private pure returns (uint256) {
@@ -169,15 +160,11 @@ contract _15 is _15Parser, Heap, ArrayUtils {
     function shortestPath(uint256[][] memory g) private returns (uint256) {
         uint256 ymax = g.length - 1;
         uint256 xmax = g[ymax].length - 1;
-        uint256 vkm = g.length;
-        return 0;
+
         heapReset(g.length * xmax);
 
         uint256 nend = neighbours(g, 0, 0, 0);
-        for (uint256 i = 0; i < nend; i++) heapInsertOrUpdate(nx[i]);
-
-        uint256[] memory visited = new uint256[]((ymax + 1) * (xmax + 1));
-        visited[vkm * 0 + 0] = 1;
+        for (uint256 i = 0; i < nend; i++) heapInsertOrUpdate(nbr[i]);
 
         while (true) {
             uint256[3] memory m = heapPopMin();
@@ -185,10 +172,11 @@ contract _15 is _15Parser, Heap, ArrayUtils {
 
             nend = neighbours(g, m[0], m[1], m[2]);
             for (uint256 i = 0; i < nend; i++) {
-                uint256 vk = vkm * nx[i][0] + nx[i][1];
-                if (visited[vk] == 0) {
-                    heapInsertOrUpdate(nx[i]);
-                    visited[vk] = 1;
+                uint256 nx = nbr[i][0];
+                uint256 ny = nbr[i][1];
+                if (g[ny][nx] > 0) {
+                    heapInsertOrUpdate(nbr[i]);
+                    g[ny][nx] = 0;
                 }
             }
         }
@@ -203,11 +191,11 @@ contract _15 is _15Parser, Heap, ArrayUtils {
         uint256 w
     ) private returns (uint256 end) {
         end = 0;
-        if (x > 0) nx[end++] = [x - 1, y, w + g[y][x - 1]];
-        if (x < g[y].length - 1) nx[end++] = [x + 1, y, w + g[y][x + 1]];
-        if (y > 0) nx[end++] = [x, y - 1, w + g[y - 1][x]];
-        if (y < g.length - 1) nx[end++] = [x, y + 1, w + g[y + 1][x]];
+        if (x > 0) nbr[end++] = [x - 1, y, w + g[y][x - 1]];
+        if (x < g[y].length - 1) nbr[end++] = [x + 1, y, w + g[y][x + 1]];
+        if (y > 0) nbr[end++] = [x, y - 1, w + g[y - 1][x]];
+        if (y < g.length - 1) nbr[end++] = [x, y + 1, w + g[y + 1][x]];
     }
 
-    uint256[3][4] private nx;
+    uint256[3][4] private nbr;
 }
