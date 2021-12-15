@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "hardhat/console.sol";
+import "./ArrayUtils.sol";
 
 contract _15Parser is Parser {
     string private constant exampleInput =
@@ -108,7 +110,7 @@ contract Heap {
     }
 }
 
-contract _15 is _15Parser, Heap {
+contract _15 is _15Parser, Heap, ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[][] memory g = parse(input);
         return (p1(g), p2(g));
@@ -124,7 +126,6 @@ contract _15 is _15Parser, Heap {
 
     function expand(uint256[][] memory g)
         private
-        pure
         returns (uint256[][] memory r)
     {
         uint256 nrow = g.length;
@@ -135,7 +136,7 @@ contract _15 is _15Parser, Heap {
             for (uint256 x = 0; x < ncol; x++) {
                 r[y][x] = g[y][x];
                 for (uint256 cm = 1; cm < 5; cm++) {
-                    r[y][x * cm] = inc(r[y][x], cm);
+                    r[y][ncol * cm + x] = inc(r[y][x], cm);
                 }
             }
         }
@@ -146,6 +147,17 @@ contract _15 is _15Parser, Heap {
                     r[nrow * rm + y][x] = inc(r[y][x], rm);
                 }
             }
+        }
+
+        for (uint256 i = 0; i < r.length; i++) {
+            bytes memory s;
+            for (uint256 j = 0; j < r[i].length; j++) {
+                s = bytes.concat(
+                    s,
+                    bytes1(uint8(bytes1("0")) + uint8(r[i][j]))
+                );
+            }
+            console.log(string(s));
         }
     }
 
@@ -158,7 +170,7 @@ contract _15 is _15Parser, Heap {
         uint256 ymax = g.length - 1;
         uint256 xmax = g[ymax].length - 1;
         uint256 vkm = g.length;
-
+        return 0;
         heapReset(g.length * xmax);
 
         uint256 nend = neighbours(g, 0, 0, 0);
