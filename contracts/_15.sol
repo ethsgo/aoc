@@ -39,12 +39,12 @@ contract _15Parser is Parser {
 
 contract Heap {
     uint256[3][] internal heap;
-    uint256 private lastIndex;
+    uint256 private hlength;
 
     function heapReset(uint256 maxSize) internal {
         delete heap;
         heap = new uint256[3][](maxSize);
-        lastIndex = 0;
+        hlength = 0;
     }
 
     function lessThan(uint256 i, uint256 j) private view returns (bool) {
@@ -76,13 +76,12 @@ contract Heap {
     function heapPopMin() internal returns (uint256[3] memory r) {
         r = heap[0];
         uint256 i = 0;
-        heap[0] = heap[lastIndex];
-        lastIndex--;
-        while (i <= lastIndex) {
+        heap[0] = heap[hlength--];
+        while (i < hlength) {
             uint256 li = lix(i);
-            if (li > lastIndex) break;
+            if (li >= hlength) break;
             uint256 ri = rix(i);
-            if (ri > lastIndex || lessThan(li, ri)) {
+            if (ri >= hlength || lessThan(li, ri)) {
                 if (lessThan(i, li)) break;
                 swap(i, li);
                 i = li;
@@ -96,14 +95,14 @@ contract Heap {
 
     function heapInsertOrUpdate(uint256[3] memory e) internal {
         uint256 i = 0;
-        while (i <= lastIndex) {
+        while (i < hlength) {
             if (equal(e, i)) {
                 heap[i] = e;
                 break;
             }
             i++;
         }
-        if (i > lastIndex) heap[++lastIndex] = e;
+        if (i == hlength) heap[hlength++] = e;
         while (i > 0 && lessThan(i, pix(i))) {
             swap(i, pix(i));
             i = pix(i);
