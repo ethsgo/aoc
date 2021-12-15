@@ -37,7 +37,7 @@ contract _15Parser is Parser {
 
 contract Heap {
     uint256[3][] internal heap;
-    uint private lastIndex;
+    uint256 private lastIndex;
 
     function heapReset(uint256 maxSize) internal {
         delete heap;
@@ -48,12 +48,8 @@ contract Heap {
         return heap[i][2] < heap[j][2];
     }
 
-    function equal(uint256[3] memory p, uint256[3] memory q)
-        private
-        pure
-        returns (bool)
-    {
-        return p[0] == q[0] && p[1] == q[1];
+    function equal(uint256[3] memory p, uint256 j) private view returns (bool) {
+        return p[0] == heap[j][0] && p[1] == heap[j][1];
     }
 
     function swap(uint256 i, uint256 j) private {
@@ -98,7 +94,7 @@ contract Heap {
     function heapInsertOrUpdate(uint256[3] memory e) internal {
         uint256 i = 0;
         while (i <= lastIndex) {
-            if (equal(e, heap[i])) {
+            if (equal(e, i)) {
                 heap[i] = e;
                 break;
             }
@@ -138,8 +134,8 @@ contract _15 is _15Parser, Heap {
 
         heapReset(ymax * xmax);
 
-        uint256[3][] memory nx = neighbours(g, 0, 0, 0);
-        for (uint256 i = 0; i < nx.length; i++) heapInsertOrUpdate(nx[i]);
+        uint256 nend = neighbours(g, 0, 0, 0);
+        for (uint256 i = 0; i < nend; i++) heapInsertOrUpdate(nx[i]);
 
         visited[visitKey(g, 0, 0)] = true;
 
@@ -147,8 +143,8 @@ contract _15 is _15Parser, Heap {
             uint256[3] memory m = heapPopMin();
             if (m[0] == xmax && m[1] == ymax) return m[2];
 
-            nx = neighbours(g, m[0], m[1], m[2]);
-            for (uint256 i = 0; i < nx.length; i++) {
+            nend = neighbours(g, m[0], m[1], m[2]);
+            for (uint256 i = 0; i < nend; i++) {
                 uint256 vk = visitKey(g, nx[i][0], nx[i][1]);
                 if (!visited[vk]) {
                     heapInsertOrUpdate(nx[i]);
@@ -165,14 +161,13 @@ contract _15 is _15Parser, Heap {
         uint256 x,
         uint256 y,
         uint256 w
-    ) private returns (uint256[3][] memory) {
-        delete nStore;
-        if (x > 0) nStore.push([x - 1, y, w + g[y][x - 1]]);
-        if (x < g[y].length - 1) nStore.push([x + 1, y, w + g[y][x + 1]]);
-        if (y > 0) nStore.push([x, y - 1, w + g[y - 1][x]]);
-        if (y < g.length - 1) nStore.push([x, y + 1, w + g[y + 1][x]]);
-        return nStore;
+    ) private returns (uint256 end) {
+        end = 0;
+        if (x > 0) nx[end++] = [x - 1, y, w + g[y][x - 1]];
+        if (x < g[y].length - 1) nx[end++] = [x + 1, y, w + g[y][x + 1]];
+        if (y > 0) nx[end++] = [x, y - 1, w + g[y - 1][x]];
+        if (y < g.length - 1) nx[end++] = [x, y + 1, w + g[y + 1][x]];
     }
 
-    uint256[3][] private nStore;
+    uint256[3][4] private nx;
 }
