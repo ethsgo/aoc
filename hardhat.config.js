@@ -4,6 +4,7 @@ const fs = require('fs')
 // https://hardhat.org/guides/create-task.html
 task('exec', 'Deploy and run the named contract')
   .addPositionalParam('name', 'Contract name')
+  .addFlag('skipGasEstimate', 'Skip the gas estimate')
   .setAction(async (taskArgs, hre) => {
     await hre.run('compile', { quiet: true })
 
@@ -18,16 +19,20 @@ task('exec', 'Deploy and run the named contract')
       try {
         input = fs.readFileSync(process.stdin.fd).toString()
       } catch {
-        // Only estimate gas if we're running without stdin input, it
-        // takes too long otherwise.
-        gasEstimate = await contract.estimateGas.main(input)
-        didEstimateGas = true
+        if (!taskArgs.skipGasEstimate) {
+          // Only estimate gas if we're running without stdin input, it
+          // takes too long otherwise.
+          gasEstimate = await contract.estimateGas.main(input)
+          didEstimateGas = true
+        }
       }
 
       result = await contract.callStatic.main(input)
     } else {
-      gasEstimate = await contract.estimateGas.main()
-      didEstimateGas = true
+      if (!taskArgs.skipGasEstimate) {
+        gasEstimate = await contract.estimateGas.main()
+        didEstimateGas = true
+      }
       result = await contract.callStatic.main()
     }
 

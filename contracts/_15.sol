@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
-import "hardhat/console.sol";
-import "./ArrayUtils.sol";
 
 contract _15Parser is Parser {
     string private constant exampleInput =
@@ -76,7 +74,7 @@ contract Heap {
     function heapPopMin() internal returns (uint256[3] memory r) {
         r = heap[0];
         uint256 i = 0;
-        heap[0] = heap[hlength--];
+        heap[0] = heap[--hlength];
         while (i < hlength) {
             uint256 li = lix(i);
             if (li >= hlength) break;
@@ -110,10 +108,9 @@ contract Heap {
     }
 }
 
-contract _15 is _15Parser, Heap, ArrayUtils {
+contract _15 is _15Parser, Heap {
     function main(string calldata input) external returns (uint256, uint256) {
-        uint256[][] memory g = parse(input);
-        return (p1(g), p2(g));
+        return (p1(parse(input)), p2(parse(input)));
     }
 
     function p1(uint256[][] memory g) private returns (uint256) {
