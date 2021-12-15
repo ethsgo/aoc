@@ -19,6 +19,52 @@ const parse = (input) => input.split('\n').map((s) => s.split('').map(Number))
 
 const p1 = (g) => shortestPath(g)
 
+//      0
+//   1      2
+// 3  4   5   6
+const lix = (i) => 2 * i + 1
+const rix = (i) => 2 * (i + 1)
+
+function swap(xs, i, j) {
+  const t = xs[i]
+  xs[i] = xs[j]
+  xs[j] = t
+}
+
+const heapMin = (heap) => heap[0]
+
+function heapPopMin(heap, lessThanEqual) {
+  const r = heap[0]
+  let i = 0
+  while (i < heap.length) {
+    const li = lix(i)
+    if (li >= heap.length) {
+      heap[i] = null
+      break
+    }
+    const ri = rix(i)
+    if (ri >= heap.length) {
+      swap(heap, i, li)
+      heap[li] = null
+      break
+    }
+    if (lessThanEqual(heap[li], heap[ri])) {
+      swap(heap, i, li)
+      i = li
+    } else {
+      swap(heap, i, ri)
+      i = ri
+    }
+  }
+  return r
+}
+
+function heapInsertOrUpdate(heap, e, lessThanEqual) {
+  
+}
+
+
+
 function shortestPath(g) {
   const ymax = g.length - 1
   const xmax = g[ymax].length - 1
@@ -35,6 +81,8 @@ function shortestPath(g) {
 
   let distances = neighbours(0, 0, 0).sort((u, v) => v[2] - u[2])
   let visited = [0, 0]
+
+  let distanceHeap = []
 
   while (distances.length > 0) {
     let [x, y, w] = distances.pop()
