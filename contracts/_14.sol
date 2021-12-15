@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 import "./ArrayUtils.sol";
-import "hardhat/console.sol";
 
 contract _14Parser is Parser {
     string private constant exampleInput =
