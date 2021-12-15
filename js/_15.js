@@ -92,48 +92,23 @@ function shortestPath(g) {
       .filter(([r, s]) => r >= 0 && s >= 0 && r <= xmax && s <= ymax)
       .map(([x, y]) => [x, y, w + g[y][x]])
 
-  let distances = neighbours(0, 0, 0).sort((u, v) => v[2] - u[2])
   let visited = [0, 0]
 
   let distanceHeap = []
   let lt = (e1, e2) => e1[2] < e2[2]
   let eqEntry = (e1, e2) => e1[0] === e2[0] && e1[1] === e2[1]
 
-  for (const d of distances) heapInsertOrUpdate(distanceHeap, d, lt, eqEntry)
+  for (const d of neighbours(0, 0, 0))
+    heapInsertOrUpdate(distanceHeap, d, lt, eqEntry)
 
-  while (distances.length > 0) {
-    let [dx, dy, dw] = distances.pop()
-    let [ex, ey, ew] = heapPopMin(distanceHeap, lt, eqEntry)
-    // let [x, y, w] = [dx, dy, dw]
-    let [x, y, w] = [ex, ey, ew]
-    // console.log([dx, dy, dw], [ex, ey, ew])
-    // if (ex !== dx || ey !== dy || ew !== dw) break
-    // if (ew !== dw) {
-    //   console.log(distances)
-    //   console.log(distanceHeap.sort((u, v) => v[2] - u[2]))
-    //   break
-    // }
+  while (true) {
+    let [x, y, w] = heapPopMin(distanceHeap, lt, eqEntry)
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.find((v) => v[0] === r && v[1] === s)) continue
-      let found = false
-      for (let i = 0; i < distances.length; i++) {
-        if (r === distances[i][0] && s === distances[i][1]) {
-          if (w + t < distances[i][2]) {
-            distances[i][2] = w + t
-            // heapInsertOrUpdate(distanceHeap, distances[i], lt, eqEntry)
-          }
-          found = true
-          break
-        }
-      }
-      if (!found) {
-        distances.push([r, s, t])
-      }
       heapInsertOrUpdate(distanceHeap, [r, s, t], lt, eqEntry)
       visited.push([r, s])
     }
-    distances.sort((u, v) => v[2] - u[2])
   }
 }
 
@@ -148,6 +123,5 @@ const p1 = (g) => shortestPath(g)
 const p2 = (g) => shortestPath(expand(g))
 
 const g = parse(input)
-//console.log(expand(g).map(row => row.join('')).join('\n'))
-// console.log(p1(g))
+console.log(p1(g))
 console.log(p2(g))
