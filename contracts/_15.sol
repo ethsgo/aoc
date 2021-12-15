@@ -38,12 +38,8 @@ contract _15Parser is Parser {
 contract Heap {
     uint256[3][] internal heap;
 
-    function lessThan(uint256[3] memory p, uint256[3] memory q)
-        private
-        pure
-        returns (bool)
-    {
-        return p[2] < q[2];
+    function lessThan(uint256 i, uint256 j) private view returns (bool) {
+        return heap[i][2] < heap[j][2];
     }
 
     function equal(uint256[3] memory p, uint256[3] memory q)
@@ -54,9 +50,60 @@ contract Heap {
         return p[0] == q[0] && p[1] == q[1];
     }
 
-    function heapPopMin() internal returns (uint256[3] memory) {}
+    function swap(uint256 i, uint256 j) private {
+        uint256[3] memory t = heap[i];
+        heap[i] = heap[j];
+        heap[j] = t;
+    }
 
-    function heapInsertOrUpdate(uint256[3] memory e) internal {}
+    function lix(uint256 i) private pure returns (uint256) {
+        return 2 * i + 1;
+    }
+
+    function rix(uint256 i) private pure returns (uint256) {
+        return 2 * (i + 1);
+    }
+
+    function pix(uint256 i) private pure returns (uint256) {
+        return (i - 1) / 2;
+    }
+
+    function heapPopMin() internal returns (uint256[3] memory r) {
+        r = heap[0];
+        uint256 i = 0;
+        heap[0] = heap[heap.length - 1];
+        heap.pop();
+        while (i < heap.length) {
+            uint256 li = lix(i);
+            if (li >= heap.length) break;
+            uint256 ri = rix(i);
+            if (ri >= heap.length || lessThan(li, ri)) {
+                if (lessThan(i, li)) break;
+                swap(i, li);
+                i = li;
+            } else {
+                if (lessThan(i, ri)) break;
+                swap(i, ri);
+                i = ri;
+            }
+        }
+    }
+
+    function heapInsertOrUpdate(uint256[3] memory e) internal {
+        uint256 i = 0;
+        while (i < heap.length) {
+            if (equal(e, heap[i])) {
+                heap[i] = e;
+                break;
+            }
+            i++;
+        }
+        if (i == heap.length) heap.push(e);
+        while (i > 0 && lessThan(i, pix(i))) {
+            swap(i, pix(i));
+            i = pix(i);
+        }
+    }
 }
 
 contract _15 is _15Parser, Heap {
