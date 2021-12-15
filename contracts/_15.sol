@@ -111,11 +111,47 @@ contract Heap {
 contract _15 is _15Parser, Heap {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[][] memory g = parse(input);
-        return (p1(g), 0);
+        return (p1(g), p2(g));
     }
 
     function p1(uint256[][] memory g) private returns (uint256) {
         return shortestPath(g);
+    }
+
+    function p2(uint256[][] memory g) private returns (uint256) {
+        return shortestPath(expand(g));
+    }
+
+    function expand(uint256[][] memory g)
+        private
+        pure
+        returns (uint256[][] memory r)
+    {
+        uint256 nrow = g.length;
+        uint256 ncol = g[0].length;
+        r = new uint256[][](nrow * 5);
+        for (uint256 y = 0; y < nrow; y++) {
+            r[y] = new uint256[](ncol * 5);
+            for (uint256 x = 0; x < ncol; x++) {
+                r[y][x] = g[y][x];
+                for (uint256 cm = 1; cm < 5; cm++) {
+                    r[y][x * cm] = inc(r[y][x], cm);
+                }
+            }
+        }
+        for (uint256 rm = 1; rm < 5; rm++) {
+            for (uint256 y = 0; y < nrow; y++) {
+                r[nrow * rm + y] = new uint256[](ncol * 5);
+                for (uint256 x = 0; x < ncol * 5; x++) {
+                    r[nrow * rm + y][x] = inc(r[y][x], rm);
+                }
+            }
+        }
+    }
+
+    function inc(uint256 w, uint256 i) private pure returns (uint256) {
+        uint256 z = w + i;
+        return z > 9 ? z % 9 : z;
     }
 
     function shortestPath(uint256[][] memory g) private returns (uint256) {
