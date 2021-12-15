@@ -18,50 +18,43 @@ if (!process.stdin.isTTY) {
 const parse = (input) => input.split('\n').map((s) => s.split('').map(Number))
 
 /// A min-heap.
-class Heap {
-  constructor(keyLessThan, equalEntry) {
-    this.lessThan = keyLessThan
-    this.equalEntry = equalEntry
-    this.items = []
-  }
+function Heap(lessThan, equalEntry) {
+  let items = []
 
   //      0
   //   1      2
   // 3  4   5   6
-  #lix = (i) => 2 * i + 1
-  #rix = (i) => 2 * (i + 1)
-  #pix = (i) => Math.floor((i - 1) / 2)
+  const lix = (i) => 2 * i + 1
+  const rix = (i) => 2 * (i + 1)
+  const pix = (i) => Math.floor((i - 1) / 2)
 
-  #swap(i, j) {
-    const t = this.items[i]
-    this.items[i] = this.items[j]
-    this.items[j] = t
+  function swap(i, j) {
+    const t = items[i]
+    items[i] = items[j]
+    items[j] = t
   }
 
-  popMin() {
-    const r = this.items[0]
+  this.popMin = () => {
+    const r = items[0]
     let i = 0
-    this.items[0] = this.items.pop()
-    while (i < this.items.length) {
-      const li = this.#lix(i)
-      if (li >= this.items.length) {
+    items[0] = items.pop()
+    while (i < items.length) {
+      const li = lix(i)
+      if (li >= items.length) {
         break
       }
 
-      const ri = this.#rix(i)
-      if (
-        ri >= this.items.length ||
-        this.lessThan(this.items[li], this.items[ri])
-      ) {
-        if (this.lessThan(this.items[li], this.items[i])) {
-          this.#swap(i, li)
+      const ri = rix(i)
+      if (ri >= items.length || lessThan(items[li], items[ri])) {
+        if (lessThan(items[li], items[i])) {
+          swap(i, li)
           i = li
         } else {
           break
         }
       } else {
-        if (this.lessThan(this.items[ri], this.items[i])) {
-          this.#swap(i, ri)
+        if (lessThan(items[ri], items[i])) {
+          swap(i, ri)
           i = ri
         } else {
           break
@@ -71,21 +64,21 @@ class Heap {
     return r
   }
 
-  insertOrUpdate(e) {
+  this.insertOrUpdate = (e) => {
     let i = 0
-    while (i < this.items.length) {
-      if (this.equalEntry(e, this.items[i])) {
-        this.items[i] = e
+    while (i < items.length) {
+      if (equalEntry(e, items[i])) {
+        items[i] = e
         break
       }
       i++
     }
-    if (i === this.items.length) {
-      this.items.push(e)
+    if (i === items.length) {
+      items.push(e)
     }
-    while (i > 0 && this.lessThan(e, this.items[this.#pix(i)])) {
-      this.#swap(i, this.#pix(i))
-      i = this.#pix(i)
+    while (i > 0 && lessThan(e, items[pix(i)])) {
+      swap(i, pix(i))
+      i = pix(i)
     }
   }
 }
