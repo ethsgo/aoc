@@ -34,11 +34,30 @@ function shortestPath(g) {
       .map(([x, y]) => [x, y, w + g[y][x]])
 
   let distances = neighbours(0, 0, 0).sort((u, v) => u[2] - v[2])
+  let visited = [0, 0]
 
   while (distances.length > 0) {
     let [x, y, w] = distances.pop()
     console.log([x, y, w])
     if (x === ymax && y === xmax) return w
+    for (const [r, s, t] of neighbours(x, y, w)) {
+      if (visited.find((v) => v[0] === r && v[1] === s)) continue
+      let found = false
+      for (let i = 0; i < distances.length; i++) {
+        if (r === distances[i][0] && s === distances[i][1]) {
+          if (w + t < distances[i][2]) {
+            distances[i][2] = w + t
+          }
+          found = true
+          break
+        }
+      }
+      if (!found) {
+        distances.push([r, s, t])
+      }
+      visited.push([r, s])
+    }
+    distances.sort((u, v) => u[2] - v[2])
   }
 }
 
