@@ -118,26 +118,18 @@ contract _15 is _15Parser, Heap {
         return shortestPath(g);
     }
 
-    mapping(uint256 => bool) visited;
-
-    function visitKey(
-        uint256[][] memory g,
-        uint256 x,
-        uint256 y
-    ) private pure returns (uint256) {
-        return g.length * y + x;
-    }
-
     function shortestPath(uint256[][] memory g) private returns (uint256) {
         uint256 ymax = g.length - 1;
         uint256 xmax = g[ymax].length - 1;
+        uint256 vkm = g.length;
 
-        heapReset(ymax * xmax);
+        heapReset(g.length * xmax);
 
         uint256 nend = neighbours(g, 0, 0, 0);
         for (uint256 i = 0; i < nend; i++) heapInsertOrUpdate(nx[i]);
 
-        visited[visitKey(g, 0, 0)] = true;
+        uint256[] memory visited = new uint256[]((ymax + 1) * (xmax + 1));
+        visited[vkm * 0 + 0] = 1;
 
         while (true) {
             uint256[3] memory m = heapPopMin();
@@ -145,10 +137,10 @@ contract _15 is _15Parser, Heap {
 
             nend = neighbours(g, m[0], m[1], m[2]);
             for (uint256 i = 0; i < nend; i++) {
-                uint256 vk = visitKey(g, nx[i][0], nx[i][1]);
-                if (!visited[vk]) {
+                uint256 vk = vkm * nx[i][0] + nx[i][1];
+                if (visited[vk] == 0) {
                     heapInsertOrUpdate(nx[i]);
-                    visited[vk] = true;
+                    visited[vk] = 1;
                 }
             }
         }
