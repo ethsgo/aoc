@@ -24,6 +24,7 @@ const p1 = (g) => shortestPath(g)
 // 3  4   5   6
 const lix = (i) => 2 * i + 1
 const rix = (i) => 2 * (i + 1)
+const pix = (i) => Math.floor((i - 1) / 2)
 
 function swap(xs, i, j) {
   const t = xs[i]
@@ -33,7 +34,7 @@ function swap(xs, i, j) {
 
 const heapMin = (heap) => heap[0]
 
-function heapPopMin(heap, lessThanEqual) {
+function heapPopMin(heap, lessThan) {
   const r = heap[0]
   let i = 0
   while (i < heap.length) {
@@ -42,13 +43,16 @@ function heapPopMin(heap, lessThanEqual) {
       heap[i] = null
       break
     }
+    if (heap[li] === null) {
+      break
+    }
     const ri = rix(i)
     if (ri >= heap.length) {
       swap(heap, i, li)
       heap[li] = null
       break
     }
-    if (lessThanEqual(heap[li], heap[ri])) {
+    if (heap[ri] == null || lessThan(heap[li], heap[ri])) {
       swap(heap, i, li)
       i = li
     } else {
@@ -59,11 +63,27 @@ function heapPopMin(heap, lessThanEqual) {
   return r
 }
 
-function heapInsertOrUpdate(heap, e, lessThanEqual) {
-  
+function heapInsertOrUpdate(heap, e, lessThan, equalEntry) {
+  let i = 0
+  while (i < heap.length) {
+    if (heap[i] === null) {
+      heap[i] = e
+      break
+    }
+    if (equalEntry(e, heap[i])) {
+      heap[i] = e
+      break
+    }
+    i++
+  }
+  if (i == heap.length) {
+    heap.push(e)
+  }
+  while (i > 0 && lessThan(e, heap[pix(i)])) {
+    swap(heap, i, pix(i))
+    i = pix(i)
+  }
 }
-
-
 
 function shortestPath(g) {
   const ymax = g.length - 1
@@ -83,9 +103,15 @@ function shortestPath(g) {
   let visited = [0, 0]
 
   let distanceHeap = []
+  let lt = (e1, e2) => e1[2] < e2[2]
+  let eqEntry = (e1, e2) => e1[0] === e2[0] && e1[1] === e2[1]
+
+  for (const d of distances) heapInsertOrUpdate(distanceHeap, d, lt, eqEntry)
 
   while (distances.length > 0) {
     let [x, y, w] = distances.pop()
+    let [ex, ey, ew] = heapPopMin(distanceHeap, lt)
+    console.log([x, y, w], [ex, ey, ew])
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.find((v) => v[0] === r && v[1] === s)) continue
@@ -94,6 +120,7 @@ function shortestPath(g) {
         if (r === distances[i][0] && s === distances[i][1]) {
           if (w + t < distances[i][2]) {
             distances[i][2] = w + t
+            heapInsertOrUpdate(distanceHeap, distances[i], lt, eqEntry)
           }
           found = true
           break
@@ -101,6 +128,7 @@ function shortestPath(g) {
       }
       if (!found) {
         distances.push([r, s, t])
+        heapInsertOrUpdate(distanceHeap, [r, s, t], lt, eqEntry)
       }
       visited.push([r, s])
     }
