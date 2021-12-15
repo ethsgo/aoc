@@ -40,12 +40,21 @@ function heapPopMin(heap, lessThan, equalEntry) {
       break
     }
 
+    const ri = rix(i)
     if (ri >= heap.length || lessThan(heap[li], heap[ri])) {
-      swap(heap, i, li)
-      i = li
+      if (lessThan(heap[li], heap[i])) {
+        swap(heap, i, li)
+        i = li
+      } else {
+        break
+      }
     } else {
-      swap(heap, i, ri)
-      i = ri
+      if (lessThan(heap[ri], heap[i])) {
+        swap(heap, i, ri)
+        i = ri
+      } else {
+        break
+      }
     }
   }
   return r
@@ -97,13 +106,13 @@ function shortestPath(g) {
     let [ex, ey, ew] = heapPopMin(distanceHeap, lt, eqEntry)
     // let [x, y, w] = [dx, dy, dw]
     let [x, y, w] = [ex, ey, ew]
-    console.log([dx, dy, dw], [ex, ey, ew])
+    // console.log([dx, dy, dw], [ex, ey, ew])
     // if (ex !== dx || ey !== dy || ew !== dw) break
-    if (ew !== dw) {
-      console.log(distances)
-      console.log(distanceHeap.sort((u, v) => v[2] - u[2]))
-      break
-    }
+    // if (ew !== dw) {
+    //   console.log(distances)
+    //   console.log(distanceHeap.sort((u, v) => v[2] - u[2]))
+    //   break
+    // }
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.find((v) => v[0] === r && v[1] === s)) continue
@@ -140,5 +149,5 @@ const p2 = (g) => shortestPath(expand(g))
 
 const g = parse(input)
 //console.log(expand(g).map(row => row.join('')).join('\n'))
-console.log(p1(g))
+// console.log(p1(g))
 console.log(p2(g))
