@@ -97,7 +97,10 @@ function shortestPath(g) {
       .filter(([r, s]) => r >= 0 && s >= 0 && r <= xmax && s <= ymax)
       .map(([x, y]) => [x, y, w + g[y][x]])
 
-  let visited = [0, 0]
+  const visitKey = (x, y) => g.length * y + x
+
+  let visited = new Set()
+  visited.add(visitKey(0, 0))
 
   let lt = (e1, e2) => e1[2] < e2[2]
   let eqEntry = (e1, e2) => e1[0] === e2[0] && e1[1] === e2[1]
@@ -109,9 +112,9 @@ function shortestPath(g) {
     let [x, y, w] = distanceHeap.popMin()
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
-      if (visited.find((v) => v[0] === r && v[1] === s)) continue
+      if (visited.has(visitKey(r, s))) continue
       distanceHeap.insertOrUpdate([r, s, t])
-      visited.push([r, s])
+      visited.add(visitKey(r, s))
     }
   }
 }
