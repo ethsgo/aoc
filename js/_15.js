@@ -32,27 +32,27 @@ function swap(xs, i, j) {
   xs[j] = t
 }
 
-const heapMin = (heap) => heap[0]
-
-function heapPopMin(heap, lessThan) {
+function heapPopMin(heap, lessThan, equalEntry) {
   const r = heap[0]
   let i = 0
   while (i < heap.length) {
     const li = lix(i)
     if (li >= heap.length) {
-      heap[i] = null
+      swap(heap, i, heap.length - 1)
+      heap.pop()
       break
     }
-    if (heap[li] === null) {
-      break
-    }
+
     const ri = rix(i)
     if (ri >= heap.length) {
       swap(heap, i, li)
-      heap[li] = null
+
+      swap(heap, li, heap.length - 1)
+      heap.pop()
       break
     }
-    if (heap[ri] == null || lessThan(heap[li], heap[ri])) {
+
+    if (lessThan(heap[li], heap[ri])) {
       swap(heap, i, li)
       i = li
     } else {
@@ -66,17 +66,13 @@ function heapPopMin(heap, lessThan) {
 function heapInsertOrUpdate(heap, e, lessThan, equalEntry) {
   let i = 0
   while (i < heap.length) {
-    if (heap[i] === null) {
-      heap[i] = e
-      break
-    }
     if (equalEntry(e, heap[i])) {
       heap[i] = e
       break
     }
     i++
   }
-  if (i == heap.length) {
+  if (i === heap.length) {
     heap.push(e)
   }
   while (i > 0 && lessThan(e, heap[pix(i)])) {
@@ -108,9 +104,10 @@ function shortestPath(g) {
 
   for (const d of distances) heapInsertOrUpdate(distanceHeap, d, lt, eqEntry)
 
+  console.log(distanceHeap)
   while (distances.length > 0) {
     let [x, y, w] = distances.pop()
-    let [ex, ey, ew] = heapPopMin(distanceHeap, lt)
+    let [ex, ey, ew] = heapPopMin(distanceHeap, lt, eqEntry)
     console.log([x, y, w], [ex, ey, ew])
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
@@ -120,7 +117,7 @@ function shortestPath(g) {
         if (r === distances[i][0] && s === distances[i][1]) {
           if (w + t < distances[i][2]) {
             distances[i][2] = w + t
-            heapInsertOrUpdate(distanceHeap, distances[i], lt, eqEntry)
+            // heapInsertOrUpdate(distanceHeap, distances[i], lt, eqEntry)
           }
           found = true
           break
@@ -128,8 +125,8 @@ function shortestPath(g) {
       }
       if (!found) {
         distances.push([r, s, t])
-        heapInsertOrUpdate(distanceHeap, [r, s, t], lt, eqEntry)
       }
+      heapInsertOrUpdate(distanceHeap, [r, s, t], lt, eqEntry)
       visited.push([r, s])
     }
     distances.sort((u, v) => v[2] - u[2])
