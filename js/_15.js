@@ -17,64 +17,76 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split('\n').map((s) => s.split('').map(Number))
 
-//      0
-//   1      2
-// 3  4   5   6
-const lix = (i) => 2 * i + 1
-const rix = (i) => 2 * (i + 1)
-const pix = (i) => Math.floor((i - 1) / 2)
+/// A min-heap.
+class Heap {
+  constructor(keyLessThan, equalEntry) {
+    this.lessThan = keyLessThan
+    this.equalEntry = equalEntry
+    this.items = []
+  }
 
-function swap(xs, i, j) {
-  const t = xs[i]
-  xs[i] = xs[j]
-  xs[j] = t
-}
+  //      0
+  //   1      2
+  // 3  4   5   6
+  #lix = (i) => 2 * i + 1
+  #rix = (i) => 2 * (i + 1)
+  #pix = (i) => Math.floor((i - 1) / 2)
 
-function heapPopMin(heap, lessThan, equalEntry) {
-  const r = heap[0]
-  let i = 0
-  heap[0] = heap.pop()
-  while (i < heap.length) {
-    const li = lix(i)
-    if (li >= heap.length) {
-      break
-    }
+  #swap(i, j) {
+    const t = this.items[i]
+    this.items[i] = this.items[j]
+    this.items[j] = t
+  }
 
-    const ri = rix(i)
-    if (ri >= heap.length || lessThan(heap[li], heap[ri])) {
-      if (lessThan(heap[li], heap[i])) {
-        swap(heap, i, li)
-        i = li
-      } else {
+  popMin() {
+    const r = this.items[0]
+    let i = 0
+    this.items[0] = this.items.pop()
+    while (i < this.items.length) {
+      const li = this.#lix(i)
+      if (li >= this.items.length) {
         break
       }
-    } else {
-      if (lessThan(heap[ri], heap[i])) {
-        swap(heap, i, ri)
-        i = ri
+
+      const ri = this.#rix(i)
+      if (
+        ri >= this.items.length ||
+        this.lessThan(this.items[li], this.items[ri])
+      ) {
+        if (this.lessThan(this.items[li], this.items[i])) {
+          this.#swap(i, li)
+          i = li
+        } else {
+          break
+        }
       } else {
-        break
+        if (this.lessThan(this.items[ri], this.items[i])) {
+          this.#swap(i, ri)
+          i = ri
+        } else {
+          break
+        }
       }
     }
+    return r
   }
-  return r
-}
 
-function heapInsertOrUpdate(heap, e, lessThan, equalEntry) {
-  let i = 0
-  while (i < heap.length) {
-    if (equalEntry(e, heap[i])) {
-      heap[i] = e
-      break
+  insertOrUpdate(e) {
+    let i = 0
+    while (i < this.items.length) {
+      if (this.equalEntry(e, this.items[i])) {
+        this.items[i] = e
+        break
+      }
+      i++
     }
-    i++
-  }
-  if (i === heap.length) {
-    heap.push(e)
-  }
-  while (i > 0 && lessThan(e, heap[pix(i)])) {
-    swap(heap, i, pix(i))
-    i = pix(i)
+    if (i === this.items.length) {
+      this.items.push(e)
+    }
+    while (i > 0 && this.lessThan(e, this.items[this.#pix(i)])) {
+      this.#swap(i, this.#pix(i))
+      i = this.#pix(i)
+    }
   }
 }
 
@@ -94,19 +106,18 @@ function shortestPath(g) {
 
   let visited = [0, 0]
 
-  let distanceHeap = []
   let lt = (e1, e2) => e1[2] < e2[2]
   let eqEntry = (e1, e2) => e1[0] === e2[0] && e1[1] === e2[1]
+  let distanceHeap = new Heap(lt, eqEntry)
 
-  for (const d of neighbours(0, 0, 0))
-    heapInsertOrUpdate(distanceHeap, d, lt, eqEntry)
+  for (const d of neighbours(0, 0, 0)) distanceHeap.insertOrUpdate(d)
 
   while (true) {
-    let [x, y, w] = heapPopMin(distanceHeap, lt, eqEntry)
+    let [x, y, w] = distanceHeap.popMin()
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.find((v) => v[0] === r && v[1] === s)) continue
-      heapInsertOrUpdate(distanceHeap, [r, s, t], lt, eqEntry)
+      distanceHeap.insertOrUpdate([r, s, t])
       visited.push([r, s])
     }
   }
@@ -119,6 +130,7 @@ function expand(g) {
   const topTiles = g.map((row) => five.map((i) => row.map(inc(i))).flat())
   return five.flatMap((i) => topTiles.map((row) => row.map(inc(i))))
 }
+
 const p1 = (g) => shortestPath(g)
 const p2 = (g) => shortestPath(expand(g))
 
