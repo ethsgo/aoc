@@ -110,7 +110,7 @@ function shortestPath(g) {
 
   while (true) {
     let [x, y, w] = distanceHeap.popMin()
-    if (x === ymax && y === xmax) return w
+    if (x === xmax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.has(visitKey(r, s))) continue
       distanceHeap.insertOrUpdate([r, s, t])

@@ -35,21 +35,91 @@ contract _15Parser is Parser {
     }
 }
 
-contract _15 is _15Parser {
+contract Heap {
+    uint256[3][] internal heap;
+
+    function lessThan(uint256[3] memory p, uint256[3] memory q)
+        private
+        pure
+        returns (bool)
+    {
+        return p[2] < q[2];
+    }
+
+    function equal(uint256[3] memory p, uint256[3] memory q)
+        private
+        pure
+        returns (bool)
+    {
+        return p[0] == q[0] && p[1] == q[1];
+    }
+
+    function heapPopMin() internal returns (uint256[3] memory) {}
+
+    function heapInsertOrUpdate(uint256[3] memory e) internal {}
+}
+
+contract _15 is _15Parser, Heap {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[][] memory g = parse(input);
         return (p1(g), 0);
     }
 
-    function p1(uint256[][] memory g) private view returns (uint256) {
+    function p1(uint256[][] memory g) private returns (uint256) {
         return shortestPath(g);
     }
 
-    function shortestPath(uint256[][] memory g)
-        private
-        view
-        returns (uint256)
-    {
-        return g.length;
+    mapping(uint256 => bool) visited;
+
+    function visitKey(
+        uint256[][] memory g,
+        uint256 x,
+        uint256 y
+    ) private pure returns (uint256) {
+        return g.length * y + x;
     }
+
+    function shortestPath(uint256[][] memory g) private returns (uint256) {
+        delete heap;
+
+        uint256 ymax = g.length - 1;
+        uint256 xmax = g[ymax].length - 1;
+
+        uint256[3][] memory nx = neighbours(g, 0, 0, 0);
+        for (uint256 i = 0; i < nx.length; i++) heapInsertOrUpdate(nx[i]);
+
+        visited[visitKey(g, 0, 0)] = true;
+
+        while (true) {
+            uint256[3] memory m = heapPopMin();
+            if (m[0] == xmax && m[1] == ymax) return m[2];
+
+            nx = neighbours(g, m[0], m[1], m[2]);
+            for (uint256 i = 0; i < nx.length; i++) {
+                uint256 vk = visitKey(g, nx[i][0], nx[i][1]);
+                if (!visited[vk]) {
+                    heapInsertOrUpdate(nx[i]);
+                    visited[vk] = true;
+                }
+            }
+        }
+
+        revert();
+    }
+
+    function neighbours(
+        uint256[][] memory g,
+        uint256 x,
+        uint256 y,
+        uint256 w
+    ) private returns (uint256[3][] memory) {
+        delete nStore;
+        if (x > 0) nStore.push([x - 1, y, w + g[y][x - 1]]);
+        if (x < g[y].length - 1) nStore.push([x + 1, y, w + g[y][x + 1]]);
+        if (y > 0) nStore.push([x, y - 1, w + g[y - 1][x]]);
+        if (y < g.length - 1) nStore.push([x, y + 1, w + g[y + 1][x]]);
+        return nStore;
+    }
+
+    uint256[3][] private nStore;
 }
