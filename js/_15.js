@@ -17,8 +17,6 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split('\n').map((s) => s.split('').map(Number))
 
-const p1 = (g) => shortestPath(g)
-
 //      0
 //   1      2
 // 3  4   5   6
@@ -106,9 +104,9 @@ function shortestPath(g) {
 
   console.log(distanceHeap)
   while (distances.length > 0) {
-    let [x, y, w] = distances.pop()
-    let [ex, ey, ew] = heapPopMin(distanceHeap, lt, eqEntry)
-    console.log([x, y, w], [ex, ey, ew])
+    // let [ex, ey, ew] = distances.pop()
+    let [x, y, w] = heapPopMin(distanceHeap, lt, eqEntry)
+    // console.log([x, y, w], [ex, ey, ew])
     if (x === ymax && y === xmax) return w
     for (const [r, s, t] of neighbours(x, y, w)) {
       if (visited.find((v) => v[0] === r && v[1] === s)) continue
@@ -133,5 +131,18 @@ function shortestPath(g) {
   }
 }
 
+function expand(g) {
+  const wrap = (i) => (i > 9 ? i % 9 : i)
+  const inc = (i) => (w) => wrap(w + i)
+  const five = [...Array(5)].map((_, i) => i)
+  const topTiles = g.map((row) => five.map((i) => row.map(inc(i))).flat())
+  return five.flatMap((i) => topTiles.map((row) => row.map(inc(i))))
+}
+const p1 = (g) => shortestPath(g)
+const p2 = (g) => shortestPath(expand(g))
+
 const g = parse(input)
+//console.log(expand(g).map(row => row.join('')).join('\n'))
 console.log(p1(g))
+console.log(p2(g))
+
