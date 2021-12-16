@@ -1,6 +1,12 @@
-let input = `
+const inputLit = `
 110100101111111000101000
 `.trim()
+
+const inputOpLen = `
+00111000000000000110111101000101001010010001001000000000
+`.trim()
+
+let input = inputOpLen
 
 if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
@@ -12,7 +18,7 @@ const parse = (input) =>
     .map((s) => s.split(''))
     .flat()
 
-function decimal(b) {
+function pdecimal(b) {
   let r = 0
   for (const c of b) {
     r *= 2
@@ -21,30 +27,49 @@ function decimal(b) {
   return r
 }
 
-function packet(b) {
+function ppacket(b) {
   let i = 0
-  const v = decimal(b.slice(i, (i += 3)))
-  const t = decimal(b.slice(i, (i += 3)))
-  if (t === 4) {
-    let lit = 0
-    let more = true
-    while (more) {
-      console.log(i)
-      console.log(b.slice(i + 1, i + 1 + 4))
-      console.log(decimal(b.slice(i + 1, i + 1 + 4)))
-      lit = (lit << 4) + decimal(b.slice(i + 1, i + 1 + 4))
-      more = b[i] === '1'
-      i += 5
-    }
-    return { version: v, type: t, literal: lit }
+  const version = pdecimal(b.slice(i, (i += 3)))
+  const type = pdecimal(b.slice(i, (i += 3)))
+  if (type === 4) {
+    let { literal, length } = pliteral(b.slice(i, b.length))
+    return { packet: { version, type, literal }, length }
   } else {
-    return { version: v, type: t, operator: operator(b.slice(i, b.length)) }
+    let { operator, length } = poperator(b.slice(i, b.length))
+    return { packet: { version, type, ...operator }, length }
   }
 }
 
-function operator(b) {}
+function pliteral(b) {
+  let i = 0
+  let more = true
+  let lit = 0
+  while (more) {
+    lit = (lit << 4) + pdecimal(b.slice(i + 1, i + 1 + 4))
+    more = b[i] === '1'
+    i += 5
+  }
+  return { literal: lit, length: i }
+}
 
-const p1 = (b) => packet(b)
+function poperator(b) {
+  let i = 0
+  let id = b[i++] === '0' ? 0 : 1
+  if (id === 0) {
+    let len = pdecimal(b.slice(i, (i += 15)))
+    let packets = []
+    while (i < len) {
+      let { packet, length } = ppacket(b.slice(i, b.length))
+      console.log('.', packet, length)
+      packets.push(packet)
+      i += length
+    }
+    return { operator: { id, packets }, length: i }
+  }
+  return id
+}
+
+const p1 = (b) => ppacket(b)
 const p2 = (g) => shortestPath(expand(g))
 
 const bits = parse(input)
