@@ -131,6 +131,13 @@ contract _16 is _16Parser {
     }
 
     function p1(Packet memory packet) private returns (uint256) {
-        return packet.packets.length;
+        return versionSum(packet);
+    }
+
+    function versionSum(Packet memory packet) private returns (uint256 sum) {
+        sum = packet.version;
+        for (uint256 i = 0; i < packet.packets.length; i++) {
+            sum += versionSum(packet.packets[i]);
+        }
     }
 }
