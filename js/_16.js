@@ -1,25 +1,4 @@
-const inputLit = `
-110100101111111000101000
-`.trim()
-
-const inputOpLen = `
-00111000000000000110111101000101001010010001001000000000
-`.trim()
-
-const inputOpNum = `
-11101110000000001101010000001100100000100011000001100000
-`.trim()
-
-const hexToBin = (s) =>
-  s
-    .split('')
-    .map((c) => parseInt(c, 16).toString(2).padStart(4, 0))
-    .join('')
-
-const inputVsum16 = hexToBin('8A004A801A8002F478')
-const inputVSum31 = hexToBin('A0016C880162017C3686B18A3D4780')
-
-let input = inputVSum31
+let input = '8A004A801A8002F478'
 
 if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
@@ -27,9 +6,8 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) =>
   input
-    .split('\n')
-    .map((s) => s.split(''))
-    .flat()
+    .split('')
+    .flatMap((c) => parseInt(c, 16).toString(2).padStart(4, 0).split(''))
 
 function decimal(b) {
   let r = 0
