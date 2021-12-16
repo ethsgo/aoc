@@ -85,7 +85,14 @@ function versionSum(p) {
   return c
 }
 
-const p1 = (b) => versionSum(packet(b).packet)
+function eval2(p) {
+  return p
+}
+
+const p1 = versionSum
+const p2 = eval2
 
 const bits = parse(input)
-console.log(p1(bits))
+const pkt = packet(bits).packet
+console.log(p1(pkt))
+console.log(p2(pkt))
