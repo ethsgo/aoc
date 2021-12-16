@@ -42,7 +42,7 @@ function literal(b) {
   let more = true
   let lit = 0
   while (more) {
-    lit = (lit << 4) + decimal(b.slice(i + 1, i + 1 + 4))
+    lit = (lit * 2 ** 4) + decimal(b.slice(i + 1, i + 1 + 4))
     more = b[i] === '1'
     i += 5
   }
