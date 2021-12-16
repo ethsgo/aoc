@@ -18,7 +18,7 @@ const parse = (input) =>
     .map((s) => s.split(''))
     .flat()
 
-function pdecimal(b) {
+function decimal(b) {
   let r = 0
   for (const c of b) {
     r *= 2
@@ -27,51 +27,56 @@ function pdecimal(b) {
   return r
 }
 
-function ppacket(b) {
+function packet(b) {
   let i = 0
-  const version = pdecimal(b.slice(i, (i += 3)))
-  const type = pdecimal(b.slice(i, (i += 3)))
-  if (type === 4) {
-    let { literal, length } = pliteral(b.slice(i, b.length))
-    return { packet: { version, type, literal }, length }
+  const v = decimal(b.slice(i, (i += 3)))
+  const t = decimal(b.slice(i, (i += 3)))
+  if (t === 4) {
+    const p = literal(b.slice(i, b.length))
+    return {
+      packet: { version: v, type: t, literal: p.literal },
+      length: p.length + i,
+    }
   } else {
-    let { operator, length } = poperator(b.slice(i, b.length))
-    return { packet: { version, type, ...operator }, length }
+    const p = operator(b.slice(i, b.length))
+    return {
+      packet: { version: v, type: t, ...p.operator },
+      length: p.length + i,
+    }
   }
 }
 
-function pliteral(b) {
+function literal(b) {
   let i = 0
   let more = true
   let lit = 0
   while (more) {
-    lit = (lit << 4) + pdecimal(b.slice(i + 1, i + 1 + 4))
+    lit = (lit << 4) + decimal(b.slice(i + 1, i + 1 + 4))
     more = b[i] === '1'
     i += 5
   }
   return { literal: lit, length: i }
 }
 
-function poperator(b) {
+function operator(b) {
   let i = 0
   let id = b[i++] === '0' ? 0 : 1
   if (id === 0) {
-    let len = pdecimal(b.slice(i, (i += 15)))
+    let len = decimal(b.slice(i, (i += 15)))
+    let end = i + len
     let packets = []
-    while (i < len) {
-      let { packet, length } = ppacket(b.slice(i, b.length))
-      console.log('.', packet, length)
-      packets.push(packet)
-      i += length
+    while (i < end) {
+      const p = packet(b.slice(i, b.length))
+      console.log(p)
+      packets.push(p.packet)
+      i += p.length
     }
     return { operator: { id, packets }, length: i }
   }
   return id
 }
 
-const p1 = (b) => ppacket(b)
-const p2 = (g) => shortestPath(expand(g))
+const p1 = (b) => packet(b)
 
 const bits = parse(input)
 console.log(p1(bits))
-// console.log(p2(g))
