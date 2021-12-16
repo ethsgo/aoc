@@ -88,14 +88,14 @@ function versionSum(p) {
 function eval(p) {
   const ev = (p.packets ?? []).map(eval)
   switch (p.type) {
-    case 0: return ev.reduce((a, x) => a + x, BigInt(0))
-    case 1: return ev.reduce((a, x) => a * x, BigInt(1))
-    case 2: return ev.reduce((a, x) => a < x ? a : x, BigInt.max)
-    case 3: return ev.reduce((a, x) => a > x ? a : x, BigInt(0))
-    case 4: return BigInt(p.literal)
-    case 5: return BigInt(ev[0] > ev[1])
-    case 6: return BigInt(ev[0] < ev[1])
-    case 7: return BigInt(ev[0] === ev[1])
+    case 0: return ev.reduce((a, x) => a + x, 0)
+    case 1: return ev.reduce((a, x) => a * x, 1)
+    case 2: return ev.reduce((a, x) => a < x ? a : x, Number.max)
+    case 3: return ev.reduce((a, x) => a > x ? a : x, 0)
+    case 4: return p.literal
+    case 5: return Number(ev[0] > ev[1])
+    case 6: return Number(ev[0] < ev[1])
+    case 7: return Number(ev[0] === ev[1])
     }
 }
 
