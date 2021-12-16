@@ -127,17 +127,64 @@ contract _16Parser is Parser {
 contract _16 is _16Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         Packet memory packet = parse(input);
-        return (p1(packet), 0);
+        return (p1(packet), p2(packet));
     }
 
     function p1(Packet memory packet) private returns (uint256) {
         return versionSum(packet);
     }
 
-    function versionSum(Packet memory packet) private returns (uint256 sum) {
-        sum = packet.version;
+    function p2(Packet memory packet) private returns (uint256) {
+        return eval(packet);
+    }
+
+    function versionSum(Packet memory packet) private returns (uint256 r) {
+        r = packet.version;
         for (uint256 i = 0; i < packet.packets.length; i++) {
-            sum += versionSum(packet.packets[i]);
+            r += versionSum(packet.packets[i]);
+        }
+    }
+
+    function eval(Packet memory packet) private returns (uint256) {
+        uint256 t = packet.ptype;
+        Packet[] memory packets = packet.packets;
+        if (t == 0) return sum(packets);
+        if (t == 1) return product(packets);
+        if (t == 2) return min(packets);
+        if (t == 3) return max(packets);
+        if (t == 4) return packet.literal;
+        if (t == 5) return eval(packets[0]) < eval(packets[1]) ? 1 : 0;
+        if (t == 6) return eval(packets[0]) > eval(packets[1]) ? 1 : 0;
+        if (t == 7) return eval(packets[0]) == eval(packets[1]) ? 1 : 0;
+        revert();
+    }
+
+    function sum(Packet[] memory packets) private returns (uint256 r) {
+        for (uint256 i = 0; i < packets.length; i++) {
+            r += eval(packets[i]);
+        }
+    }
+
+    function product(Packet[] memory packets) private returns (uint256 r) {
+        r = 1;
+        for (uint256 i = 0; i < packets.length; i++) {
+            r *= eval(packets[i]);
+        }
+    }
+
+    function min(Packet[] memory packets) private returns (uint256 r) {
+        r = eval(packets[0]);
+        for (uint256 i = 1; i < packets.length; i++) {
+            uint256 e = eval(packets[i]);
+            if (e < r) r = e;
+        }
+    }
+
+    function max(Packet[] memory packets) private returns (uint256 r) {
+        r = eval(packets[0]);
+        for (uint256 i = 1; i < packets.length; i++) {
+            uint256 e = eval(packets[i]);
+            if (e > r) r = e;
         }
     }
 }
