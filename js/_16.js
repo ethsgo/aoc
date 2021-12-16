@@ -86,29 +86,21 @@ function versionSum(p) {
 }
 
 function eval(p) {
-  const [u, v] = p.packets ?? []
+  const ev = (p.packets ?? []).map(eval)
   switch (p.type) {
-    case 0:
-      return v ? eval(u) + eval(v) : eval(u)
-    case 1:
-      return v ? eval(u) * eval(v) : eval(u)
-    case 2:
-      return Math.min(...p.packets.map(eval))
-    case 3:
-      return Math.max(...p.packets.map(eval))
-    case 4:
-      return p.literal
-    case 5:
-      return eval(u) > eval(v) ? 1 : 0
-    case 6:
-      return eval(u) < eval(v) ? 1 : 0
-    case 7:
-      return eval(u) === eval(v) ? 1 : 0
+    case 0: return ev.reduce((a, x) => a + x, BigInt(0))
+    case 1: return ev.reduce((a, x) => a * x, BigInt(1))
+    case 2: return ev.reduce((a, x) => a < x ? a : x, BigInt.max)
+    case 3: return ev.reduce((a, x) => a > x ? a : x, BigInt(0))
+    case 4: return BigInt(p.literal)
+    case 5: return BigInt(ev[0] > ev[1])
+    case 6: return BigInt(ev[0] < ev[1])
+    case 7: return BigInt(ev[0] === ev[1])
     }
 }
 
 const p1 = versionSum
-const p2 = eval
+const p2 = (p) => eval(p).toString()
 
 const bits = parse(input)
 const pkt = packet(bits).packet

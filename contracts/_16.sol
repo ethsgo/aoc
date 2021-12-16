@@ -153,8 +153,8 @@ contract _16 is _16Parser {
         if (t == 2) return min(packets);
         if (t == 3) return max(packets);
         if (t == 4) return packet.literal;
-        if (t == 5) return eval(packets[0]) < eval(packets[1]) ? 1 : 0;
-        if (t == 6) return eval(packets[0]) > eval(packets[1]) ? 1 : 0;
+        if (t == 5) return eval(packets[0]) > eval(packets[1]) ? 1 : 0;
+        if (t == 6) return eval(packets[0]) < eval(packets[1]) ? 1 : 0;
         if (t == 7) return eval(packets[0]) == eval(packets[1]) ? 1 : 0;
         revert();
     }
