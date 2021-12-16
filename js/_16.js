@@ -85,12 +85,30 @@ function versionSum(p) {
   return c
 }
 
-function eval2(p) {
-  return p
+function eval(p) {
+  const [u, v] = p.packets ?? []
+  switch (p.type) {
+    case 0:
+      return v ? eval(u) + eval(v) : eval(u)
+    case 1:
+      return v ? eval(u) * eval(v) : eval(u)
+    case 2:
+      return Math.min(...p.packets.map(eval))
+    case 3:
+      return Math.max(...p.packets.map(eval))
+    case 4:
+      return p.literal
+    case 5:
+      return eval(u) > eval(v) ? 1 : 0
+    case 6:
+      return eval(u) < eval(v) ? 1 : 0
+    case 7:
+      return eval(u) === eval(v) ? 1 : 0
+    }
 }
 
 const p1 = versionSum
-const p2 = eval2
+const p2 = eval
 
 const bits = parse(input)
 const pkt = packet(bits).packet
