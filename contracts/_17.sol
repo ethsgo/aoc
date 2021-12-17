@@ -27,9 +27,9 @@ contract _17 is _17Parser {
         pure
         returns (uint256 ymax, uint256 count)
     {
-        for (int256 x = 0; x < ta[1]; x++) {
-            for (int256 y = ta[2]; y < -ta[2]; y++) {
-                (bool hit, uint256 ym) = valid(ta, [x, y]);
+        for (int256 x = 0; x <= ta[1]; x++) {
+            for (int256 y = ta[2]; y <= -ta[2]; y++) {
+                (bool hit, uint256 ym) = valid(ta, x, y);
                 if (hit) {
                     count++;
                     if (ym > ymax) ymax = ym;
@@ -38,26 +38,24 @@ contract _17 is _17Parser {
         }
     }
 
-    function valid(int256[4] memory ta, int256[2] memory v)
-        private
-        pure
-        returns (bool hit, uint256 ymax)
-    {
-        int256[2] memory p = [int256(0), 0];
-        while (p[0] <= ta[1] && p[1] >= ta[2]) {
-            p[0] += v[0];
-            p[1] += v[1];
-            if (
-                (p[0] >= ta[0] && p[0] <= ta[1]) &&
-                (p[1] >= ta[2] && p[1] <= ta[3])
-            ) {
+    function valid(
+        int256[4] memory ta,
+        int256 vx,
+        int256 vy
+    ) private pure returns (bool hit, uint256 ymax) {
+        int256 px;
+        int256 py;
+        while (px <= ta[1] && py >= ta[2]) {
+            px += vx;
+            py += vy;
+            if (px >= ta[0] && px <= ta[1] && py >= ta[2] && py <= ta[3]) {
                 return (true, ymax);
             }
-            if (p[1] > 0 && uint256(p[1]) > ymax) {
-                ymax = uint256(p[1]);
+            if (py > 0 && uint256(py) > ymax) {
+                ymax = uint256(py);
             }
-            v[0] = v[0] > 0 ? v[0] - 1 : v[0] < 0 ? v[0] + 1 : int256(0);
-            v[1] = v[1] - 1;
+            vx = vx > 0 ? vx - 1 : vx < 0 ? vx + 1 : int256(0);
+            vy = vy - 1;
         }
     }
 }
