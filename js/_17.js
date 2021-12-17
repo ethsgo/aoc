@@ -28,7 +28,6 @@ function valid(ta, v) {
 function trajectories(ta) {
   let r = 0
   let c = 0
-  let yr = Math.abs()
   for (let x = 0; x <= ta[1]; x++) {
     for (let y = ta[2]; y <= -ta[2]; y++) {
       const v = [x, y]

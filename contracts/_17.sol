@@ -6,10 +6,7 @@ import "./Parser.sol";
 contract _17Parser is Parser {
     string private constant exampleInput = "target area: x=20..30, y=-10..-5";
 
-    function parse(string memory input)
-        internal
-        returns (int256[4] memory ta)
-    {
+    function parse(string memory input) internal returns (int256[4] memory ta) {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         int256[] memory xs = parseInts(s);
@@ -27,6 +24,40 @@ contract _17 is _17Parser {
 
     function trajectories(int256[4] memory ta)
         private
+        pure
         returns (uint256 ymax, uint256 count)
-    {}
+    {
+        for (int256 x = 0; x < ta[1]; x++) {
+            for (int256 y = ta[2]; y < -ta[2]; y++) {
+                (bool hit, uint256 ym) = valid(ta, [x, y]);
+                if (hit) {
+                    count++;
+                    if (ym > ymax) ymax = ym;
+                }
+            }
+        }
+    }
+
+    function valid(int256[4] memory ta, int256[2] memory v)
+        private
+        pure
+        returns (bool hit, uint256 ymax)
+    {
+        int256[2] memory p = [int256(0), 0];
+        while (p[0] <= ta[1] && p[1] >= ta[2]) {
+            p[0] += v[0];
+            p[1] += v[1];
+            if (
+                (p[0] >= ta[0] && p[0] <= ta[1]) &&
+                (p[1] >= ta[2] && p[1] <= ta[3])
+            ) {
+                return (true, ymax);
+            }
+            if (p[1] > 0 && uint256(p[1]) > ymax) {
+                ymax = uint256(p[1]);
+            }
+            v[0] = v[0] > 0 ? v[0] - 1 : v[0] < 0 ? v[0] + 1 : int256(0);
+            v[1] = v[1] - 1;
+        }
+    }
 }
