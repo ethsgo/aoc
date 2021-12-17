@@ -10,39 +10,38 @@ const parse = (input) =>
     .slice(1, 5)
     .map(Number)
 
-function valid(t, v) {
+// ta: target area
+function valid(ta, v) {
   let p = [0, 0]
-  let maxY = 0
-  while (p[0] <= t[1] && p[1] >= t[2]) {
-    p = [p[0] + v[0], p[1] + v[1]]
+  let ymax = 0
+  while (p[0] <= ta[1] && p[1] >= ta[2]) {
+    const np = [p[0] + v[0], p[1] + v[1]]
+    if (np[0] >= ta[0] && np[0] <= ta[1] && np[1] >= ta[2] && np[1] <= ta[3])
+      return { hit: true, ymax }
+    ymax = Math.max(ymax, p[1])
+    p = np
     v = [v[0] > 0 ? v[0] - 1 : v[0] < 0 ? v[0] + 1 : 0, v[1] - 1]
-    maxY = Math.max(maxY, p[1])
-    if (p[0] >= t[0] && p[0] <= t[1] && p[1] >= t[2] && p[1] <= t[3])
-      return maxY
   }
-  return 0
+  return { hit: false, ymax }
 }
 
-function validTrajectories(target) {
-  let maxY = 0
+function trajectoryWithMaxY(ta) {
+  let r = 0
   let c = 0
-  for (let x = 0; x <= target[1]; x++) {
-    for (let y = target[2]; y <= -target[2]; y++) {
+  let yr = Math.abs(ta[2])
+  for (let x = 0; x <= ta[1]; x++) {
+    for (let y = -yr; y <= yr; y++) {
       const v = [x, y]
-      const ym = valid(ta, v)
-      if (ym > 0) {
-        c++
-        if (ym > maxY) maxY = ym
-      }
+      const { hit, ymax } = valid(ta, v)
+      // console.log(v, hit, ymax)
+      if (hit) c++
+      if (hit && ymax > r) r = ymax
     }
   }
-  return { maxY, count: c }
+  return [r, c]
 }
 
-const target = parse(input)
-const { maxY, count } = validTrajectories(target)
-const p1 = maxY
-const p2 = count
+const p1 = (ta) => trajectoryWithMaxY(ta)
 
-console.log(p1)
-console.log(p2)
+const ta = parse(input)
+console.log(p1(ta))
