@@ -14,6 +14,7 @@ contract Parser {
     /// Only storage arrays have a .push function, so we need to keep the
     /// internal array used by the parse methods as a state variable.
     uint256[] private xsStorage;
+    int256[] private xiStorage;
     string[] private tokensStorage;
 
     /// Convert the given string into an array of uints.
@@ -23,7 +24,7 @@ contract Parser {
         return parseUintsSlice(s, 0, bytes(s).length);
     }
 
-    /// Convert the given string slice into an array of integers.
+    /// Convert the given string slice into an array of uints.
     ///
     /// startIndex and endIndex behave similar to arguments to the Javascript
     /// Array.slice method, i.e, we parse [startIndex, endIndex), the start
@@ -70,6 +71,60 @@ contract Parser {
         // The return type has data location memory, so we return a copy
         // (instead of a pointer to our internal storage).
         return xs;
+    }
+
+    /// Convert the given string into an array of ints.
+    ///
+    /// Any non-digit character acts as a separator.
+    function parseInts(string memory s) internal returns (int256[] memory) {
+        return parseIntsSlice(s, 0, bytes(s).length);
+    }
+
+    /// Convert the given string slice into an array of integers.
+    ///
+    /// See: parseUintsSlice for more details.
+    function parseIntsSlice(
+        string memory s,
+        uint256 startIndex,
+        uint256 endIndex
+    ) internal returns (int256[] memory) {
+        // Strings are not indexable.
+        bytes memory b = bytes(s);
+
+        // Clear the stored array, emptying it.
+        delete xiStorage;
+        // Get a local reference to the storage.
+        int256[] storage xi = xiStorage;
+
+        uint256 x;
+        bool negative = false;
+        bool didSeeDigit = false;
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            uint8 ascii = uint8(b[i]);
+            if (ascii == uint8(bytes1("-")) && x == 0) {
+                negative = true;
+            } else if (ascii >= ascii_0 && ascii <= ascii_9) {
+                uint256 digit = ascii - ascii_0;
+                x *= 10;
+                x += digit;
+
+                didSeeDigit = true;
+            } else {
+                if (didSeeDigit) {
+                    xi.push(negative ? -int256(x) : int256(x));
+                }
+                x = 0;
+                didSeeDigit = false;
+            }
+        }
+
+        if (didSeeDigit) {
+            xi.push(negative ? -int256(x) : int256(x));
+        }
+
+        // The return type has data location memory, so we return a copy
+        // (instead of a pointer to our internal storage).
+        return xi;
     }
 
     /// Convert the given string into an array of tokens.
