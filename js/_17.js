@@ -11,11 +11,10 @@ const parse = (input) =>
     .map(Number)
 
 // ta: target area
-function trajectoryWithMaxY(ta) {
-  let v = [7, 2]
+function valid(ta, v) {
   let p = [0, 0]
   while (p[0] <= ta[1] && p[1] >= ta[2]) {
-    console.log(p)
+    // console.log(p)
     const np = [p[0] + v[0], p[1] + v[1]]
     if (np[0] >= ta[0] && np[0] <= ta[1] && np[1] >= ta[2] && np[1] <= ta[3])
       return true
@@ -23,6 +22,14 @@ function trajectoryWithMaxY(ta) {
     v = [v[0] > 0 ? v[0] - 1 : v[0] < 0 ? v[0] + 1 : 0, v[1] - 1]
   }
   return false
+}
+
+function trajectoryWithMaxY(ta) {
+  // let v = [7, 2]
+  // let v = [6, 3]
+  // let v = [9, 0]
+  let v = [17, -4]
+  return valid(ta, v)
 }
 
 const p1 = (ta) => trajectoryWithMaxY(ta)
