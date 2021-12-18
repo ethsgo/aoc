@@ -93,22 +93,22 @@ function magnitude(xs) {
   }
 }
 
-const sum = (xs) => xs.slice(1, xs.length).reduce(add, xs[0])
+const sum = (xss) => xss.slice(1, xss.length).reduce(add, xss[0])
 
-const p1 = (xs) => magnitude(sum(xs))
+const p1 = (xss) => magnitude(sum(xss))
 
-function p2(xs) {
+function p2(xss) {
   let maxm = 0
-  for (let i = 0; i < xs.length; i++) {
-    for (let j = 0; j < xs.length; j++) {
+  for (let i = 0; i < xss.length; i++) {
+    for (let j = 0; j < xss.length; j++) {
       if (i === j) continue
-      const m = magnitude(add(xs[i], xs[j]))
+      const m = magnitude(add(xss[i], xss[j]))
       if (m > maxm) maxm = m
     }
   }
   return maxm
 }
 
-const xs = parse(input)
-console.log(p1(xs))
-console.log(p2(xs))
+const xss = parse(input)
+console.log(p1(xss))
+console.log(p2(xss))
