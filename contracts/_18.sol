@@ -56,20 +56,8 @@ contract _18Parser is Parser {
     }
 }
 
-contract _18 is _18Parser, StringUtils {
-    function main(string calldata input) external returns (uint256, uint256) {
-        uint256[2][][] memory xss = parse(input);
-        return (p1(xss), 0);
-    }
-
-    function p1(uint256[2][][] memory xss) private view returns (uint256) {
-        print(xss[0]);
-        uint256[2][] memory ys = explode(xss[0]);
-        print(ys);
-        return xss.length;
-    }
-
-    function print(uint256[2][] memory xs) private view {
+contract _18ArrayUtils is StringUtils {
+    function print(uint256[2][] memory xs) internal view {
         bytes memory bs;
         for (uint256 i = 0; i < xs.length; i++) {
             bs = bytes.concat(
@@ -83,17 +71,8 @@ contract _18 is _18Parser, StringUtils {
         console.log(string(bs));
     }
 
-    function explode(uint256[2][] memory xs)
-        private
-        pure
-        returns (uint256[2][] memory ys)
-    {
-        ys = remove(xs, 0);
-        ys = insert(ys, 0, [uint256(3), 5]);
-    }
-
     function remove(uint256[2][] memory xs, uint256 i)
-        private
+        internal
         pure
         returns (uint256[2][] memory ys)
     {
@@ -106,10 +85,33 @@ contract _18 is _18Parser, StringUtils {
         uint256[2][] memory xs,
         uint256 i,
         uint256[2] memory x
-    ) private pure returns (uint256[2][] memory ys) {
+    ) internal pure returns (uint256[2][] memory ys) {
         ys = new uint256[2][](xs.length + 1);
         for (uint256 j = 0; j <= i; j++) ys[j] = xs[j];
         ys[i] = x;
         for (; i < xs.length; i++) ys[i + 1] = xs[i];
+    }
+}
+
+contract _18 is _18Parser, _18ArrayUtils {
+    function main(string calldata input) external returns (uint256, uint256) {
+        uint256[2][][] memory xss = parse(input);
+        return (p1(xss), 0);
+    }
+
+    function p1(uint256[2][][] memory xss) private view returns (uint256) {
+        print(xss[0]);
+        uint256[2][] memory ys = explode(xss[0]);
+        print(ys);
+        return xss.length;
+    }
+
+    function explode(uint256[2][] memory xs)
+        private
+        pure
+        returns (uint256[2][] memory ys)
+    {
+        ys = remove(xs, 0);
+        ys = insert(ys, 0, [uint256(3), 5]);
     }
 }
