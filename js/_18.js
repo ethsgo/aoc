@@ -33,6 +33,7 @@ function explode(xs) {
       xs.splice(i + 1, 1)
       if (i > 0) xs[i - 1][0] += xl
       if (i + 1 < xs.length) xs[i + 1][0] += xr
+      console.log('after explode', JSON.stringify(xs))
       return true
     }
   }
@@ -47,6 +48,7 @@ function split(xs) {
       const xr = Math.ceil(v / 2)
       xs[i] = [xl, depth + 1]
       xs.splice(i + 1, 0, [xr, depth + 1])
+      console.log('after split', JSON.stringify(xs))
       return true
     }
   }
@@ -55,6 +57,7 @@ function split(xs) {
 
 function p1(ns) {
   const xs = linearize(ns)
+  console.log('initial', JSON.stringify(xs))
   while (explode(xs) || split(xs)) {}
   return xs
 }
@@ -63,4 +66,6 @@ const ns = parse(input)
 // console.log(p1(ns))
 // console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
 // console.log(p1([7,[6,[5,[4,[3,2]]]]]))
-console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
+// console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
+// prettier-ignore
+console.log(JSON.stringify(p1([[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]])))
