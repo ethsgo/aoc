@@ -7,6 +7,7 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
+        "[[[[[9,8],1],2],3],4]\n"
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
         "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]\n"
@@ -63,6 +64,8 @@ contract _18 is _18Parser, StringUtils {
 
     function p1(uint256[2][][] memory xss) private view returns (uint256) {
         print(xss[0]);
+        uint256[2][] memory ys = explode(xss[0]);
+        print(ys);
         return xss.length;
     }
 
@@ -79,5 +82,22 @@ contract _18 is _18Parser, StringUtils {
         }
         console.log(string(bs));
     }
-    // function explode(uint[2][] memory xs)
+
+    function explode(uint256[2][] memory xs)
+        private
+        pure
+        returns (uint256[2][] memory ys)
+    {
+        ys = remove(xs, 0);
+    }
+
+    function remove(uint256[2][] memory xs, uint256 i)
+        private
+        pure
+        returns (uint256[2][] memory ys)
+    {
+        ys = new uint256[2][](xs.length - 1);
+        for (uint256 j = 0; j < i; j++) ys[j] = xs[j];
+        for (; i < xs.length - 1; i++) ys[i] = xs[i + 1];
+    }
 }
