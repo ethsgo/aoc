@@ -75,10 +75,12 @@ function tree(xs) {
       if (nd === depth) {
         xs[i] = [[v, nv], depth - 1]
         xs.splice(i + 1, 1)
+        i = 0
       } else {
         i++
       }
     } else {
+      console.log(xs)
       return v
     }
   }
@@ -89,7 +91,9 @@ function magnitude(xs) {
     if (typeof t === 'number') return t
     return 3 * m(t[0]) + 2 * m(t[1])
   }
-  return m(tree(xs))
+  const t = tree(xs)
+  console.log(t)
+  return m(t)
 }
 
 function p1(ns) {
@@ -105,5 +109,9 @@ const ns = parse(input)
 // console.log(p1([7,[6,[5,[4,[3,2]]]]]))
 // console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
 // prettier-ignore
-console.log(magnitude(linearize([[1,2],[[3,4],5]])))
+// console.log(magnitude(linearize([9,1])))
+// prettier-ignore
+console.log(magnitude(linearize([[9,1],[1,9]])))
+// prettier-ignore
+// console.log(magnitude(linearize([[1,2],[[3,4],5]])))
 // console.log(p1(ns))
