@@ -62,16 +62,17 @@ function split(xs) {
   return false
 }
 
+function reduce(xs) {
+  while (explode(xs) || split(xs)) {}
+  return xs
+}
+
 function join(xs, ys) {
   const deepen = (xs) => xs.map((e) => [e[0], e[1] + 1])
   return [...deepen(xs), ...deepen(ys)]
 }
 
-function add(xs, ys) {
-  let zs = join(xs, ys)
-  while (explode(zs) || split(zs)) {}
-  return zs
-}
+const add = (xs, ys) => reduce(join(xs, ys))
 
 function magnitude(xs) {
   xs = [...xs]

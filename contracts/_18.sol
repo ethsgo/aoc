@@ -7,7 +7,9 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
-        "[[[[[9,8],1],2],3],4]\n"
+        "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]\n"
+        "[[[[4,3],4],4],[7,[[8,4],9]]]\n"
+        "[1,1]\n"
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
         "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]\n"
@@ -101,11 +103,31 @@ contract _18 is _18Parser, _18ArrayUtils {
 
     function p1(uint256[2][][] memory xss) private view returns (uint256) {
         print(xss[0]);
-        (uint256[2][] memory ys, bool didExplode) = explode(xss[0]);
-        if (didExplode) {
-            print(ys);
-        }
+        uint256[2][] memory ys = reduce(xss[0]);
+        print(ys);
+
         return xss.length;
+    }
+
+    function reduce(uint256[2][] memory xs)
+        private
+        pure
+        returns (uint256[2][] memory)
+    {
+        while (true) {
+            (uint256[2][] memory ys, bool didExplode) = explode(xs);
+            if (didExplode) {
+                xs = ys;
+            } else {
+                (uint256[2][] memory zs, bool didSplit) = split(xs);
+                if (didSplit) {
+                    xs = zs;
+                } else {
+                    return xs;
+                }
+            }
+        }
+        revert();
     }
 
     function explode(uint256[2][] memory xs)
@@ -121,6 +143,23 @@ contract _18 is _18Parser, _18ArrayUtils {
                 ys[i] = [uint256(0), 4];
                 if (i > 0) ys[i - 1][0] += xl;
                 if (i + 1 < ys.length) ys[i + 1][0] += xr;
+                return (ys, true);
+            }
+        }
+    }
+
+    function split(uint256[2][] memory xs)
+        private
+        pure
+        returns (uint256[2][] memory ys, bool didSplit)
+    {
+        for (uint256 i = 0; i < xs.length; i++) {
+            if (xs[i][0] >= 10) {
+                uint256 depth = xs[i][1];
+                uint256 xl = xs[i][0] / 2;
+                uint256 xr = (xs[i][0] + 1) / 2;
+                ys = insert(xs, i + 1, [xr, depth + 1]);
+                ys[i] = [xl, depth + 1];
                 return (ys, true);
             }
         }
