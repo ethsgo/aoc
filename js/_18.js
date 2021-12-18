@@ -66,16 +66,44 @@ function add(xs, ys) {
   return zs
 }
 
+function tree(xs) {
+  let i = 0
+  while (true) {
+    let [v, depth] = xs[i]
+    if (i + 1 < xs.length) {
+      let [nv, nd] = xs[i + 1]
+      if (nd === depth) {
+        xs[i] = [[v, nv], depth - 1]
+        xs.splice(i + 1, 1)
+      } else {
+        i++
+      }
+    } else {
+      return v
+    }
+  }
+}
+
+function magnitude(xs) {
+  function m(t) {
+    if (typeof t === 'number') return t
+    return 3 * m(t[0]) + 2 * m(t[1])
+  }
+  return m(tree(xs))
+}
+
 function p1(ns) {
   const ls = ns.map(linearize)
-  console.log(ls)
-  return ls.slice(1, ls.length).reduce(add, ls[0])
+  const sum = ls.slice(1, ls.length).reduce(add, ls[0])
+  return magnitude(sum)
 }
 
 const ns = parse(input)
 // console.log(p1(ns))
 // console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
+// console.log(JSON.stringify(tree(linearize([[[[[9, 8], 1], 2], 3], 4]))))
 // console.log(p1([7,[6,[5,[4,[3,2]]]]]))
 // console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
-
-console.log(p1(ns))
+// prettier-ignore
+console.log(magnitude(linearize([[1,2],[[3,4],5]])))
+// console.log(p1(ns))
