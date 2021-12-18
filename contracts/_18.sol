@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./Parser.sol";
+import "./StringUtils.sol";
+import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
@@ -53,13 +55,22 @@ contract _18Parser is Parser {
     }
 }
 
-contract _18 is _18Parser {
+contract _18 is _18Parser, StringUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2][][] memory xss = parse(input);
         return (p1(xss), 0);
     }
 
-    function p1(uint256[2][][] memory xss) private pure returns (uint256) {
+    function p1(uint256[2][][] memory xss) private view returns (uint256) {
+        console.log(uintString(23));
         return xss.length;
     }
+
+    function print(uint256[2][] memory xs) private returns (uint256) {
+        // bytes memory bs;
+        // for (uint i = 0; i < xs.length; x++) {
+        // }
+        // return xss.length;
+    }
+    // function explode(uint[2][] memory xs)
 }

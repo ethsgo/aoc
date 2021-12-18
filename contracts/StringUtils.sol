@@ -12,4 +12,18 @@ contract StringUtils {
         }
         return -1;
     }
+
+    /// Return a string representation of the given uint.
+    ///
+    /// Useful for combining arrays when console logging.
+    function uintString(uint256 x) internal pure returns (string memory) {
+        if (x == 0) return "0";
+        return string(_uintString(x));
+    }
+
+    function _uintString(uint256 x) private pure returns (bytes memory) {
+        if (x == 0) return bytes.concat();
+        bytes1 b = bytes1(uint8(bytes1("0")) + (uint8(x) % 10));
+        return bytes.concat(_uintString(x / 10), b);
+    }
 }
