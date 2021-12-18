@@ -11,24 +11,37 @@ const parse = (input) => input.split('\n').map(JSON.parse)
 
 function treeTop(n) {
   console.log(`before - ${JSON.stringify(n)}`)
-  const m = tree(n, 0)
+  const m = tree({ n: n, depth: 0 }).v
   console.log(`after  - ${JSON.stringify(m)}`)
   console.log(`orignl - ${JSON.stringify(n)}`)
 }
 
-function tree(n, depth) {
+function tree({ n, depth, didExplode, debris }) {
+  if (didExplode && !debris) return n
   if (typeof n === 'number') {
-    console.log(`depth ${depth} leaf - regular number - ${n}`)
-    return n
+    if (typeof debris === 'number') {
+      console.log(
+        `depth ${depth} leaf - regular number - ${n} - debris ${debris}`
+      )
+      return { v: n + debris }
+    } else {
+      console.log(`depth ${depth} leaf - regular number - ${n}`)
+      return { v: n }
+    }
   } else {
     console.log(`depth ${depth} pair - ${JSON.stringify(n)}`)
     if (depth === 4) {
       console.log(`explode!`)
-      return 0
+      return { v: 0, didExplode: true, debris: n[1] }
     } else {
-      const l = tree(n[0], depth + 1)
-      const r = tree(n[1], depth + 1)
-      return [l, r]
+      const l = tree({ n: n[0], depth: depth + 1, didExplode, debris })
+      const r = tree({
+        n: n[1],
+        depth: depth + 1,
+        didExplode: l.didExplode,
+        debris: l.debris,
+      })
+      return { v: [l.v, r.v], didExplode: r.didExplode, debris: r.debris }
     }
   }
 }
