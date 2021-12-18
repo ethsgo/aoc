@@ -15,20 +15,21 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
 }
 
-const parse = (input) => input.split('\n').map(JSON.parse)
+const parse = (input) => input.split('\n').map(parseNum)
 
-function linearize(n) {
-  function lin(n, depth) {
-    if (typeof n === 'number') {
-      return [[n, depth]]
-    } else {
-      const l = lin(n[0], depth + 1)
-      const r = lin(n[1], depth + 1)
-      return [...l, ...r]
+function parseNum(s) {
+  let depth = 0
+  let r = []
+  for (const c of s) {
+    if (c === '[') {
+      depth += 1
+    } else if (c === ']') {
+      depth -= 1
+    } else if (c !== ',') {
+      r.push([parseInt(c, 10), depth])
     }
   }
-
-  return lin(n, 0)
+  return r
 }
 
 function explode(xs) {
@@ -108,7 +109,6 @@ function p2(xs) {
   return maxm
 }
 
-const ns = parse(input)
-const xs = ns.map(linearize)
+const xs = parse(input)
 console.log(p1(xs))
 console.log(p2(xs))
