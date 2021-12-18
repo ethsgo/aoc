@@ -134,6 +134,7 @@ contract _18ArrayUtils is StringUtils {
 contract _18Tree is _18Parser, _18ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         Node[] memory xss = parse(input);
+        console.log(treeToString(xss[0]));
         return (xss.length, 0); //(p1(xss), p2(xss));
     }
 
@@ -149,6 +150,33 @@ contract _18Tree is _18Parser, _18ArrayUtils {
                 if (m > max) max = m;
             }
         }
+    }
+
+    function _treeToString(Node memory xs)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        if (xs.children.length == 0) {
+            return bytes(uintString(xs.value));
+        } else {
+            return
+                bytes.concat(
+                    bytes("("),
+                    _treeToString(xs.children[0]),
+                    bytes(","),
+                    _treeToString(xs.children[1]),
+                    bytes(")")
+                );
+        }
+    }
+
+    function treeToString(Node memory xs)
+        internal
+        pure
+        returns (string memory)
+    {
+        return string(_treeToString(xs));
     }
 
     function reduce(uint256[2][] memory xs)
