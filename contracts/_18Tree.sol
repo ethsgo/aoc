@@ -58,7 +58,7 @@ contract _18Parser is Parser {
             // Nested pair
             (n1, j) = parseNum(bs, j);
         } else {
-            console.log(string(bytes.concat(bs[j])));
+            // console.log(string(bytes.concat(bs[j])));
             v = parseDigit(bs[j]);
             j++;
         }
@@ -79,7 +79,11 @@ contract _18Parser is Parser {
                 // Nested pair
                 (n2, j) = parseNum(bs, j);
             } else {
-                v = parseDigit(bs[j++]);
+                v = parseDigit(bs[j]);
+                j++;
+                require(bs[j] == "]");
+                j++;
+
                 n2 = Node({value: v, children: new Node[](0)});
             }
 
