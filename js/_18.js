@@ -105,6 +105,7 @@ function magnitude(xs) {
 }
 
 function m2(xs) {
+  xs = [...xs]
   let i = 0
   while (true) {
     let [v, depth] = xs[i]
@@ -127,7 +128,8 @@ function m2(xs) {
 function p1(ns) {
   const ls = ns.map(linearize)
   const sum = ls.slice(1, ls.length).reduce(add, ls[0])
-  return magnitude(sum)
+  return [m2(sum), magnitude(sum)]
+  // return [magnitude(sum), m2(sum)]
 }
 
 function p2(ns) {
@@ -137,6 +139,10 @@ function p2(ns) {
     for (let j = 0; j < xs.length; j++) {
       if (i === j) continue
       const m = magnitude(add(xs[i], xs[j]))
+      const me = m2(add(xs[i], xs[j]))
+      if (m !== me) {
+        return 0
+      }
       if (m > maxm) maxm = m
     }
   }
@@ -151,7 +157,7 @@ const ns = parse(input)
 // console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
 // prettier-ignore
 console.log(magnitude(linearize([9,1])))
-console.log(m2(linearize([9,1])))
+console.log(m2(linearize([9, 1])))
 // prettier-ignore
 // console.log(magnitude(linearize([[9,1],[1,9]])))
 // prettier-ignore
@@ -161,5 +167,5 @@ console.log(m2(linearize([[1,2],[[3,4],5]])))
 
 // prettier-ignore
 // console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
-// console.log(p1(ns))
-// console.log(p2(ns))
+console.log(p1(ns))
+console.log(p2(ns))
