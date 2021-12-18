@@ -55,11 +55,21 @@ function split(xs) {
   return false
 }
 
+function join(xs, ys) {
+  const deepen = (xs) => xs.map((e) => [e[0], e[1] + 1])
+  return [...deepen(xs), ...deepen(ys)]
+}
+
+function add(xs, ys) {
+  let zs = join(xs, ys)
+  while (explode(zs) || split(zs)) {}
+  return zs
+}
+
 function p1(ns) {
-  const xs = linearize(ns)
-  console.log('initial', JSON.stringify(xs))
-  while (explode(xs) || split(xs)) {}
-  return xs
+  const ls = ns.map(linearize)
+  console.log(ls)
+  return ls.slice(1, ls.length).reduce(add, ls[0])
 }
 
 const ns = parse(input)
@@ -67,5 +77,5 @@ const ns = parse(input)
 // console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
 // console.log(p1([7,[6,[5,[4,[3,2]]]]]))
 // console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
-// prettier-ignore
-console.log(JSON.stringify(p1([[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]])))
+
+console.log(p1(ns))
