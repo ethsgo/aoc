@@ -16,8 +16,19 @@ function treeTop(n) {
   console.log(`orignl - ${JSON.stringify(n)}`)
 }
 
+function addLeftDebris({ n, debris }) {
+  if (!debris) return { v: n }
+  if (typeof n === 'number') {
+    return { v: n + debris }
+  } else {
+    const r = addLeftDebris({ n: n[1], debris })
+    const l = addLeftDebris({ n: n[0], debris: r.debris })
+    return { v: [l.v, r.v], debris: l.debris }
+  }
+}
+
 function tree({ n, depth, didExplode, debris }) {
-  if (didExplode && !debris) return n
+  if (didExplode && !debris) return { v: n }
   if (typeof n === 'number') {
     if (typeof debris === 'number') {
       console.log(
