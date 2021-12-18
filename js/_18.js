@@ -1,6 +1,14 @@
 let input = `
-[[[[4,3],4],4],[7,[[8,4],9]]]
-[1,1]
+[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+[[[5,[2,8]],4],[5,[[9,9],0]]]
+[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+[[[[5,4],[7,7]],8],[[8,3],8]]
+[[9,3],[[9,9],[6,[4,9]]]]
+[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]
 `.trim()
 
 if (!process.stdin.isTTY) {
@@ -33,7 +41,7 @@ function explode(xs) {
       xs.splice(i + 1, 1)
       if (i > 0) xs[i - 1][0] += xl
       if (i + 1 < xs.length) xs[i + 1][0] += xr
-      console.log('after explode', JSON.stringify(xs))
+      // console.log('after explode', JSON.stringify(xs))
       return true
     }
   }
@@ -48,7 +56,7 @@ function split(xs) {
       const xr = Math.ceil(v / 2)
       xs[i] = [xl, depth + 1]
       xs.splice(i + 1, 0, [xr, depth + 1])
-      console.log('after split', JSON.stringify(xs))
+      // console.log('after split', JSON.stringify(xs))
       return true
     }
   }
@@ -80,7 +88,7 @@ function tree(xs) {
         i++
       }
     } else {
-      console.log(xs)
+      // console.log(xs)
       return v
     }
   }
@@ -92,7 +100,7 @@ function magnitude(xs) {
     return 3 * m(t[0]) + 2 * m(t[1])
   }
   const t = tree(xs)
-  console.log(t)
+  // console.log(t)
   return m(t)
 }
 
@@ -113,8 +121,8 @@ const ns = parse(input)
 // prettier-ignore
 // console.log(magnitude(linearize([[9,1],[1,9]])))
 // prettier-ignore
-console.log(magnitude(linearize([[1,2],[[3,4],5]])))
+// console.log(magnitude(linearize([[1,2],[[3,4],5]])))
 
 // prettier-ignore
-console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
-// console.log(p1(ns))
+// console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
+console.log(p1(ns))
