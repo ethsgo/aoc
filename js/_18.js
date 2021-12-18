@@ -41,7 +41,6 @@ function explode(xs) {
       xs.splice(i + 1, 1)
       if (i > 0) xs[i - 1][0] += xl
       if (i + 1 < xs.length) xs[i + 1][0] += xr
-      // console.log('after explode', JSON.stringify(xs))
       return true
     }
   }
@@ -56,7 +55,6 @@ function split(xs) {
       const xr = Math.ceil(v / 2)
       xs[i] = [xl, depth + 1]
       xs.splice(i + 1, 0, [xr, depth + 1])
-      // console.log('after split', JSON.stringify(xs))
       return true
     }
   }
@@ -74,37 +72,7 @@ function add(xs, ys) {
   return zs
 }
 
-function tree(xs) {
-  let i = 0
-  while (true) {
-    let [v, depth] = xs[i]
-    if (i + 1 < xs.length) {
-      let [nv, nd] = xs[i + 1]
-      if (nd === depth) {
-        xs[i] = [[v, nv], depth - 1]
-        xs.splice(i + 1, 1)
-        i = 0
-      } else {
-        i++
-      }
-    } else {
-      // console.log(xs)
-      return v
-    }
-  }
-}
-
 function magnitude(xs) {
-  function m(t) {
-    if (typeof t === 'number') return t
-    return 3 * m(t[0]) + 2 * m(t[1])
-  }
-  const t = tree(xs)
-  // console.log(t)
-  return m(t)
-}
-
-function m2(xs) {
   xs = [...xs]
   let i = 0
   while (true) {
@@ -119,30 +87,21 @@ function m2(xs) {
         i++
       }
     } else {
-      // console.log(xs)
       return v
     }
   }
 }
 
-function p1(ns) {
-  const ls = ns.map(linearize)
-  const sum = ls.slice(1, ls.length).reduce(add, ls[0])
-  return [m2(sum), magnitude(sum)]
-  // return [magnitude(sum), m2(sum)]
-}
+const sum = (xs) => xs.slice(1, xs.length).reduce(add, xs[0])
 
-function p2(ns) {
-  const xs = ns.map(linearize)
+const p1 = (xs) => magnitude(sum(xs))
+
+function p2(xs) {
   let maxm = 0
   for (let i = 0; i < xs.length; i++) {
     for (let j = 0; j < xs.length; j++) {
       if (i === j) continue
       const m = magnitude(add(xs[i], xs[j]))
-      const me = m2(add(xs[i], xs[j]))
-      if (m !== me) {
-        return 0
-      }
       if (m > maxm) maxm = m
     }
   }
@@ -150,22 +109,6 @@ function p2(ns) {
 }
 
 const ns = parse(input)
-// console.log(p1(ns))
-// console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
-// console.log(JSON.stringify(tree(linearize([[[[[9, 8], 1], 2], 3], 4]))))
-// console.log(p1([7,[6,[5,[4,[3,2]]]]]))
-// console.log(p1([[6, [5, [4, [3, 2]]]], 1]))
-// prettier-ignore
-console.log(magnitude(linearize([9,1])))
-console.log(m2(linearize([9, 1])))
-// prettier-ignore
-// console.log(magnitude(linearize([[9,1],[1,9]])))
-// prettier-ignore
-console.log(magnitude(linearize([[1,2],[[3,4],5]])))
-// prettier-ignore
-console.log(m2(linearize([[1,2],[[3,4],5]])))
-
-// prettier-ignore
-// console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
-console.log(p1(ns))
-console.log(p2(ns))
+const xs = ns.map(linearize)
+console.log(p1(xs))
+console.log(p2(xs))
