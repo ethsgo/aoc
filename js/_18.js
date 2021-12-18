@@ -110,6 +110,19 @@ function p1(ns) {
   return magnitude(sum)
 }
 
+function p2(ns) {
+  const xs = ns.map(linearize)
+  let maxm = 0
+  for (let i = 0; i < xs.length; i++) {
+    for (let j = 0; j < xs.length; j++) {
+      if (i === j) continue
+      const m = magnitude(add(xs[i], xs[j]))
+      if (m > maxm) maxm = m
+    }
+  }
+  return maxm
+}
+
 const ns = parse(input)
 // console.log(p1(ns))
 // console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
@@ -126,3 +139,4 @@ const ns = parse(input)
 // prettier-ignore
 // console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
 console.log(p1(ns))
+console.log(p2(ns))
