@@ -101,17 +101,28 @@ contract _18 is _18Parser, _18ArrayUtils {
 
     function p1(uint256[2][][] memory xss) private view returns (uint256) {
         print(xss[0]);
-        uint256[2][] memory ys = explode(xss[0]);
-        print(ys);
+        (uint256[2][] memory ys, bool didExplode) = explode(xss[0]);
+        if (didExplode) {
+            print(ys);
+        }
         return xss.length;
     }
 
     function explode(uint256[2][] memory xs)
         private
         pure
-        returns (uint256[2][] memory ys)
+        returns (uint256[2][] memory ys, bool didExplode)
     {
-        ys = remove(xs, 0);
-        ys = insert(ys, 0, [uint256(3), 5]);
+        for (uint256 i = 0; i < xs.length; i++) {
+            if (xs[i][1] == 5) {
+                uint256 xl = xs[i][0];
+                uint256 xr = xs[i + 1][0];
+                ys = remove(xs, i + 1);
+                ys[i] = [uint256(0), 4];
+                if (i > 0) ys[i - 1][0] += xl;
+                if (i + 1 < ys.length) ys[i + 1][0] += xr;
+                return (ys, true);
+            }
+        }
     }
 }
