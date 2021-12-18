@@ -34,25 +34,24 @@ contract _18Parser is Parser, StringUtils {
     }
 
     // numIds are indexes into this array.
-    Num[] internal nums = [
-        Num({value: 0, leftId: 0, rightId: 0, numType: NumType.invalid})
-    ];
+    Num[] internal nums;
 
-    function makeValue(uint256 v) internal returns (uint256 NumId) {
-        NumId = nums.length;
-        NumType nt = NumType.regular;
-        nums.push(Num({value: v, leftId: 0, rightId: 0, numType: nt}));
+    function makeValue(uint256 v) internal returns (uint256 id) {
+        id = nums.length;
+        nums.push();
+        nums[id].value = v;
+        nums[id].numType = NumType.regular;
     }
 
     function makePair(uint256 leftId, uint256 rightId)
         internal
-        returns (uint256 NumId)
+        returns (uint256 id)
     {
-        NumId = nums.length;
-        NumType nt = NumType.pair;
-        nums.push(
-            Num({value: 0, leftId: leftId, rightId: rightId, numType: nt})
-        );
+        id = nums.length;
+        nums.push();
+        nums[id].leftId = leftId;
+        nums[id].rightId = rightId;
+        nums[id].numType = NumType.pair;
     }
 
     function parse(string memory input)
@@ -70,26 +69,26 @@ contract _18Parser is Parser, StringUtils {
         xss[0] = parseNum(lines[0]);
     }
 
-    function _numToString(uint256 id) internal returns (bytes memory) {
-        NumType nt = nums[id].numType;
-        require(nt != NumType.invalid);
-        if (nt == NumType.regular) {
-            return bytes(uintString(nums[id].value));
-        } else {
-            return
-                bytes.concat(
-                    bytes("("),
-                    _numToString(nums[id].leftId),
-                    bytes(","),
-                    _numToString(nums[id].rightId),
-                    bytes(")")
-                );
-        }
-    }
+    // function _numToString(uint256 id) internal returns (bytes memory) {
+    //     NumType nt = nums[id].numType;
+    //     require(nt != NumType.invalid);
+    //     if (nt == NumType.regular) {
+    //         return bytes(uintString(nums[id].value));
+    //     } else {
+    //         return
+    //             bytes.concat(
+    //                 bytes("("),
+    //                 _numToString(nums[id].leftId),
+    //                 bytes(","),
+    //                 _numToString(nums[id].rightId),
+    //                 bytes(")")
+    //             );
+    //     }
+    // }
 
-    function numToString(uint256 id) internal returns (string memory) {
-        return string(_numToString(id));
-    }
+    // function numToString(uint256 id) internal returns (string memory) {
+    //     return string(_numToString(id));
+    // }
 
     function parseNum(string memory s) private returns (uint256) {
         console.log(s);
