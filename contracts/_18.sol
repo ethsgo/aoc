@@ -7,6 +7,7 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
+        "[[1,2],[[3,4],5]]\n"
         "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]\n"
         "[[[[4,3],4],4],[7,[[8,4],9]]]\n"
         "[1,1]\n"
@@ -103,8 +104,10 @@ contract _18 is _18Parser, _18ArrayUtils {
 
     function p1(uint256[2][][] memory xss) private view returns (uint256) {
         print(xss[0]);
-        uint256[2][] memory ys = reduce(xss[0]);
-        print(ys);
+        // uint256[2][] memory ys = reduce(xss[0]);
+        // print(ys);
+        uint256 m = magnitude(xss[0]);
+        console.log(m);
 
         return xss.length;
     }
@@ -163,5 +166,26 @@ contract _18 is _18Parser, _18ArrayUtils {
                 return (ys, true);
             }
         }
+    }
+
+    function magnitude(uint256[2][] memory xs) private pure returns (uint256) {
+        uint256 i = 0;
+        while (true) {
+            uint256 v = xs[i][0];
+            if (i + 1 < xs.length) {
+                uint256 depth = xs[i][1];
+                if (xs[i + 1][1] == depth) {
+                    uint256 nv = xs[i + 1][0];
+                    xs = remove(xs, i + 1);
+                    xs[i] = [3 * v + 2 * nv, depth - 1];
+                    i = 0;
+                } else {
+                    i++;
+                }
+            } else {
+                return v;
+            }
+        }
+        revert();
     }
 }
