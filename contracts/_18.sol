@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./Parser.sol";
 import "./StringUtils.sol";
-import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
@@ -56,7 +55,11 @@ contract _18Parser is Parser {
 }
 
 contract _18ArrayUtils is StringUtils {
-    function print(uint256[2][] memory xs) internal view {
+    function toString(uint256[2][] memory xs)
+        internal
+        pure
+        returns (string memory)
+    {
         bytes memory bs;
         for (uint256 i = 0; i < xs.length; i++) {
             bs = bytes.concat(
@@ -67,7 +70,7 @@ contract _18ArrayUtils is StringUtils {
                 bytes(uintString(xs[i][1]))
             );
         }
-        console.log(string(bs));
+        return string(bs);
     }
 
     function remove(uint256[2][] memory xs, uint256 i)
@@ -98,9 +101,8 @@ contract _18 is _18Parser, _18ArrayUtils {
         return (p1(xss), 0);
     }
 
-    function p1(uint256[2][][] memory xss) private returns (uint256) {
-        print(sum(xss));
-        return 0; //return magnitude(sum(xss));
+    function p1(uint256[2][][] memory xss) private pure returns (uint256) {
+        return magnitude(sum(xss));
     }
 
     function reduce(uint256[2][] memory xs)
