@@ -39,9 +39,23 @@ function explode(xs) {
   return false
 }
 
+function split(xs) {
+  for (let i = 0; i < xs.length; i++) {
+    let [v, depth] = xs[i]
+    if (v >= 10) {
+      const xl = Math.floor(v / 2)
+      const xr = Math.ceil(v / 2)
+      xs[i] = [xl, depth + 1]
+      xs.splice(i + 1, 0, [xr, depth + 1])
+      return true
+    }
+  }
+  return false
+}
+
 function p1(ns) {
   const xs = linearize(ns)
-  while (explode(xs)) {}
+  while (explode(xs) || split(xs)) {}
   return xs
 }
 
