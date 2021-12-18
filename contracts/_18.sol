@@ -7,10 +7,6 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser {
     string private constant exampleInput =
-        "[[1,2],[[3,4],5]]\n"
-        "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]\n"
-        "[[[[4,3],4],4],[7,[[8,4],9]]]\n"
-        "[1,1]\n"
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
         "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]\n"
@@ -90,7 +86,7 @@ contract _18ArrayUtils is StringUtils {
         uint256[2] memory x
     ) internal pure returns (uint256[2][] memory ys) {
         ys = new uint256[2][](xs.length + 1);
-        for (uint256 j = 0; j <= i; j++) ys[j] = xs[j];
+        for (uint256 j = 0; j < i; j++) ys[j] = xs[j];
         ys[i] = x;
         for (; i < xs.length; i++) ys[i + 1] = xs[i];
     }
@@ -102,14 +98,9 @@ contract _18 is _18Parser, _18ArrayUtils {
         return (p1(xss), 0);
     }
 
-    function p1(uint256[2][][] memory xss) private view returns (uint256) {
-        print(xss[0]);
-        // uint256[2][] memory ys = reduce(xss[0]);
-        // print(ys);
-        uint256 m = magnitude(xss[0]);
-        console.log(m);
-
-        return xss.length;
+    function p1(uint256[2][][] memory xss) private returns (uint256) {
+        print(sum(xss));
+        return 0; //return magnitude(sum(xss));
     }
 
     function reduce(uint256[2][] memory xs)
@@ -187,5 +178,35 @@ contract _18 is _18Parser, _18ArrayUtils {
             }
         }
         revert();
+    }
+
+    function join(uint256[2][] memory xs, uint256[2][] memory ys)
+        private
+        pure
+        returns (uint256[2][] memory zs)
+    {
+        uint256 n = xs.length;
+        zs = new uint256[2][](n + ys.length);
+        for (uint256 i = 0; i < n; i++) zs[i] = [xs[i][0], xs[i][1] + 1];
+        for (uint256 i = 0; i < ys.length; i++)
+            zs[n + i] = [ys[i][0], ys[i][1] + 1];
+    }
+
+    function add(uint256[2][] memory xs, uint256[2][] memory ys)
+        private
+        pure
+        returns (uint256[2][] memory zs)
+    {
+        zs = join(xs, ys);
+        zs = reduce(zs);
+    }
+
+    function sum(uint256[2][][] memory xss)
+        private
+        pure
+        returns (uint256[2][] memory xs)
+    {
+        xs = xss[0];
+        for (uint256 i = 1; i < xss.length; i++) xs = add(xs, xss[i]);
     }
 }
