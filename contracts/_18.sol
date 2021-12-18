@@ -98,11 +98,21 @@ contract _18ArrayUtils is StringUtils {
 contract _18 is _18Parser, _18ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2][][] memory xss = parse(input);
-        return (p1(xss), 0);
+        return (p1(xss), p2(xss));
     }
 
     function p1(uint256[2][][] memory xss) private pure returns (uint256) {
         return magnitude(sum(xss));
+    }
+
+    function p2(uint256[2][][] memory xss) private pure returns (uint256 max) {
+        for (uint256 i = 0; i < xss.length; i++) {
+            for (uint256 j = 0; j < xss.length; j++) {
+                if (i == j) continue;
+                uint256 m = magnitude(add(xss[i], xss[j]));
+                if (m > max) max = m;
+            }
+        }
     }
 
     function reduce(uint256[2][] memory xs)
