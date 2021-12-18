@@ -111,7 +111,10 @@ const ns = parse(input)
 // prettier-ignore
 // console.log(magnitude(linearize([9,1])))
 // prettier-ignore
-console.log(magnitude(linearize([[9,1],[1,9]])))
+// console.log(magnitude(linearize([[9,1],[1,9]])))
 // prettier-ignore
-// console.log(magnitude(linearize([[1,2],[[3,4],5]])))
+console.log(magnitude(linearize([[1,2],[[3,4],5]])))
+
+// prettier-ignore
+console.log(magnitude(linearize([[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]])))
 // console.log(p1(ns))
