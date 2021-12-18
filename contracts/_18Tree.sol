@@ -5,7 +5,7 @@ import "./Parser.sol";
 import "./StringUtils.sol";
 import "hardhat/console.sol";
 
-contract _18Parser is Parser {
+contract _18Parser is Parser, StringUtils {
     string private constant exampleInput =
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
@@ -39,9 +39,36 @@ contract _18Parser is Parser {
         xss[0] = parseNum(lines[0]);
     }
 
+    function _treeToString(Node memory xs)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        if (xs.children.length == 0) {
+            return bytes(uintString(xs.value));
+        } else {
+            return
+                bytes.concat(
+                    bytes("("),
+                    _treeToString(xs.children[0]),
+                    bytes(","),
+                    _treeToString(xs.children[1]),
+                    bytes(")")
+                );
+        }
+    }
+
+    function treeToString(Node memory xs)
+        internal
+        pure
+        returns (string memory)
+    {
+        return string(_treeToString(xs));
+    }
+
     function parseNum(string memory s) private returns (Node memory) {
         console.log(s);
-        (Node memory xs, ) = parseNum(bytes(s), 0);
+        (Node memory xs, ) = parseNum(bytes(s), 1);
         return xs;
     }
 
@@ -49,6 +76,8 @@ contract _18Parser is Parser {
         private
         returns (Node memory xs, uint256 j)
     {
+        console.log("pn", i);
+
         require(bs[i] == "[");
         j = i + 1;
 
@@ -57,9 +86,10 @@ contract _18Parser is Parser {
         if (bs[j] == "[") {
             // Nested pair
             (n1, j) = parseNum(bs, j);
+            console.log("nn", i, treeToString(n1), j);
         } else {
-            // console.log(string(bytes.concat(bs[j])));
             v = parseDigit(bs[j]);
+            console.log("vn", i, uintString(v), j);
             j++;
         }
 
@@ -78,15 +108,19 @@ contract _18Parser is Parser {
             if (bs[j] == "[") {
                 // Nested pair
                 (n2, j) = parseNum(bs, j);
+                console.log("nn", i, treeToString(n2), j);
             } else {
                 v = parseDigit(bs[j]);
                 j++;
-                require(bs[j] == "]");
-                j++;
+                console.log("vn", i, uintString(v), j);
 
                 n2 = Node({value: v, children: new Node[](0)});
             }
 
+            require(bs[j] == "]");
+            j++;
+            console.log("fn", i, treeToString(n1), j);
+            console.log("fn", i, treeToString(n2), j);
             xs.children = new Node[](2);
             xs.children[0] = n1;
             xs.children[1] = n2;
@@ -154,33 +188,6 @@ contract _18Tree is _18Parser, _18ArrayUtils {
                 if (m > max) max = m;
             }
         }
-    }
-
-    function _treeToString(Node memory xs)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        if (xs.children.length == 0) {
-            return bytes(uintString(xs.value));
-        } else {
-            return
-                bytes.concat(
-                    bytes("("),
-                    _treeToString(xs.children[0]),
-                    bytes(","),
-                    _treeToString(xs.children[1]),
-                    bytes(")")
-                );
-        }
-    }
-
-    function treeToString(Node memory xs)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string(_treeToString(xs));
     }
 
     function reduce(uint256[2][] memory xs)
