@@ -9,50 +9,37 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split('\n').map(JSON.parse)
 
-function treeTop(n) {
-  console.log(`before - ${JSON.stringify(n)}`)
-  const m = tree({ n: n, depth: 0 }).v
-  console.log(`after  - ${JSON.stringify(m)}`)
-  console.log(`orignl - ${JSON.stringify(n)}`)
+function linearize(n) {
+  return lin(n, 0)
 }
 
-function addLeftDebris({ n, debris }) {
-  if (!debris) return { v: n }
+function lin(n, depth) {
   if (typeof n === 'number') {
-    return { v: n + debris }
+    return [[n, depth]]
   } else {
-    const r = addLeftDebris({ n: n[1], debris })
-    const l = addLeftDebris({ n: n[0], debris: r.debris })
-    return { v: [l.v, r.v], debris: l.debris }
+    const l = lin(n[0], depth + 1)
+    const r = lin(n[1], depth + 1)
+    return [...l, ...r]
   }
 }
 
-function tree({ n, depth, didExplode, debris }) {
-  if (didExplode && !debris) return { v: n }
+function treeTop(n) {
+  return tree(n, 0)
+}
+
+function tree(n, depth) {
   if (typeof n === 'number') {
-    if (typeof debris === 'number') {
-      console.log(
-        `depth ${depth} leaf - regular number - ${n} - debris ${debris}`
-      )
-      return { v: n + debris }
-    } else {
-      console.log(`depth ${depth} leaf - regular number - ${n}`)
-      return { v: n }
-    }
+    console.log(`depth ${depth} leaf - regular number - ${n}`)
+    return [[n, depth]]
   } else {
     console.log(`depth ${depth} pair - ${JSON.stringify(n)}`)
-    if (depth === 4) {
+    if (depth === 40) {
       console.log(`explode!`)
-      return { v: 0, didExplode: true, debris: n[1] }
+      return 0
     } else {
-      const l = tree({ n: n[0], depth: depth + 1, didExplode, debris })
-      const r = tree({
-        n: n[1],
-        depth: depth + 1,
-        didExplode: l.didExplode,
-        debris: l.debris,
-      })
-      return { v: [l.v, r.v], didExplode: r.didExplode, debris: r.debris }
+      const l = tree(n[0], depth + 1)
+      const r = tree(n[1], depth + 1)
+      return [...l, ...r]
     }
   }
 }
@@ -61,4 +48,4 @@ const p1 = (ns) => reduce
 
 const ns = parse(input)
 // console.log(p1(ns))
-console.log(treeTop([[[[[9, 8], 1], 2], 3], 4]))
+console.log(linearize([[[[[9, 8], 1], 2], 3], 4]))
