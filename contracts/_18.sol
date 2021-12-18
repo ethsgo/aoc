@@ -62,15 +62,22 @@ contract _18 is _18Parser, StringUtils {
     }
 
     function p1(uint256[2][][] memory xss) private view returns (uint256) {
-        console.log(uintString(23));
+        print(xss[0]);
         return xss.length;
     }
 
-    function print(uint256[2][] memory xs) private returns (uint256) {
-        // bytes memory bs;
-        // for (uint i = 0; i < xs.length; x++) {
-        // }
-        // return xss.length;
+    function print(uint256[2][] memory xs) private view {
+        bytes memory bs;
+        for (uint256 i = 0; i < xs.length; i++) {
+            bs = bytes.concat(
+                bs,
+                bytes(bs.length > 0 ? " " : ""),
+                bytes(uintString(xs[i][0])),
+                bytes("/"),
+                bytes(uintString(xs[i][1]))
+            );
+        }
+        console.log(string(bs));
     }
     // function explode(uint[2][] memory xs)
 }
