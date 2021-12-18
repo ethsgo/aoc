@@ -23,29 +23,25 @@ function lin(n, depth) {
   }
 }
 
-function treeTop(n) {
-  return tree(n, 0)
-}
-
-function tree(n, depth) {
-  if (typeof n === 'number') {
-    console.log(`depth ${depth} leaf - regular number - ${n}`)
-    return [[n, depth]]
-  } else {
-    console.log(`depth ${depth} pair - ${JSON.stringify(n)}`)
-    if (depth === 40) {
-      console.log(`explode!`)
-      return 0
+function explode(xs) {
+  for (let i = 0; i < xs.length; ) {
+    let [v, depth] = xs[i]
+    if (depth === 5) {
+      xs[i] = [0, 4]
+      xs.splice(i + 1, 1)
+      i++
     } else {
-      const l = tree(n[0], depth + 1)
-      const r = tree(n[1], depth + 1)
-      return [...l, ...r]
+      i++
     }
   }
 }
 
-const p1 = (ns) => reduce
+function p1(ns) {
+  const xs = linearize(ns)
+  explode(xs)
+  return xs
+}
 
 const ns = parse(input)
 // console.log(p1(ns))
-console.log(linearize([[[[[9, 8], 1], 2], 3], 4]))
+console.log(p1([[[[[9, 8], 1], 2], 3], 4]))
