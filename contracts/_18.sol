@@ -89,6 +89,7 @@ contract _18 is _18Parser, StringUtils {
         returns (uint256[2][] memory ys)
     {
         ys = remove(xs, 0);
+        ys = insert(ys, 0, [uint256(3), 5]);
     }
 
     function remove(uint256[2][] memory xs, uint256 i)
@@ -99,5 +100,16 @@ contract _18 is _18Parser, StringUtils {
         ys = new uint256[2][](xs.length - 1);
         for (uint256 j = 0; j < i; j++) ys[j] = xs[j];
         for (; i < xs.length - 1; i++) ys[i] = xs[i + 1];
+    }
+
+    function insert(
+        uint256[2][] memory xs,
+        uint256 i,
+        uint256[2] memory x
+    ) private pure returns (uint256[2][] memory ys) {
+        ys = new uint256[2][](xs.length + 1);
+        for (uint256 j = 0; j <= i; j++) ys[j] = xs[j];
+        ys[i] = x;
+        for (; i < xs.length; i++) ys[i + 1] = xs[i];
     }
 }
