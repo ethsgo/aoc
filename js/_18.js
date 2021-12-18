@@ -9,50 +9,32 @@ if (!process.stdin.isTTY) {
 
 const parse = (input) => input.split('\n').map(JSON.parse)
 
-function linearize(n) {
-  let prev
-  let depth = 1
-  let stack = [[n, 0]]
-  let r = []
-  while (stack.length > 0) {
-    let (i, m) = stack.pop()
-    for (; i < m.length; i++) {
-      if (typeof m[i] === 'number') {
-        r.push(m[i])
-      }
+function treeTop(n) {
+  console.log(`before - ${JSON.stringify(n)}`)
+  const m = tree(n, 0)
+  console.log(`after  - ${JSON.stringify(m)}`)
+  console.log(`orignl - ${JSON.stringify(n)}`)
+}
+
+function tree(n, depth) {
+  if (typeof n === 'number') {
+    console.log(`depth ${depth} leaf - regular number - ${n}`)
+    return n
+  } else {
+    console.log(`depth ${depth} pair - ${JSON.stringify(n)}`)
+    if (depth === 4) {
+      console.log(`explode!`)
+      return 0
+    } else {
+      const l = tree(n[0], depth + 1)
+      const r = tree(n[1], depth + 1)
+      return [l, r]
     }
   }
-}
-
-function tree(n) {
-  if (typeof n === 'number') {
-    console.log('leaf - regular number -', n)
-  } else {
-    console.log('pair -', n)
-    tree(n[0])
-    tree(n[1])
-  }
-}
-
-function reduce(n) {
-  let prev
-  let depth
-  let actions
-
-  return explode(n, null, 0)
-}
-
-function explode(n, prev, depth) {
-  if (depth === 4 && typeof n !== 'number') {
-return true
-  } else {
-    explode(n)
-  }
-  return n.length + prev
 }
 
 const p1 = (ns) => reduce
 
 const ns = parse(input)
 // console.log(p1(ns))
-console.log(tree([[[[[9, 8], 1], 2], 3], 4]))
+console.log(treeTop([[[[[9, 8], 1], 2], 3], 4]))
