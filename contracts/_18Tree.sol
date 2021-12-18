@@ -18,20 +18,51 @@ contract _18Parser is Parser, StringUtils {
         "[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]\n"
         "[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]\n";
 
-    struct Node {
-        // Valid when children.length == 0
-        uint256 value;
-        // We just have two children, left and right, but we need to use an
-        // array to get around the limitation of not being able to define
-        // recursive structs.
-        Node[] children;
+    enum NumType {
+        invalid,
+        regular,
+        pair
     }
 
-    function parse(string memory input) internal returns (Node[] memory xss) {
+    struct Num {
+        NumType numType;
+        // Valid only for regular nums
+        uint256 value;
+        // Valid only for pairs
+        uint256 leftId;
+        uint256 rightId;
+    }
+
+    // numIds are indexes into this array.
+    Num[] internal nums = [
+        Num({value: 0, leftId: 0, rightId: 0, numType: NumType.invalid})
+    ];
+
+    function makeValue(uint256 v) internal returns (uint256 NumId) {
+        NumId = nums.length;
+        NumType nt = NumType.regular;
+        nums.push(Num({value: v, leftId: 0, rightId: 0, numType: nt}));
+    }
+
+    function makePair(uint256 leftId, uint256 rightId)
+        internal
+        returns (uint256 NumId)
+    {
+        NumId = nums.length;
+        NumType nt = NumType.pair;
+        nums.push(
+            Num({value: 0, leftId: leftId, rightId: rightId, numType: nt})
+        );
+    }
+
+    function parse(string memory input)
+        internal
+        returns (uint256[] memory xss)
+    {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory lines = split(s, "\n");
-        xss = new Node[](1); //lines.length);
+        xss = new uint256[](1); //lines.length);
         // for (uint256 i = 0; i < lines.length; i++) {
         //     xss[i] = parseNum(lines[i]);
         // }
@@ -39,91 +70,84 @@ contract _18Parser is Parser, StringUtils {
         xss[0] = parseNum(lines[0]);
     }
 
-    function _treeToString(Node memory xs)
-        internal
-        pure
-        returns (bytes memory)
-    {
-        if (xs.children.length == 0) {
-            return bytes(uintString(xs.value));
+    function _numToString(uint256 id) internal returns (bytes memory) {
+        NumType nt = nums[id].numType;
+        require(nt != NumType.invalid);
+        if (nt == NumType.regular) {
+            return bytes(uintString(nums[id].value));
         } else {
             return
                 bytes.concat(
                     bytes("("),
-                    _treeToString(xs.children[0]),
+                    _numToString(nums[id].leftId),
                     bytes(","),
-                    _treeToString(xs.children[1]),
+                    _numToString(nums[id].rightId),
                     bytes(")")
                 );
         }
     }
 
-    function treeToString(Node memory xs)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string(_treeToString(xs));
+    function numToString(uint256 id) internal returns (string memory) {
+        return string(_numToString(id));
     }
 
-    function parseNum(string memory s) private returns (Node memory) {
+    function parseNum(string memory s) private returns (uint256) {
         console.log(s);
-        (Node memory xs, ) = parseNum(bytes(s), 1);
-        return xs;
+        (uint256 id, ) = parseNum(bytes(s), 1);
+        return id;
     }
 
     function parseNum(bytes memory bs, uint256 i)
         private
-        returns (Node memory xs, uint256 j)
+        returns (uint256 id, uint256 j)
     {
-        console.log("pn", i);
+        // console.log("pn", i);
 
         require(bs[i] == "[");
         j = i + 1;
 
         uint256 v;
-        Node memory n1;
+        uint256 leftId;
         if (bs[j] == "[") {
             // Nested pair
-            (n1, j) = parseNum(bs, j);
-            console.log("nn", i, treeToString(n1), j);
+            (leftId, j) = parseNum(bs, j);
+            // console.log("nn", i, treeToString(n1), j);
         } else {
             v = parseDigit(bs[j]);
-            console.log("vn", i, uintString(v), j);
+            // console.log("vn", i, uintString(v), j);
             j++;
         }
 
         if (bs[j] == "]") {
             // Regular number
             j++;
-            xs.value = v;
+            id = makeValue(v);
         } else {
             // Pair
-            n1 = Node({value: v, children: new Node[](0)});
+            leftId = makeValue(v);
 
             require(bs[j] == ",");
             j++;
 
-            Node memory n2;
+            uint256 rightId;
             if (bs[j] == "[") {
                 // Nested pair
-                (n2, j) = parseNum(bs, j);
-                console.log("nn", i, treeToString(n2), j);
+                (rightId, j) = parseNum(bs, j);
+                // console.log("nn", i, treeToString(n2), j);
             } else {
                 v = parseDigit(bs[j]);
                 j++;
-                console.log("vn", i, uintString(v), j);
+                // console.log("vn", i, uintString(v), j);
 
-                n2 = Node({value: v, children: new Node[](0)});
+                rightId = makeValue(v);
             }
 
             require(bs[j] == "]");
             j++;
-            console.log("fn", i, treeToString(n1), j);
-            console.log("fn", i, treeToString(n2), j);
-            xs.children = new Node[](2);
-            xs.children[0] = n1;
-            xs.children[1] = n2;
+
+            // console.log("fn", i, treeToString(n1), j);
+            // console.log("fn", i, treeToString(n2), j);
+            id = makePair(leftId, rightId);
         }
     }
 }
@@ -171,9 +195,9 @@ contract _18ArrayUtils is StringUtils {
 
 contract _18Tree is _18Parser, _18ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
-        Node[] memory xss = parse(input);
-        console.log(treeToString(xss[0]));
-        return (xss.length, 0); //(p1(xss), p2(xss));
+        uint256[] memory nids = parse(input);
+        // console.log(treeToString(xss[0]));
+        return (nids.length, 0); //(p1(xss), p2(xss));
     }
 
     function p1(uint256[2][][] memory xss) private pure returns (uint256) {
