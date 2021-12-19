@@ -156,26 +156,34 @@ function parse(input) {
 }
 
 function dist(p1, p2) {
+  // return p1[0] - p2[0] + (p1[1] - p2[1]) + (p1[2] - p2[2])
   return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
 }
 
 function p1(scan) {
-  function pr(j) {
-    const s0 = scan[j]
+  function distances(si, pi) {
+    const s = scan[si]
     // reference point
-    const rp = s0[0]
-    for (let i = 1; i < s0.length; i++) {
-      console.log(dist(s0[i], rp))
+    const rp = s[pi]
+    let r = new Set()
+    for (let i = 0; i < s.length; i++) {
+      if (i !== pi) {
+        r.add(dist(s[i], rp))
+      }
     }
-
-    console.log('--')
+    return r
   }
 
-  pr(0)
-  pr(1)
-  pr(2)
-  pr(4)
-  pr(5)
+  const intersection = (s1, s2) => [...s1].filter((v) => s2.has(v))
+
+  for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
+    let r1 = distances(0, pi1)
+    for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
+      let r2 = distances(1, pi2)
+      let ix = intersection(r1, r2)
+      console.log(ix.length)
+    }
+  }
 }
 
 const scan = parse(input)
