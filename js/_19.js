@@ -179,12 +179,51 @@ function p1(scan) {
   }
 
   // const intersection = (s1, s2) => [...s1].filter((v) => s2.has(v))
-  const intersection = (m1, m2) => [...m1.keys()].filter((v) => m2.has(v))
+  const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
 
+  // Consider the coordinate system of the first scanner as the reference space.
+  // Index the beacons in this space by their distance to the coordinates of
+  // the first beacon
+  // let beacons = distancesFrom(0, 0)
+  // beacons[0] = scan[0][0]
+
+  for (let si1 = 0; si1 < scan.length; si1++) {
+    // For each scan, consider one of the points as the reference point.
+    for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
+      // Find distances from that point in the coordinate space of this scan.
+      let m1 = distancesFrom(si1, pi1)
+
+      // For each other scan, find the reference point which has 12 of the same
+      // distances from the other points in the coordinate space of that scan.
+      for (let si2 = 0; si2 < scan.length; si2++) {
+        if (si1 === si2) continue
+        for (let pi2 = 0; pi2 < scan[si2].length; pi2++) {
+          let m2 = distancesFrom(si2, pi2)
+          let ix = intersection(m1, m2)
+
+          if (ix.length === 11) {
+            console.log({
+              si1,
+              pi1,
+              // rp1: scan[si1][pi1],
+              si2,
+              pi2,
+              // rp2: scan[si2][pi2],
+              ixc: ix.length,
+            })
+          }
+        }
+      }
+      // distances from the
+    }
+  }
+
+  return
   // for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
   // Find distances from a point in the first scan
-  let m1 = distancesFrom(0, 0)
+  let m1 = distancesFrom(3, 0)
 
+  // for (let i = 1; i < scan.length; i++) {
   // Find distances from a point in the second scan
   for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
     let m2 = distancesFrom(1, pi2)
@@ -194,9 +233,34 @@ function p1(scan) {
     // If we find a point with 11 intersections, then those 11 plus the point
     // itself are the 12 common beacons shared between the two scanners.
     // Furthermore, these two coordinates refer to the same beacon.
-    if (intersection(m1, m2).length !== 11) continue
+    // let ix = intersection(m, beacons)
+    let ix = intersection(m1, m2)
+    console.log(ix.length)
+    if (ix.length !== 11) continue
 
     console.log(scan[0][0], scan[1][pi2])
+    // console.log(ix)
+  }
+  // }
+
+  console.log('--')
+
+  // Find distances from a point in the third scan
+  for (let pi2 = 0; pi2 < scan[2].length; pi2++) {
+    let m2 = distancesFrom(2, pi2)
+
+    // How many of those distances are the same?
+    //
+    // If we find a point with 11 intersections, then those 11 plus the point
+    // itself are the 12 common beacons shared between the two scanners.
+    // Furthermore, these two coordinates refer to the same beacon.
+    // let ix = intersection(m, beacons)
+    let ix = intersection(m1, m2)
+    console.log(ix.length)
+    if (ix.length !== 11) continue
+
+    console.log(scan[0][0], scan[2][pi2])
+    // console.log(ix)
   }
 
   // for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
