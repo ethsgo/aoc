@@ -9,7 +9,6 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser, StringUtils {
     string private constant exampleInput =
-        "[1,2]\n"
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
         "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]\n"
@@ -64,15 +63,54 @@ contract _18Parser is Parser, StringUtils {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
         string[] memory lines = split(s, "\n");
-        xss = new uint256[](1); //lines.length);
-        // for (uint256 i = 0; i < lines.length; i++) {
-        //     xss[i] = parseNum(lines[i]);
-        // }
+        xss = new uint256[](lines.length);
+        for (uint256 i = 0; i < lines.length; i++) {
+            xss[i] = parseNum(lines[i]);
+            console.log(numString(xss[i]));
+        }
 
         xss[0] = parseNum(lines[0]);
     }
 
-    function _numToString(uint256 id) internal returns (bytes memory) {
+    function parseNum(string memory s) private returns (uint256) {
+        (uint256 id, ) = parseNum(bytes(s), 0);
+        return id;
+    }
+
+    function parseNum(bytes memory bs, uint256 i)
+        private
+        returns (uint256 id, uint256 j)
+    {
+        j = i;
+
+        if (bs[j] == "[") {
+            // Pair
+            j++;
+
+            uint256 leftId;
+            (leftId, j) = parseNum(bs, j);
+            require(bs[j] == ",");
+            j++;
+
+            uint256 rightId;
+            (rightId, j) = parseNum(bs, j);
+            require(bs[j] == "]");
+            j++;
+
+            id = makePair(leftId, rightId);
+        } else {
+            // Regular number
+            uint256 v = parseDigit(bs[j]);
+            j++;
+            id = makeValue(v);
+        }
+    }
+
+    function numString(uint256 id) internal returns (string memory) {
+        return string(_numString(id));
+    }
+
+    function _numString(uint256 id) internal returns (bytes memory) {
         NumType nt = nums[id].numType;
         require(nt != NumType.invalid);
         if (nt == NumType.regular) {
@@ -81,107 +119,11 @@ contract _18Parser is Parser, StringUtils {
             return
                 bytes.concat(
                     bytes("("),
-                    _numToString(nums[id].leftId),
+                    _numString(nums[id].leftId),
                     bytes(","),
-                    _numToString(nums[id].rightId),
+                    _numString(nums[id].rightId),
                     bytes(")")
                 );
-        }
-    }
-
-    function numToString(uint256 id) internal returns (string memory) {
-        return string(_numToString(id));
-    }
-
-    function parseNum(string memory s) private returns (uint256) {
-        console.log(s);
-        (uint256 id, ) = parseNum2(bytes(s), 0);
-        return id;
-    }
-
-    function parseNum2(bytes memory bs, uint256 i)
-        private
-        returns (uint256 id, uint256 j)
-    {
-        console.log("start", i, string(bytes.concat(bs[i])));
-        j = i;
-        if (bs[j] == "[") {
-            // Pair
-            j++;
-            uint256 leftId;
-            uint256 rightId;
-            (leftId, j) = parseNum2(bs, j);
-            console.log("nestd", i, uintString(leftId), j);
-            require(bs[j] == ",");
-            j++;
-            (rightId, j) = parseNum2(bs, j);
-            console.log("nestd", i, uintString(rightId), j);
-            require(bs[j] == "]");
-            j++;
-
-            id = makePair(leftId, rightId);
-            console.log("end  ", i, numToString(id), j);
-        } else {
-            // Regular number
-            uint256 v = parseDigit(bs[j]);
-            j++;
-            console.log("value", i, uintString(v), j);
-            id = makeValue(v);
-            console.log("end  ", i, numToString(id), j);
-        }
-    }
-
-    function parseNum(bytes memory bs, uint256 i)
-        private
-        returns (uint256 id, uint256 j)
-    {
-        console.log("start", i);
-
-        require(bs[i] == "[");
-        j = i + 1;
-
-        uint256 v;
-        uint256 leftId;
-        if (bs[j] == "[") {
-            // Nested pair
-            (leftId, j) = parseNum(bs, j);
-            console.log("nestd", i, uintString(leftId), j);
-        } else {
-            v = parseDigit(bs[j]);
-            j++;
-            console.log("value", i, uintString(v), j);
-        }
-
-        if (bs[j] == "]") {
-            // Regular number
-            j++;
-            id = makeValue(v);
-            console.log("end  ", i, numToString(id), j);
-        } else {
-            // Pair
-            leftId = makeValue(v);
-
-            require(bs[j] == ",");
-            j++;
-
-            uint256 rightId;
-            if (bs[j] == "[") {
-                // Nested pair
-                (rightId, j) = parseNum(bs, j);
-                console.log("nestd", i, uintString(rightId), j);
-            } else {
-                v = parseDigit(bs[j]);
-                j++;
-                console.log("value", i, uintString(v), j);
-
-                rightId = makeValue(v);
-            }
-
-            require(bs[j] == "]");
-            j++;
-
-            id = makePair(leftId, rightId);
-            console.log("end  ", i, numToString(id), j);
         }
     }
 }
@@ -230,10 +172,6 @@ contract _18ArrayUtils is StringUtils {
 contract _18Tree is _18Parser, _18ArrayUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[] memory nids = parse(input);
-        console.log(numToString(nids[0]));
-        for (uint256 i = 0; i < nums.length; i++) {
-            console.log(numToString(i));
-        }
         return (nids.length, 0); //(p1(xss), p2(xss));
     }
 
