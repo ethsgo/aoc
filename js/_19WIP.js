@@ -141,9 +141,6 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
 }
 
-// TODO: Clean
-const assert = require('assert')
-
 function parse(input) {
   const lines = input.split('\n')
   let scan = [[]]
@@ -158,387 +155,86 @@ function parse(input) {
   return scan
 }
 
-function dist(p1, p2) {
-  // return p1[0] - p2[0] + (p1[1] - p2[1]) + (p1[2] - p2[2])
-  return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
-}
-
-function p1(scan) {
-  function distancesFrom(si, pi) {
-    const s = scan[si]
-    // reference point
-    const rp = s[pi]
-    let m = new Map()
-    for (let i = 0; i < s.length; i++) {
-      if (true || i !== pi) {
-        assert(!m.get(dist(s[i], rp)))
-        m.set(dist(s[i], rp), s[i])
+const permutations = (() => {
+  let perm = []
+  for (let xindex of [0, 1, 2]) {
+    for (let yindex of [0, 1, 2]) {
+      if (yindex === xindex) continue
+      for (let zindex of [0, 1, 2]) {
+        if (zindex === xindex) continue
+        if (zindex === yindex) continue
+        for (let nindex of [
+          [],
+          [0],
+          [1],
+          [2],
+          [0, 1],
+          [0, 2],
+          [1, 2],
+          [1, 2, 3],
+        ]) {
+          perm.push({
+            x: { i: xindex, m: nindex.includes(xindex) ? -1 : 1 },
+            y: { i: yindex, m: nindex.includes(yindex) ? -1 : 1 },
+            z: { i: zindex, m: nindex.includes(zindex) ? -1 : 1 },
+          })
+        }
       }
     }
-    return m
   }
+  return perm
+})()
 
-  const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
+const applyPermutation = (p, u) => [
+  p.x.m * u[p.x.i],
+  p.y.m * u[p.y.i],
+  p.z.m * u[p.z.i],
+]
 
-  /// Return the coordinate of scanner si2 in the coordinate space of scanner si1.
-  function scannerCoord(si1, si2) {
-    // For each scan, consider one of the points as the reference point.
+const dist = (u, v) =>
+  (u[0] - v[0]) ** 2 + (u[1] - v[1]) ** 2 + (u[2] - v[2]) ** 2
+
+const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
+const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
+
+const distancesFrom = (s, p) => new Map(s.map((q) => [dist(p, q), q]))
+const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
+
+function p1(scan) {
+  function transformation(si1, si2) {
     for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
-      // console.log({ checking: si2, pi1 })
-
+      // For the base scanner, consider each point as a reference point.
       // Find distances from that point in the coordinate space of this scan.
-      let m1 = distancesFrom(si1, pi1)
+      const rp1 = scan[si1][pi1]
+      const dm1 = distancesFrom(scan[si1], scan[si1][pi1])
 
       // For each other scan, find the reference point which has 12 of the same
       // distances from the other points in the coordinate space of that scan.
-
       for (let pi2 = 0; pi2 < scan[si2].length; pi2++) {
-        const m2 = distancesFrom(si2, pi2)
-        const ix = intersection(m1, m2)
-        // console.log({ checking: si2, pi1, pi2, ixc: ix.length })
-
-        // console.log(ix.length)
+        const rp2 = scan[si2][pi2]
+        const dm2 = distancesFrom(scan[si2], scan[si2][pi2])
+        const ix = intersection(dm1, dm2)
 
         if (ix.length !== 12) continue
 
-        const rp1 = scan[si1][pi1]
-        const rp2 = scan[si2][pi2]
-        // console.log({ match: true, si1, pi1, rp1, si2, pi2, rp2 })
-        // console.log({ match: true, si1, pi1, si2, pi2 })
-
-        // So both the reference points refer to the same beacon.
-
-        // console.log(rp1[0] - rp2[0], rp1[1] - rp2[1], rp1[2] - rp2[2])
-        // console.log(rp1[0] + rp2[0], rp1[1] + rp2[1], rp1[2] + rp2[2])
-        // console.log(m1)
-        // console.log(m2)
-
-        // // Combine all points at the same distances
-        // let mc = new Map()
-        // for (const [k, v] of m1) {
-        //   mc.set(k, [...(mc.get(k) ?? []), v])
-        // }
-        // for (const [k, v] of m2) {
-        //   mc.set(k, [...(mc.get(k) ?? []), v])
-        // }
-        // console.log(mc)
-        // Combine all points at the same distances
-        let mc = new Map()
-        for (const [k] of ix) {
-          mc.set(k, [m1.get(k), m2.get(k)])
-        }
-        // console.log('common', mc)
-
-        const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
-
-        const sl = (u, v, d) => [
-          Math.abs(Math.round(10000 * ((u[0] - v[0]) / d))),
-          Math.abs(Math.round(10000 * ((u[1] - v[1]) / d))),
-          Math.abs(Math.round(10000 * ((u[2] - v[2]) / d))),
-        ]
-
-        const sl2 = (u, v, d) =>
-          [
-            Math.abs(Math.round(10000 * ((u[0] - v[0]) / d))),
-            Math.abs(Math.round(10000 * ((u[1] - v[1]) / d))),
-            Math.abs(Math.round(10000 * ((u[2] - v[2]) / d))),
-          ].sort((x, y) => x - y)
-
-        // console.log('slopes of 1')
-        for (const [k, v] of m1) {
-          if (equal(v, rp1)) continue
-          // console.log(sl(v, rp1, Math.sqrt(k)), 1, 'sl')
-        }
-
-        // console.log('slopes of 2')
-        for (const [k, v] of m2) {
-          if (equal(v, rp2)) continue
-          // console.log(sl(v, rp2, Math.sqrt(k)), 2, 'sl')
-        }
-
-        // for (const [k2, v2] of m2) {
-        //   if (equal(v2, rp2)) continue
-        //   const s2 = sl2(v2, rp2, Math.sqrt(k2))
-        //   for (const [k1, v1] of m1) {
-        //     if (equal(v1, rp1)) continue
-        //     const s1 = sl2(v1, rp1, Math.sqrt(k1))
-        //     if (equal(s2, s1)) {
-        //       console.log(v2, v1)
-        //     }
-        //   }
-        // }
-        const mc2 = new Map(mc)
-        mc2.delete(0)
         let someCommonDistance = ix.find((e) => e[0] !== 0)[0]
-        const pointInScan1 = m1.get(someCommonDistance)
-        const pointInScan2 = m2.get(someCommonDistance)
-        const psc1 = pointInScan1
-        const d1 = [psc1[0] - rp1[0], psc1[1] - rp1[1], psc1[2] - rp1[2]]
-        const psc2 = pointInScan2
-        const d2 = [psc2[0] - rp2[0], psc2[1] - rp2[1], psc2[2] - rp2[2]]
+        const d1 = diff(dm1.get(someCommonDistance), rp1)
+        const d2 = diff(dm2.get(someCommonDistance), rp2)
 
-        // console.log({ pointInScan1, pointInScan2, rp1, rp2, d1, d2 })
-
-        let perm = []
-        for (let xindex of [0, 1, 2]) {
-          for (let yindex of [0, 1, 2]) {
-            if (yindex === xindex) continue
-            for (let zindex of [0, 1, 2]) {
-              if (zindex === xindex) continue
-              if (zindex === yindex) continue
-              for (let nindex of [
-                [],
-                [0],
-                [1],
-                [2],
-                [0, 1],
-                [0, 2],
-                [1, 2],
-                [1, 2, 3],
-              ]) {
-                perm.push({
-                  x: { i: xindex, m: nindex.includes(xindex) ? -1 : 1 },
-                  y: { i: yindex, m: nindex.includes(yindex) ? -1 : 1 },
-                  z: { i: zindex, m: nindex.includes(zindex) ? -1 : 1 },
-                })
-              }
-            }
-          }
-        }
-        // console.log(perm)
-        // console.log(perm.length)
-
-        const applyPerm = (p, u) => [
-          p.x.m * u[p.x.i],
-          p.y.m * u[p.y.i],
-          p.z.m * u[p.z.i],
-        ]
-
-        let pm2
-        for (let p of perm) {
-          // console.log(applyPerm(p, d2), d1, d2)
-          if (equal(applyPerm(p, d2), d1)) {
-            pm2 = p
-            break
-          }
-        }
-
-        const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
-
-        const postPermOffset = diff(rp1, applyPerm(pm2, rp2))
-        console.log(postPermOffset)
-
-        return
-        // const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
-
-        // for (const [k, v] of mc) {
-        //   console.log(add(v[0], v[1]))
-        // }
-        // prettier-ignore
-        const tx = [
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, +1], [+1, +1], [+1, -1]],
-          [[+1, +1], [+1, +1], [-1, +1]],
-          [[+1, +1], [+1, +1], [-1, -1]],
-  
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, +1], [+1, -1], [+1, +1]],
-          [[+1, +1], [-1, +1], [+1, +1]],
-          [[+1, +1], [-1, -1], [+1, +1]],
-  
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, +1], [+1, -1], [+1, -1]],
-          [[+1, +1], [-1, +1], [-1, +1]],
-          [[+1, +1], [-1, -1], [-1, -1]],
-  
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, -1], [+1, +1], [+1, +1]],
-          [[-1, +1], [+1, +1], [+1, +1]],
-          [[-1, -1], [+1, +1], [+1, +1]],
-  
-          [[-1, -1], [+1, +1], [-1, -1]],
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, -1], [+1, +1], [+1, -1]],
-          [[-1, +1], [+1, +1], [-1, +1]],
-  
-          [[-1, -1], [-1, -1], [-1, -1]],
-          [[+1, +1], [+1, +1], [+1, +1]],
-          [[+1, -1], [+1, -1], [+1, -1]],
-          [[-1, +1], [-1, +1], [-1, +1]],
-        ]
-
-        // console.log(tx.length)
-
-        const addtx = (u, v, t) => [
-          t[0][0] * u[0] + t[0][1] * v[0],
-          t[1][0] * u[1] + t[1][1] * v[1],
-          t[2][0] * u[2] + t[2][1] * v[2],
-        ]
-
-        const slope = (s1, s2) => [
-          (s1[0][0] - s2[0][0]) / (s1[1][0] - s2[1][0]),
-          (s1[0][1] - s2[0][1]) / (s1[1][1] - s2[1][1]),
-          (s1[0][2] - s2[0][2]) / (s1[1][2] - s2[1][2]),
-        ]
-
-        // Find the transformation that causes the same delta between the
-        // different representations of two different beacons. This
-        // transformation is the coordinate of this scanner in the coordinate
-        // space of the original scanner.
-        function matchingOffset(same1, same2) {
-          // for (let i = 0; i < tx.length; i++) {
-          const d1 = addtx(same1[0], same1[1], tx[i])
-          const d2 = addtx(same2[0], same2[1], tx[i])
-          // Relative to s0
-          // prettier-ignore
-          // const d0 = addtx([ 68, -1246, -43 ], same1[1], [[-1, -1], [-1, +1], [-1, -1]])
-          console.log(d1, d2, slope(same1, same2)) //, d0)
-          // if (equal(d1, d2)) return { d: d1, t: tx[i] }
-          // }
-        }
-
-        const mv = [...mc.values()]
-        // console.log(mv)
-        for (let a = 0; a < mv.length; a++) {
-          for (let b = a + 1; b < mv.length; b++) {
-            // const kp = [
-            //   [-391, 539, -444],
-            //   [-660, -479, -426],
-            // ]
-            // console.log(a, b)
-            console.log(slope(mv[a], mv[b]))
-            // console.log(mv[0], matchingOffset(mv[0], kp))
-          }
-        }
-        return
-
-        let [same1, same2, same3] = mc.values()
-        let mo = matchingOffset(same1, same2)
-        console.log(mo)
-        // if (!mo) {
-        //   console.log('skip')
-        //   mo = matchingOffset(same1, same3)
-        //   console.log(mo)
-        // }
-        if (!mo) return
-        let offset = mo.d
-
-        console.log({ scannerCoordinate: offset, si1, si2, transform: mo.t })
-        return offset
-
-        console.log({ scanner: si2, coordinate: offset })
-
-        const invertT = (t) => t.map((w) => [w[0], -w[1]])
-
-        for (const pt2 of m2.values()) {
-          // for (let i = 0; i < tx.length; i++) {
-          //   console.log(pt2, addtx(offset, pt2, tx[i]), tx[i])
-          // }
-          // This point in the reference coordinate space.
-          let pt1 = addtx(offset, pt2, invertT(mo.t))
-          // Add to the set of known beacons
-          beacons.set(refDist(pt1), pt1)
-
-          // console.log(pt2, addtx(pt2, offset, mo.t))
-        }
-
-        console.log('#b', beacons.size)
-        // return
-        // break next_scanner
-        pi1 = scan[si1].length
-        break
+        const pm = permutations.find((p) => equal(d1, applyPermutation(p, d2)))
+        const sc = diff(rp1, applyPermutation(pm, rp2))
+        return { scanner: sc, permutation: pm }
       }
     }
   }
 
-  // const intersection = (s1, s2) => [...s1].filter((v) => s2.has(v))
-
-  // Consider the coordinate system of the first scanner as the reference space.
-  // Index the beacons in this space by their distance to the coordinates of
-  // the first beacon
-  // let beacons = distancesFrom(0, 0)
-  // console.log('#b', beacons.size)
-
-  const refDist = (pt) => dist(pt, scan[0][0])
-
-  // { scannerCoordinate: [ 68, -1246, -43 ], si1: 0, si2: 1 }
-  // scannerCoord(0, 1)
-
-  // { scannerCoordinate: [ 160, -1134, -23 ], si1: 1, si2: 3 }
-  // scannerCoord(1, 3)
-
   for (let i = 0; i <= scan.length; i++)
     for (let j = i + 1; j <= 4; j++) {
-      console.log(i, j)
-      scannerCoord(i, j)
+      const t = transformation(i, j)
+      if (t) {
+        console.log(i, j, t)
+      }
     }
-
-  // scannerCoord(1, 4)
-
-  return
-  // for (let si1 = 0; si1 < scan.length; si1++) {
-  //   for (let si2 = si1 + 1; si2 < scan.length; si2++) {
-  //     console.log(scannerCoord(si1, si2))
-  //     // return
-  //   }
-  // }
-
-  // let bs = [...beacons.values()].sort((u, v) => u[0] - v[0])
-  // console.log('#b', beacons.size)
-  // console.log(bs)
-
-  return
-  // for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
-  // Find distances from a point in the first scan
-  let m1 = distancesFrom(3, 0)
-
-  // for (let i = 1; i < scan.length; i++) {
-  // Find distances from a point in the second scan
-  for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
-    let m2 = distancesFrom(1, pi2)
-
-    // How many of those distances are the same?
-    //
-    // If we find a point with 11 intersections, then those 11 plus the point
-    // itself are the 12 common beacons shared between the two scanners.
-    // Furthermore, these two coordinates refer to the same beacon.
-    // let ix = intersection(m, beacons)
-    let ix = intersection(m1, m2)
-    console.log(ix.length)
-    if (ix.length !== 11) continue
-
-    console.log(scan[0][0], scan[1][pi2])
-    // console.log(ix)
-  }
-  // }
-
-  console.log('--')
-
-  // Find distances from a point in the third scan
-  for (let pi2 = 0; pi2 < scan[2].length; pi2++) {
-    let m2 = distancesFrom(2, pi2)
-
-    // How many of those distances are the same?
-    //
-    // If we find a point with 11 intersections, then those 11 plus the point
-    // itself are the 12 common beacons shared between the two scanners.
-    // Furthermore, these two coordinates refer to the same beacon.
-    // let ix = intersection(m, beacons)
-    let ix = intersection(m1, m2)
-    console.log(ix.length)
-    if (ix.length !== 11) continue
-
-    console.log(scan[0][0], scan[2][pi2])
-    // console.log(ix)
-  }
-
-  // for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
-  // let pi2 = 0
-  // let r2 = distances(1, pi2)
-  // let ix = intersection(r1, r2)
-  // console.log(ix.length)
-  // }
-  // }
 }
 
 const scan = parse(input)
