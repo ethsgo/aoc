@@ -195,7 +195,10 @@ const dist = (u, v) =>
   (u[0] - v[0]) ** 2 + (u[1] - v[1]) ** 2 + (u[2] - v[2]) ** 2
 
 const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
+const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
 const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
+
+const transform = (t, p) => add(applyPermutation(t.permutation, p), t.scanner)
 
 const distancesFrom = (s, p) => new Map(s.map((q) => [dist(p, q), q]))
 const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
@@ -228,13 +231,35 @@ function p1(scan) {
     }
   }
 
-  for (let i = 0; i <= scan.length; i++)
-    for (let j = i + 1; j <= 4; j++) {
-      const t = transformation(i, j)
-      if (t) {
-        console.log(i, j, t)
-      }
+  // Use scanner 0 as the reference coordinate space. Find the transformations
+  // to tranform the other scanner's spaces into this reference space.
+  let beacons = distancesFrom(scan[0], scan[0][0])
+
+  const t = transformation(0, 1)
+  const p = scan[1][0]
+  console.log(p)
+  console.log(transform(t, p))
+
+  // for (const ps2 of scan[1]) {
+  //   console.log(ps2)
+  // }
+
+  return
+  let transformations = Array(scan.length)
+
+  for (let i = 1; i < scan.length; i++) {
+    const t = transformation(0, i)
+    if (t) {
+      transformations[i] = t
     }
+  }
+
+  console.log(transformations)
+  // for (let j = i + 1; j <= 4; j++) {
+  //   if (t) {
+  //     console.log(i, j, t)
+  //   }
+  // }
 }
 
 const scan = parse(input)
