@@ -184,8 +184,10 @@ function p1(scan) {
   // Consider the coordinate system of the first scanner as the reference space.
   // Index the beacons in this space by their distance to the coordinates of
   // the first beacon
-  // let beacons = distancesFrom(0, 0)
-  // beacons[0] = scan[0][0]
+  let beacons = distancesFrom(0, 0)
+  console.log('#b', beacons.size)
+
+  const refDist = (pt) => dist(pt, scan[0][0])
 
   for (let si1 = 0; si1 < scan.length; si1++) {
     // For each scan, consider one of the points as the reference point.
@@ -270,12 +272,59 @@ function p1(scan) {
 
           console.log(tx.length)
 
-          return
+          const addtx = (u, v, t) => [
+            t[0][0] * u[0] + t[0][1] * v[0],
+            t[1][0] * u[1] + t[1][1] * v[1],
+            t[2][0] * u[2] + t[2][1] * v[2],
+          ]
+
+          const equal = (u, v) =>
+            u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
+
+          // Find the transformation that causes the same delta between the
+          // different representations of two different beacons. This
+          // transformation is the coordinate of this scanner in the coordinate
+          // space of the original scanner.
+          function matchingOffset(same1, same2) {
+            for (let i = 0; i < tx.length; i++) {
+              const d1 = addtx(same1[0], same1[1], tx[i])
+              const d2 = addtx(same2[0], same2[1], tx[i])
+              // console.log(d1, d2)
+              if (equal(d1, d2)) return { d: d1, t: tx[i] }
+            }
+          }
+
+          let [same1, same2] = mc.values()
+          let mo = matchingOffset(same1, same2)
+          if (!mo) continue
+          let offset = mo.d
+          console.log(mo)
+
+          const invertT = (t) => t.map((w) => [w[0], -w[1]])
+
+          for (const pt2 of m2.values()) {
+            // for (let i = 0; i < tx.length; i++) {
+            //   console.log(pt2, addtx(offset, pt2, tx[i]), tx[i])
+            // }
+            // This point in the reference coordinate space.
+            let pt1 = addtx(offset, pt2, invertT(mo.t))
+            // Add to the set of known beacons
+            beacons.set(refDist(pt1), pt1)
+
+            // console.log(pt2, addtx(pt2, offset, mo.t))
+          }
+
+          console.log('#b', beacons.size)
+          // return
         }
       }
       // distances from the
     }
   }
+
+  let bs = [...beacons.values()].sort((u, v) => u[0] - v[0])
+  console.log('#b', beacons.size)
+  console.log(bs)
 
   return
   // for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
