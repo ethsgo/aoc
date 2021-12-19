@@ -141,6 +141,9 @@ if (!process.stdin.isTTY) {
   input = require('fs').readFileSync(0).toString().trim()
 }
 
+// TODO: Clean
+const assert = require('assert')
+
 function parse(input) {
   const lines = input.split('\n')
   let scan = [[]]
@@ -161,29 +164,48 @@ function dist(p1, p2) {
 }
 
 function p1(scan) {
-  function distances(si, pi) {
+  function distancesFrom(si, pi) {
     const s = scan[si]
     // reference point
     const rp = s[pi]
-    let r = new Set()
+    let m = new Map()
     for (let i = 0; i < s.length; i++) {
       if (i !== pi) {
-        r.add(dist(s[i], rp))
+        assert(!m.get(dist(s[i], rp)))
+        m.set(dist(s[i], rp), s[i])
       }
     }
-    return r
+    return m
   }
 
-  const intersection = (s1, s2) => [...s1].filter((v) => s2.has(v))
+  // const intersection = (s1, s2) => [...s1].filter((v) => s2.has(v))
+  const intersection = (m1, m2) => [...m1.keys()].filter((v) => m2.has(v))
 
-  for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
-    let r1 = distances(0, pi1)
-    for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
-      let r2 = distances(1, pi2)
-      let ix = intersection(r1, r2)
-      console.log(ix.length)
-    }
+  // for (let pi1 = 0; pi1 < scan[0].length; pi1++) {
+  // Find distances from a point in the first scan
+  let m1 = distancesFrom(0, 0)
+
+  // Find distances from a point in the second scan
+  for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
+    let m2 = distancesFrom(1, pi2)
+
+    // How many of those distances are the same?
+    //
+    // If we find a point with 11 intersections, then those 11 plus the point
+    // itself are the 12 common beacons shared between the two scanners.
+    // Furthermore, these two coordinates refer to the same beacon.
+    if (intersection(m1, m2).length !== 11) continue
+
+    console.log(scan[0][0], scan[1][pi2])
   }
+
+  // for (let pi2 = 0; pi2 < scan[1].length; pi2++) {
+  // let pi2 = 0
+  // let r2 = distances(1, pi2)
+  // let ix = intersection(r1, r2)
+  // console.log(ix.length)
+  // }
+  // }
 }
 
 const scan = parse(input)
