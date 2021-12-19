@@ -9,6 +9,7 @@ import "hardhat/console.sol";
 
 contract _18Parser is Parser, StringUtils {
     string private constant exampleInput =
+        "[1,2]\n"
         "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]\n"
         "[[[5,[2,8]],4],[5,[[9,9],0]]]\n"
         "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]\n"
@@ -94,15 +95,47 @@ contract _18Parser is Parser, StringUtils {
 
     function parseNum(string memory s) private returns (uint256) {
         console.log(s);
-        (uint256 id, ) = parseNum(bytes(s), 1);
+        (uint256 id, ) = parseNum2(bytes(s), 0);
         return id;
+    }
+
+    function parseNum2(bytes memory bs, uint256 i)
+        private
+        returns (uint256 id, uint256 j)
+    {
+        console.log("start", i, string(bytes.concat(bs[i])));
+        j = i;
+        if (bs[j] == "[") {
+            // Pair
+            j++;
+            uint256 leftId;
+            uint256 rightId;
+            (leftId, j) = parseNum2(bs, j);
+            console.log("nestd", i, uintString(leftId), j);
+            require(bs[j] == ",");
+            j++;
+            (rightId, j) = parseNum2(bs, j);
+            console.log("nestd", i, uintString(rightId), j);
+            require(bs[j] == "]");
+            j++;
+
+            id = makePair(leftId, rightId);
+            console.log("end  ", i, numToString(id), j);
+        } else {
+            // Regular number
+            uint256 v = parseDigit(bs[j]);
+            j++;
+            console.log("value", i, uintString(v), j);
+            id = makeValue(v);
+            console.log("end  ", i, numToString(id), j);
+        }
     }
 
     function parseNum(bytes memory bs, uint256 i)
         private
         returns (uint256 id, uint256 j)
     {
-        console.log("si", i);
+        console.log("start", i);
 
         require(bs[i] == "[");
         j = i + 1;
@@ -112,16 +145,18 @@ contract _18Parser is Parser, StringUtils {
         if (bs[j] == "[") {
             // Nested pair
             (leftId, j) = parseNum(bs, j);
+            console.log("nestd", i, uintString(leftId), j);
         } else {
             v = parseDigit(bs[j]);
             j++;
+            console.log("value", i, uintString(v), j);
         }
 
         if (bs[j] == "]") {
             // Regular number
             j++;
             id = makeValue(v);
-            console.log("ei", i, numToString(id), j);
+            console.log("end  ", i, numToString(id), j);
         } else {
             // Pair
             leftId = makeValue(v);
@@ -133,9 +168,11 @@ contract _18Parser is Parser, StringUtils {
             if (bs[j] == "[") {
                 // Nested pair
                 (rightId, j) = parseNum(bs, j);
+                console.log("nestd", i, uintString(rightId), j);
             } else {
                 v = parseDigit(bs[j]);
                 j++;
+                console.log("value", i, uintString(v), j);
 
                 rightId = makeValue(v);
             }
@@ -144,7 +181,7 @@ contract _18Parser is Parser, StringUtils {
             j++;
 
             id = makePair(leftId, rightId);
-            console.log("ei", i, numToString(id), j);
+            console.log("end  ", i, numToString(id), j);
         }
     }
 }
