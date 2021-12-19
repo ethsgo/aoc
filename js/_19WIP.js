@@ -232,22 +232,52 @@ function p1(scan) {
         const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
 
         const sl = (u, v, d) => [
-          (u[0] - v[0]) / d,
-          (u[1] - v[1]) / d,
-          (u[2] - v[2]) / d,
+          Math.abs(Math.round(10000 * ((u[0] - v[0]) / d))),
+          Math.abs(Math.round(10000 * ((u[1] - v[1]) / d))),
+          Math.abs(Math.round(10000 * ((u[2] - v[2]) / d))),
         ]
+
+        const sl2 = (u, v, d) =>
+          [
+            Math.abs(Math.round(10000 * ((u[0] - v[0]) / d))),
+            Math.abs(Math.round(10000 * ((u[1] - v[1]) / d))),
+            Math.abs(Math.round(10000 * ((u[2] - v[2]) / d))),
+          ].sort((x, y) => x - y)
 
         // console.log('slopes of 1')
         for (const [k, v] of m1) {
           if (equal(v, rp1)) continue
-          console.log(sl(v, rp1, Math.sqrt(k)), 1)
+          // console.log(sl(v, rp1, Math.sqrt(k)), 1, 'sl')
         }
 
         // console.log('slopes of 2')
         for (const [k, v] of m2) {
           if (equal(v, rp2)) continue
-          console.log(sl(v, rp2, Math.sqrt(k)), 2)
+          // console.log(sl(v, rp2, Math.sqrt(k)), 2, 'sl')
         }
+
+        // for (const [k2, v2] of m2) {
+        //   if (equal(v2, rp2)) continue
+        //   const s2 = sl2(v2, rp2, Math.sqrt(k2))
+        //   for (const [k1, v1] of m1) {
+        //     if (equal(v1, rp1)) continue
+        //     const s1 = sl2(v1, rp1, Math.sqrt(k1))
+        //     if (equal(s2, s1)) {
+        //       console.log(v2, v1)
+        //     }
+        //   }
+        // }
+        const mc2 = new Map(mc)
+        mc2.delete(0)
+        let someCommonDistance = ix.find((e) => e[0] !== 0)[0]
+        const pointInScan1 = m1.get(someCommonDistance)
+        const pointInScan2 = m2.get(someCommonDistance)
+        const psc1 = pointInScan1
+        const d1 = [psc1[0] - rp1[0], psc1[1] - rp1[1], psc1[2] - rp1[2]]
+        const psc2 = pointInScan2
+        const d2 = [psc2[0] - rp2[0], psc2[1] - rp2[1], psc2[2] - rp2[2]]
+
+        console.log({ pointInScan1, pointInScan2, rp1, rp2, d1, d2 })
 
         return
         // const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
