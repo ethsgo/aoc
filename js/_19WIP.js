@@ -229,6 +229,27 @@ function p1(scan) {
         }
         console.log('common', mc)
 
+        const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
+
+        const sl = (u, v, d) => [
+          (u[0] - v[0]) / d,
+          (u[1] - v[1]) / d,
+          (u[2] - v[2]) / d,
+        ]
+
+        // console.log('slopes of 1')
+        for (const [k, v] of m1) {
+          if (equal(v, rp1)) continue
+          console.log(sl(v, rp1, Math.sqrt(k)), 1)
+        }
+
+        // console.log('slopes of 2')
+        for (const [k, v] of m2) {
+          if (equal(v, rp2)) continue
+          console.log(sl(v, rp2, Math.sqrt(k)), 2)
+        }
+
+        return
         // const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
 
         // for (const [k, v] of mc) {
@@ -276,21 +297,42 @@ function p1(scan) {
         ]
 
         const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
-
-        const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
+        const slope = (s1, s2) => [
+          (s1[0][0] - s2[0][0]) / (s1[1][0] - s2[1][0]),
+          (s1[0][1] - s2[0][1]) / (s1[1][1] - s2[1][1]),
+          (s1[0][2] - s2[0][2]) / (s1[1][2] - s2[1][2]),
+        ]
 
         // Find the transformation that causes the same delta between the
         // different representations of two different beacons. This
         // transformation is the coordinate of this scanner in the coordinate
         // space of the original scanner.
         function matchingOffset(same1, same2) {
-          for (let i = 0; i < tx.length; i++) {
-            const d1 = addtx(same1[0], same1[1], tx[i])
-            const d2 = addtx(same2[0], same2[1], tx[i])
-            console.log(d1, d2, diff(d1, d2))
-            if (equal(d1, d2)) return { d: d1, t: tx[i] }
+          // for (let i = 0; i < tx.length; i++) {
+          const d1 = addtx(same1[0], same1[1], tx[i])
+          const d2 = addtx(same2[0], same2[1], tx[i])
+          // Relative to s0
+          // prettier-ignore
+          // const d0 = addtx([ 68, -1246, -43 ], same1[1], [[-1, -1], [-1, +1], [-1, -1]])
+          console.log(d1, d2, slope(same1, same2)) //, d0)
+          // if (equal(d1, d2)) return { d: d1, t: tx[i] }
+          // }
+        }
+
+        const mv = [...mc.values()]
+        // console.log(mv)
+        for (let a = 0; a < mv.length; a++) {
+          for (let b = a + 1; b < mv.length; b++) {
+            // const kp = [
+            //   [-391, 539, -444],
+            //   [-660, -479, -426],
+            // ]
+            // console.log(a, b)
+            console.log(slope(mv[a], mv[b]))
+            // console.log(mv[0], matchingOffset(mv[0], kp))
           }
         }
+        return
 
         let [same1, same2, same3] = mc.values()
         let mo = matchingOffset(same1, same2)
@@ -303,8 +345,9 @@ function p1(scan) {
         if (!mo) return
         let offset = mo.d
 
-        console.log({ scannerCoordinate: offset, si1, si2 })
+        console.log({ scannerCoordinate: offset, si1, si2, transform: mo.t })
         return offset
+
         console.log({ scanner: si2, coordinate: offset })
 
         const invertT = (t) => t.map((w) => [w[0], -w[1]])
@@ -347,6 +390,8 @@ function p1(scan) {
   // scannerCoord(1, 3)
 
   // for (let i = 0; i <= 4; i++) for (let j = 0; j <= 4; j++) scannerCoord(i, j)
+
+  scannerCoord(1, 4)
 
   return
   // for (let si1 = 0; si1 < scan.length; si1++) {
