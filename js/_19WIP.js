@@ -242,20 +242,31 @@ function p1(scan) {
   //   console.log(transform(t, p))
   // }
 
-  {
-    const t01 = transformation(0, 1)
-    const t14 = transformation(1, 4)
-    console.log(t14)
-    for (const p of scan[4]) {
-      console.log(transform(t01, transform(t14, p)), p)
-    }
+  const t01 = transformation(0, 1)
+  for (const p of scan[1]) {
+    beacons.push(transform(t01, p))
   }
 
-  // for (const ps2 of scan[1]) {
-  //   console.log(ps2)
-  // }
+  const t14 = transformation(1, 4)
+  for (const p of scan[4]) {
+    beacons.push(transform(t01, transform(t14, p)))
+  }
 
-  return
+  const t13 = transformation(1, 3)
+  for (const p of scan[3]) {
+    beacons.push(transform(t01, transform(t13, p)))
+  }
+
+  const t42 = transformation(4, 2)
+  for (const p of scan[2]) {
+    beacons.push(transform(t01, transform(t14, transform(t42, p))))
+  }
+
+  // Dedup
+  // beacons = distancesFrom(beacons, beacons[0]).values()
+
+  return new Set(beacons.map(JSON.stringify)).size
+  return beacons.length
   let transformations = Array(scan.length)
 
   for (let i = 1; i < scan.length; i++) {
