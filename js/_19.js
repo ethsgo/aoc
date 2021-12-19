@@ -156,26 +156,26 @@ function parse(input) {
 }
 
 function dist(p1, p2) {
-  return (p1[0] - p2[0]) * 1000 + (p1[1] - p2[1]) * 1000 + (p1[2] - p2[2])
+  return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
 }
 
 function p1(scan) {
-  const s0 = scan[0]
-  // reference point
-  const rp = s0[0]
-  for (let i = 1; i < s0.length; i++) {
-    console.log(dist(s0[i], rp))
+  function pr(j) {
+    const s0 = scan[j]
+    // reference point
+    const rp = s0[0]
+    for (let i = 1; i < s0.length; i++) {
+      console.log(dist(s0[i], rp))
+    }
+
+    console.log('--')
   }
 
-  console.log('--')
-
-  const s1 = scan[1]
-  // reference point
-  const rp1 = s1[1]
-  console.log(dist(s1[0], rp1))
-  for (let i = 2; i < s0.length; i++) {
-    console.log(dist(s1[i], rp1))
-  }
+  pr(0)
+  pr(1)
+  pr(2)
+  pr(4)
+  pr(5)
 }
 
 const scan = parse(input)
