@@ -203,6 +203,8 @@ const transform = (t, p) => add(applyPermutation(t.permutation, p), t.scanner)
 const distancesFrom = (s, p) => new Map(s.map((q) => [dist(p, q), q]))
 const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
 
+const uniqCount = (points) => new Set(points.map(JSON.stringify)).size
+
 function p1(scan) {
   function transformation(si1, si2) {
     for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
@@ -235,21 +237,9 @@ function p1(scan) {
   // to tranform the other scanner's spaces into this reference space.
   let beacons = scan[0]
 
-  // {
-  //   const t = transformation(0, 1)
-  //   const p = scan[1][0]
-  //   console.log(p)
-  //   console.log(transform(t, p))
-  // }
-
   const t01 = transformation(0, 1)
   for (const p of scan[1]) {
     beacons.push(transform(t01, p))
-  }
-
-  const t14 = transformation(1, 4)
-  for (const p of scan[4]) {
-    beacons.push(transform(t01, transform(t14, p)))
   }
 
   const t13 = transformation(1, 3)
@@ -257,31 +247,17 @@ function p1(scan) {
     beacons.push(transform(t01, transform(t13, p)))
   }
 
+  const t14 = transformation(1, 4)
+  for (const p of scan[4]) {
+    beacons.push(transform(t01, transform(t14, p)))
+  }
+
   const t42 = transformation(4, 2)
   for (const p of scan[2]) {
     beacons.push(transform(t01, transform(t14, transform(t42, p))))
   }
 
-  // Dedup
-  // beacons = distancesFrom(beacons, beacons[0]).values()
-
-  return new Set(beacons.map(JSON.stringify)).size
-  return beacons.length
-  let transformations = Array(scan.length)
-
-  for (let i = 1; i < scan.length; i++) {
-    const t = transformation(0, i)
-    if (t) {
-      transformations[i] = t
-    }
-  }
-
-  console.log(transformations)
-  // for (let j = i + 1; j <= 4; j++) {
-  //   if (t) {
-  //     console.log(i, j, t)
-  //   }
-  // }
+  return uniqCount(beacons)
 }
 
 const scan = parse(input)
