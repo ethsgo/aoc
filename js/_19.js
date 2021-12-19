@@ -147,7 +147,7 @@ function parse(input) {
   for (let i = 1; i < lines.length; i++) {
     if (lines[i].length == 0) {
       scan.push([])
-      i++;
+      i++
     } else {
       scan[scan.length - 1].push(lines[i].split(',').map(Number))
     }
@@ -155,7 +155,28 @@ function parse(input) {
   return scan
 }
 
-const p1 = (scan) => scan
+function dist(p1, p2) {
+  return (p1[0] - p2[0]) * 1000 + (p1[1] - p2[1]) * 1000 + (p1[2] - p2[2])
+}
+
+function p1(scan) {
+  const s0 = scan[0]
+  // reference point
+  const rp = s0[0]
+  for (let i = 1; i < s0.length; i++) {
+    console.log(dist(s0[i], rp))
+  }
+
+  console.log('--')
+
+  const s1 = scan[1]
+  // reference point
+  const rp1 = s1[1]
+  console.log(dist(s1[0], rp1))
+  for (let i = 2; i < s0.length; i++) {
+    console.log(dist(s1[i], rp1))
+  }
+}
 
 const scan = parse(input)
 console.log(p1(scan))
