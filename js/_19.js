@@ -190,23 +190,33 @@ function p1(scan) {
   const refDist = (pt) => dist(pt, scan[0][0])
 
   for (let si1 = 0; si1 < scan.length; si1++) {
-    // For each scan, consider one of the points as the reference point.
-    for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
-      // Find distances from that point in the coordinate space of this scan.
-      let m1 = distancesFrom(si1, pi1)
+    // next_scanner:
+    //    console.log('here');
+    for (let si2 = si1 + 1; si2 < scan.length; si2++) {
+      console.log({ checking: si2 })
+      // For each scan, consider one of the points as the reference point.
+      for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
+        console.log({ checking: si2, pi1 })
 
-      // For each other scan, find the reference point which has 12 of the same
-      // distances from the other points in the coordinate space of that scan.
-      for (let si2 = si1 + 1; si2 < scan.length; si2++) {
+        // Find distances from that point in the coordinate space of this scan.
+        let m1 = distancesFrom(si1, pi1)
+
+        // For each other scan, find the reference point which has 12 of the same
+        // distances from the other points in the coordinate space of that scan.
+
         for (let pi2 = 0; pi2 < scan[si2].length; pi2++) {
+
           const m2 = distancesFrom(si2, pi2)
           const ix = intersection(m1, m2)
+          console.log({ checking: si2, pi1, pi2, ixc: ix.length })
+
+          // console.log(ix.length)
 
           if (ix.length !== 12) continue
 
           const rp1 = scan[si1][pi1]
           const rp2 = scan[si2][pi2]
-          console.log({ si1, pi1, rp1, si2, pi2, rp2 })
+          console.log({ match: true, si1, pi1, rp1, si2, pi2, rp2 })
 
           // So both the reference points refer to the same beacon.
 
@@ -288,16 +298,24 @@ function p1(scan) {
             for (let i = 0; i < tx.length; i++) {
               const d1 = addtx(same1[0], same1[1], tx[i])
               const d2 = addtx(same2[0], same2[1], tx[i])
-              // console.log(d1, d2)
+              console.log(d1, d2)
               if (equal(d1, d2)) return { d: d1, t: tx[i] }
             }
           }
 
-          let [same1, same2] = mc.values()
+          let [same1, same2, same3] = mc.values()
           let mo = matchingOffset(same1, same2)
-          if (!mo) continue
-          let offset = mo.d
           console.log(mo)
+          if (!mo) {
+            console.log('skip')
+            continue
+            mo = matchingOffset(same1, same3)
+            console.log(mo)
+          }
+          // if (!mo) continue
+          let offset = mo.d
+
+          console.log({ scanner: si2, coordinate: offset })
 
           const invertT = (t) => t.map((w) => [w[0], -w[1]])
 
@@ -315,6 +333,9 @@ function p1(scan) {
 
           console.log('#b', beacons.size)
           // return
+          // break next_scanner
+          pi1 = scan[si1].length
+          break
         }
       }
       // distances from the
