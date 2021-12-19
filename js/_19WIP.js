@@ -233,12 +233,23 @@ function p1(scan) {
 
   // Use scanner 0 as the reference coordinate space. Find the transformations
   // to tranform the other scanner's spaces into this reference space.
-  let beacons = distancesFrom(scan[0], scan[0][0])
+  let beacons = scan[0]
 
-  const t = transformation(0, 1)
-  const p = scan[1][0]
-  console.log(p)
-  console.log(transform(t, p))
+  // {
+  //   const t = transformation(0, 1)
+  //   const p = scan[1][0]
+  //   console.log(p)
+  //   console.log(transform(t, p))
+  // }
+
+  {
+    const t01 = transformation(0, 1)
+    const t14 = transformation(1, 4)
+    console.log(t14)
+    for (const p of scan[4]) {
+      console.log(transform(t01, transform(t14, p)), p)
+    }
+  }
 
   // for (const ps2 of scan[1]) {
   //   console.log(ps2)
