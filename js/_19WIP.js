@@ -237,6 +237,26 @@ function p1(scan) {
   // to tranform the other scanner's spaces into this reference space.
   let beacons = scan[0]
 
+  let tmap = new Map()
+  let newlyAdded = [0]
+
+  while (newlyAdded.length > 0) {
+    const i = newlyAdded.shift()
+    // console.log(tmap)
+    for (let j = 0; j < scan.length; j++) {
+      if (i === j) continue
+      if (tmap.has(i) && tmap.get(i).has(j)) continue
+      if (tmap.has(j) && tmap.get(j).has(i)) continue
+      const t = transformation(i, j)
+      if (t) {
+        // console.log(i, j)
+        tmap.set(i, tmap.get(i) ?? new Map())
+        tmap.get(i).set(j, t)
+        newlyAdded.push(j)
+      }
+    }
+  }
+
   const t01 = transformation(0, 1)
   for (const p of scan[1]) {
     beacons.push(transform(t01, p))
