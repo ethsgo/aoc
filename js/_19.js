@@ -170,7 +170,7 @@ function p1(scan) {
     const rp = s[pi]
     let m = new Map()
     for (let i = 0; i < s.length; i++) {
-      if (i !== pi) {
+      if (true || i !== pi) {
         assert(!m.get(dist(s[i], rp)))
         m.set(dist(s[i], rp), s[i])
       }
@@ -198,20 +198,79 @@ function p1(scan) {
       for (let si2 = 0; si2 < scan.length; si2++) {
         if (si1 === si2) continue
         for (let pi2 = 0; pi2 < scan[si2].length; pi2++) {
-          let m2 = distancesFrom(si2, pi2)
-          let ix = intersection(m1, m2)
+          const m2 = distancesFrom(si2, pi2)
+          const ix = intersection(m1, m2)
 
-          if (ix.length === 11) {
-            console.log({
-              si1,
-              pi1,
-              // rp1: scan[si1][pi1],
-              si2,
-              pi2,
-              // rp2: scan[si2][pi2],
-              ixc: ix.length,
-            })
+          if (ix.length !== 12) continue
+
+          const rp1 = scan[si1][pi1]
+          const rp2 = scan[si2][pi2]
+          console.log({ si1, pi1, rp1, si2, pi2, rp2 })
+
+          // So both the reference points refer to the same beacon.
+
+          console.log(rp1[0] - rp2[0], rp1[1] - rp2[1], rp1[2] - rp2[2])
+          console.log(rp1[0] + rp2[0], rp1[1] + rp2[1], rp1[2] + rp2[2])
+          console.log(m1)
+          console.log(m2)
+
+          // // Combine all points at the same distances
+          // let mc = new Map()
+          // for (const [k, v] of m1) {
+          //   mc.set(k, [...(mc.get(k) ?? []), v])
+          // }
+          // for (const [k, v] of m2) {
+          //   mc.set(k, [...(mc.get(k) ?? []), v])
+          // }
+          // console.log(mc)
+          // Combine all points at the same distances
+          let mc = new Map()
+          for (const [k] of ix) {
+            mc.set(k, [m1.get(k), m2.get(k)])
           }
+          console.log(mc)
+
+          const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
+
+          for (const [k, v] of mc) {
+            console.log(add(v[0], v[1]))
+          }
+          // prettier-ignore
+          const tx = [
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, +1], [+1, +1], [+1, -1]],
+            [[+1, +1], [+1, +1], [-1, +1]],
+            [[+1, +1], [+1, +1], [-1, -1]],
+
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, +1], [+1, -1], [+1, +1]],
+            [[+1, +1], [-1, +1], [+1, +1]],
+            [[+1, +1], [-1, -1], [+1, +1]],
+
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, +1], [+1, -1], [+1, -1]],
+            [[+1, +1], [-1, +1], [-1, +1]],
+            [[+1, +1], [-1, -1], [-1, -1]],
+
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, -1], [+1, +1], [+1, +1]],
+            [[-1, +1], [+1, +1], [+1, +1]],
+            [[-1, -1], [+1, +1], [+1, +1]],
+
+            [[-1, -1], [+1, +1], [-1, -1]],
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, -1], [+1, +1], [+1, -1]],
+            [[-1, +1], [+1, +1], [-1, +1]],
+
+            [[-1, -1], [-1, -1], [-1, -1]],
+            [[+1, +1], [+1, +1], [+1, +1]],
+            [[+1, -1], [+1, -1], [+1, -1]],
+            [[-1, +1], [-1, +1], [-1, +1]],
+          ]
+
+          console.log(tx.length)
+
+          return
         }
       }
       // distances from the
