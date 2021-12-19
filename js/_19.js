@@ -197,8 +197,7 @@ function p1(scan) {
 
       // For each other scan, find the reference point which has 12 of the same
       // distances from the other points in the coordinate space of that scan.
-      for (let si2 = 0; si2 < scan.length; si2++) {
-        if (si1 === si2) continue
+      for (let si2 = si1 + 1; si2 < scan.length; si2++) {
         for (let pi2 = 0; pi2 < scan[si2].length; pi2++) {
           const m2 = distancesFrom(si2, pi2)
           const ix = intersection(m1, m2)
