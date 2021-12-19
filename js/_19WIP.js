@@ -204,7 +204,7 @@ function p1(scan) {
         const rp1 = scan[si1][pi1]
         const rp2 = scan[si2][pi2]
         // console.log({ match: true, si1, pi1, rp1, si2, pi2, rp2 })
-        console.log({ match: true, si1, pi1, si2, pi2 })
+        // console.log({ match: true, si1, pi1, si2, pi2 })
 
         // So both the reference points refer to the same beacon.
 
@@ -227,7 +227,7 @@ function p1(scan) {
         for (const [k] of ix) {
           mc.set(k, [m1.get(k), m2.get(k)])
         }
-        console.log('common', mc)
+        // console.log('common', mc)
 
         const equal = (u, v) => u[0] === v[0] && u[1] === v[1] && u[2] === v[2]
 
@@ -277,7 +277,56 @@ function p1(scan) {
         const psc2 = pointInScan2
         const d2 = [psc2[0] - rp2[0], psc2[1] - rp2[1], psc2[2] - rp2[2]]
 
-        console.log({ pointInScan1, pointInScan2, rp1, rp2, d1, d2 })
+        // console.log({ pointInScan1, pointInScan2, rp1, rp2, d1, d2 })
+
+        let perm = []
+        for (let xindex of [0, 1, 2]) {
+          for (let yindex of [0, 1, 2]) {
+            if (yindex === xindex) continue
+            for (let zindex of [0, 1, 2]) {
+              if (zindex === xindex) continue
+              if (zindex === yindex) continue
+              for (let nindex of [
+                [],
+                [0],
+                [1],
+                [2],
+                [0, 1],
+                [0, 2],
+                [1, 2],
+                [1, 2, 3],
+              ]) {
+                perm.push({
+                  x: { i: xindex, m: nindex.includes(xindex) ? -1 : 1 },
+                  y: { i: yindex, m: nindex.includes(yindex) ? -1 : 1 },
+                  z: { i: zindex, m: nindex.includes(zindex) ? -1 : 1 },
+                })
+              }
+            }
+          }
+        }
+        // console.log(perm)
+        // console.log(perm.length)
+
+        const applyPerm = (p, u) => [
+          p.x.m * u[p.x.i],
+          p.y.m * u[p.y.i],
+          p.z.m * u[p.z.i],
+        ]
+
+        let pm2
+        for (let p of perm) {
+          // console.log(applyPerm(p, d2), d1, d2)
+          if (equal(applyPerm(p, d2), d1)) {
+            pm2 = p
+            break
+          }
+        }
+
+        const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
+
+        const postPermOffset = diff(rp1, applyPerm(pm2, rp2))
+        console.log(postPermOffset)
 
         return
         // const add = (u, v) => [u[0] + v[0], u[1] + v[1], u[2] + v[2]]
@@ -326,7 +375,6 @@ function p1(scan) {
           t[2][0] * u[2] + t[2][1] * v[2],
         ]
 
-        const diff = (u, v) => [u[0] - v[0], u[1] - v[1], u[2] - v[2]]
         const slope = (s1, s2) => [
           (s1[0][0] - s2[0][0]) / (s1[1][0] - s2[1][0]),
           (s1[0][1] - s2[0][1]) / (s1[1][1] - s2[1][1]),
@@ -419,9 +467,13 @@ function p1(scan) {
   // { scannerCoordinate: [ 160, -1134, -23 ], si1: 1, si2: 3 }
   // scannerCoord(1, 3)
 
-  // for (let i = 0; i <= 4; i++) for (let j = 0; j <= 4; j++) scannerCoord(i, j)
+  for (let i = 0; i <= scan.length; i++)
+    for (let j = i + 1; j <= 4; j++) {
+      console.log(i, j)
+      scannerCoord(i, j)
+    }
 
-  scannerCoord(1, 4)
+  // scannerCoord(1, 4)
 
   return
   // for (let si1 = 0; si1 < scan.length; si1++) {
