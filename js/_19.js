@@ -240,7 +240,7 @@ function deduceTransformations(scan) {
   let newlyAdded = [0]
 
   while (newlyAdded.length > 0) {
-    const i = newlyAdded.shift()
+    const i = newlyAdded.pop()
     for (let j = 0; j < scan.length; j++) {
       if (i === j) continue
       if (tmap.has(i) && tmap.get(i).has(j)) continue
