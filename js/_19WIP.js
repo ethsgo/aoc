@@ -1,3 +1,5 @@
+const { inspect } = require('util')
+
 let input = `
 --- scanner 0 ---
 404,-588,-901
@@ -191,6 +193,9 @@ const applyPermutation = (p, u) => [
   p.z.m * u[p.z.i],
 ]
 
+const manhattanDist = (u, v) =>
+  Math.abs(u[0] - v[0]) + Math.abs(u[1] - v[1]) + Math.abs(u[2] - v[2])
+
 const dist = (u, v) =>
   (u[0] - v[0]) ** 2 + (u[1] - v[1]) ** 2 + (u[2] - v[2]) ** 2
 
@@ -239,6 +244,7 @@ function p1(scan) {
 
   let tmap = new Map()
   let newlyAdded = [0]
+  let scanners = [[0, 0, 0]]
 
   while (newlyAdded.length > 0) {
     const i = newlyAdded.shift()
@@ -257,20 +263,29 @@ function p1(scan) {
     }
   }
 
+  console.log(require('util').inspect(tmap, {depth: 3}))
+
   for (let i = scan.length - 1; i > 0; i--) {
     let d = i
     let bx = [...scan[i]]
+    let scanner
     while (d !== 0) {
       for (const [k, v] of tmap) {
         const t = v.get(d)
         if (t) {
           console.log(`${d} => ${k}`)
           bx = bx.map((p) => transform(t, p))
+          if (!scanner) {
+            scanner = t.scanner
+          } else {
+            scanner = transform(t, scanner)
+          }
           d = k
         }
       }
     }
     beacons = [...beacons, ...bx]
+    scanners.push(scanner)
     console.log('--')
   }
   /*
@@ -294,7 +309,19 @@ function p1(scan) {
     beacons.push(transform(t01, transform(t14, transform(t42, p))))
   }
 */
-  return uniqCount(beacons)
+  let beaconCount = uniqCount(beacons)
+
+  let scandMax = 0
+  for (let i = 0; i < scanners.length; i++) {
+    for (let j = 0; j < scanners.length; j++) {
+      if (i === j) continue
+      let d = manhattanDist(scanners[i], scanners[j])
+      console.log({ i, si: scanners[i], j, sj: scanners[j], d })
+      if (d > scandMax) scandMax = d
+    }
+  }
+
+  return [beaconCount, scandMax]
 }
 
 const scan = parse(input)
