@@ -45,18 +45,18 @@ function show(image) {
   console.log(image.map((row) => row.join('')).join('\n'))
 }
 
-/// Return a new image by padding the given image by 4 pixels on each side.
+/// Return a new image by padding the given image by 2 pixels on each side.
 function padded(image) {
   const w = image[0].length
   const h = image.length
-  const emptyRow = [...Array(w + 2 * 4)].map((_) => '.')
+  const emptyRow = [...Array(w + 2 * 3)].map((_) => '.')
 
   let newImage = []
-  for (let i = 0; i < h + 2 * 4; i++) {
-    if (i < 4 || i >= h + 4) {
+  for (let i = 0; i < h + 2 * 3; i++) {
+    if (i < 3 || i >= h + 3) {
       newImage[i] = [...emptyRow]
     } else {
-      newImage[i] = ('....' + image[i - 4].join('') + '....').split('')
+      newImage[i] = ('...' + image[i - 3].join('') + '...').split('')
     }
   }
 
@@ -81,8 +81,8 @@ function enhance(map, image) {
   const w = base[0].length
   const h = base.length
 
-  for (let y = 2; y < h - 2; y++) {
-    for (let x = 2; x < w - 2; x++) {
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
       // prettier-ignore
       let pixels = [
         base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
