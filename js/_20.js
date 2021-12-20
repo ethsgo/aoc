@@ -43,26 +43,24 @@ function parse(input) {
 
 function show(image) {
   console.log(image.map((row) => row.join('')).join('\n'))
-  console.log()
 }
 
-/// Return a new image by padding the given image by n pixel on each side.
-function padded(image, n, fill) {
+const row = (fill, n) => [...Array(n)].map((_) => fill)
+
+function pad1(image, fill) {
   const w = image[0].length
   const h = image.length
-  const emptyRow = [...Array(w + 2 * n)].map((_) => fill)
-  const side = [...Array(n)].map((_) => fill)
 
-  let newImage = []
-  for (let i = 0; i < h + 2 * n; i++) {
-    if (i < n || i >= h + n) {
-      newImage[i] = [...emptyRow]
+  let padded = []
+  for (let i = 0; i < h + 2; i++) {
+    if (i === 0 || i === h + 1) {
+      padded[i] = row(fill, w + 2)
     } else {
-      newImage[i] = [...side, ...image[i - n], ...side]
+      padded[i] = [fill, ...image[i - 1], fill]
     }
   }
 
-  return newImage
+  return padded
 }
 
 const copy = (image) => image.map((row) => [...row])
@@ -77,9 +75,7 @@ function decimal(pixels) {
 }
 
 function enhance(map, image, fill) {
-  const base = padded(image, 1, fill)
-  // console.log('base')
-  // show(base)
+  const base = pad1(image, fill)
   let next = copy(base)
 
   const w = base[0].length
@@ -112,37 +108,24 @@ function enhance(map, image, fill) {
     }
   }
 
-  // console.log('next')
-  // show(next)
-
   return next
 }
 
 const lightCount = (xs) =>
   xs.reduce((a, row) => a + row.reduce((a, c) => a + (c === '#' ? 1 : 0), 0), 0)
 
-function p1({ map, image }) {
-  show(image)
-  fill = map[0]
-  image = enhance(map, image, '.')
-  image = enhance(map, image, fill)
-  show(image)
+function iter({ map, image }, steps) {
+  fill = '.'
+  for (i = 0; i < steps; i++) {
+    image = enhance(map, image, fill)
+    fill = map[decimal(row(fill, 9))]
+  }
   return lightCount(image)
 }
 
-function p2({ map, image }) {
-  show(image)
-  fill = '.'
-  image = enhance(map, image, fill)
-  for (i = 0; i < 49; i++) {
-    fill = map[decimal([...Array(9)].map(_ => fill))]
-    image = enhance(map, image, fill)
-  }
-  show(image)
-  return lightCount(image)
-}
+const p1 = (data) => iter(data, 2)
+const p2 = (data) => iter(data, 50)
 
 const data = parse(input)
 console.log(p1(data))
-console.log()
 console.log(p2(data))
