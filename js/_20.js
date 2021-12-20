@@ -66,11 +66,11 @@ function padded1(image) {
 }
 
 /// Return a new image by padding the given image by n pixel on each side.
-function padded(image, n = 1) {
+function padded(image, n = 1, fill) {
   const w = image[0].length
   const h = image.length
-  const emptyRow = [...Array(w + 2 * n)].map((_) => '.')
-  const side = [...Array(n)].map((_) => '.')
+  const emptyRow = [...Array(w + 2 * n)].map((_) => fill)
+  const side = [...Array(n)].map((_) => fill)
 
   let newImage = []
   for (let i = 0; i < h + 2 * n; i++) {
@@ -95,9 +95,9 @@ function decimal(pixels) {
   return d
 }
 
-function enhance(map, image) {
+function enhance(map, image, fill1, fill2) {
   // const base = copy(image)//padded(image, 5)
-  const base = padded(image, 3)
+  const base = padded(image, 1, fill1)
   console.log('base')
   show(base)
   let next = copy(base)
@@ -105,7 +105,7 @@ function enhance(map, image) {
   const w = base[0].length
   const h = base.length
 
-  console.log({ baseW: w, baseH: h, imgW: image[0].length, imgH: image.length })
+  // console.log({ baseW: w, baseH: h, imgW: image[0].length, imgH: image.length })
 
   function pixels(y, x, debug) {
     let px = []
@@ -115,16 +115,16 @@ function enhance(map, image) {
         for (const dx of [-1, 0, 1]) {
           const v = x + dx
           if (v >= 0 && v < w) {
-            if (debug) console.log(u, v, base[u][v])
+            // if (debug) console.log(u, v, base[u][v])
             px.push(base[u][v])
           } else {
-            if (debug) console.log(u, v, '.')
-            px.push('.')
+            // if (debug) console.log(u, v, fill)
+            px.push(fill2)
           }
         }
       } else {
-        if (debug) console.log(u, '-', '...')
-        px = [...px, ...'...']
+        // if (debug) console.log(u, '-', '...')
+        px = [...px, fill2, fill2, fill2]
       }
     }
 
@@ -133,8 +133,8 @@ function enhance(map, image) {
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-  // for (let y = 4; y < h - 4; y++) {
-  //   for (let x = 4; x < w - 4; x++) {
+      // for (let y = 4; y < h - 4; y++) {
+      //   for (let x = 4; x < w - 4; x++) {
       // prettier-ignore
       // let pixels = [
       //   base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
@@ -163,8 +163,8 @@ const lightCount = (xs) =>
 
 function p1({ map, image }) {
   show(image)
-  image = enhance(map, image)
-  image = enhance(map, image)
+  image = enhance(map, image, '.', '.')
+  image = enhance(map, image, '#', '#')
   show(image)
   return lightCount(image)
 }
