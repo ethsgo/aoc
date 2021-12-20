@@ -171,7 +171,7 @@ const permutations = (() => {
           [0, 1],
           [0, 2],
           [1, 2],
-          [1, 2, 3],
+          [0, 1, 2],
         ]) {
           perm.push({
             x: { i: xindex, m: nindex.includes(xindex) ? -1 : 1 },
