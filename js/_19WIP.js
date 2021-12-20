@@ -257,6 +257,23 @@ function p1(scan) {
     }
   }
 
+  for (let i = scan.length - 1; i > 0; i--) {
+    let d = i
+    let bx = [...scan[i]]
+    while (d !== 0) {
+      for (const [k, v] of tmap) {
+        const t = v.get(d)
+        if (t) {
+          console.log(`${d} => ${k}`)
+          bx = bx.map((p) => transform(t, p))
+          d = k
+        }
+      }
+    }
+    beacons = [...beacons, ...bx]
+    console.log('--')
+  }
+  /*
   const t01 = transformation(0, 1)
   for (const p of scan[1]) {
     beacons.push(transform(t01, p))
@@ -276,7 +293,7 @@ function p1(scan) {
   for (const p of scan[2]) {
     beacons.push(transform(t01, transform(t14, transform(t42, p))))
   }
-
+*/
   return uniqCount(beacons)
 }
 

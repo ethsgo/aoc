@@ -96,7 +96,8 @@ function decimal(pixels) {
 }
 
 function enhance(map, image) {
-  const base = padded(image, 5)
+  // const base = copy(image)//padded(image, 5)
+  const base = padded(image, 3)
   console.log('base')
   show(base)
   let next = copy(base)
@@ -130,8 +131,10 @@ function enhance(map, image) {
     return px
   }
 
-  for (let y = 4; y < h - 4; y++) {
-    for (let x = 4; x < w - 4; x++) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+  // for (let y = 4; y < h - 4; y++) {
+  //   for (let x = 4; x < w - 4; x++) {
       // prettier-ignore
       // let pixels = [
       //   base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
