@@ -98,8 +98,8 @@ function decimal(pixels) {
 function enhance(map, image, fill1, fill2) {
   // const base = copy(image)//padded(image, 5)
   const base = padded(image, 1, fill1)
-  console.log('base')
-  show(base)
+  // console.log('base')
+  // show(base)
   let next = copy(base)
 
   const w = base[0].length
@@ -152,9 +152,9 @@ function enhance(map, image, fill1, fill2) {
     }
   }
 
-  console.log('next')
-  show(next)
-  console.log('--')
+  // console.log('next')
+  // show(next)
+  // console.log('--')
   return next
 }
 
@@ -163,11 +163,24 @@ const lightCount = (xs) =>
 
 function p1({ map, image }) {
   show(image)
+  fill = map[0]
   image = enhance(map, image, '.', '.')
-  image = enhance(map, image, '#', '#')
+  image = enhance(map, image, fill, fill)
+  console.log()
+  show(image)
+  return lightCount(image)
+}
+
+function p2({ map, image }) {
+  show(image)
+  fill = map[0]
+  image = enhance(map, image, '.', '.')
+  for (i = 0; i < 49; i++) image = enhance(map, image, fill, fill)
+  console.log()
   show(image)
   return lightCount(image)
 }
 
 const data = parse(input)
-console.log(p1(data))
+// console.log(p1(data))
+console.log(p2(data))
