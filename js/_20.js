@@ -49,14 +49,14 @@ function show(image) {
 function padded(image) {
   const w = image[0].length
   const h = image.length
-  const emptyRow = [...Array(w + 2 * 3)].map((_) => '.')
+  const emptyRow = [...Array(w + 2 * 2)].map((_) => '.')
 
   let newImage = []
-  for (let i = 0; i < h + 2 * 3; i++) {
-    if (i < 3 || i >= h + 3) {
+  for (let i = 0; i < h + 2 * 2; i++) {
+    if (i < 2 || i >= h + 2) {
       newImage[i] = [...emptyRow]
     } else {
-      newImage[i] = ('...' + image[i - 3].join('') + '...').split('')
+      newImage[i] = ('..' + image[i - 2].join('') + '..').split('')
     }
   }
 
@@ -81,15 +81,37 @@ function enhance(map, image) {
   const w = base[0].length
   const h = base.length
 
-  for (let y = 1; y < h - 1; y++) {
-    for (let x = 1; x < w - 1; x++) {
+  function pixels(y, x) {
+    let px = []
+    if (y > 0 && x > 0) px.push(base[y - 1][x - 1])
+    else px.push('.')
+    if (y > 0) px.push(base[y - 1][x])
+    else px.push('.')
+    if (y > 0 && x + 1 < w) px.push(base[y - 1][x + 1])
+    else px.push('.')
+    if (x > 0) px.push(base[y][x - 1])
+    else px.push('.')
+    px.push(base[y][x])
+    if (x + 1 < w) px.push(base[y][x + 1])
+    else px.push('.')
+    if (y + 1 < h && x > 0) px.push(base[y + 1][x - 1])
+    else px.push('.')
+    if (y + 1 < h) px.push(base[y + 1][x])
+    else px.push('.')
+    if (y + 1 < h && x + 1 < h) px.push(base[y + 1][x + 1])
+    else px.push('.')
+    return px
+  }
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
       // prettier-ignore
-      let pixels = [
-        base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
-        base[y + 0][x - 1], base[y + 0][x], base[y + 0][x + 1],
-        base[y + 1][x - 1], base[y + 1][x], base[y + 1][x + 1],
-      ]
-      next[y][x] = map[decimal(pixels)]
+      // let pixels = [
+      //   base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
+      //   base[y + 0][x - 1], base[y + 0][x], base[y + 0][x + 1],
+      //   base[y + 1][x - 1], base[y + 1][x], base[y + 1][x + 1],
+      // ]
+      next[y][x] = map[decimal(pixels(y, x))]
     }
   }
 
