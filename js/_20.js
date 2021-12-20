@@ -1,5 +1,3 @@
-const { log } = require('console')
-
 let input = `
 ..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..##
 #..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###
@@ -45,28 +43,11 @@ function parse(input) {
 
 function show(image) {
   console.log(image.map((row) => row.join('')).join('\n'))
-}
-
-/// Return a new image by padding the given image by 1 pixel on each side.
-function padded1(image) {
-  const w = image[0].length
-  const h = image.length
-  const emptyRow = [...Array(w + 2)].map((_) => '.')
-
-  let newImage = []
-  for (let i = 0; i < h + 2; i++) {
-    if (i === 0 || i === h + 1) {
-      newImage[i] = [...emptyRow]
-    } else {
-      newImage[i] = ('.' + image[i - 1].join('') + '.').split('')
-    }
-  }
-
-  return newImage
+  console.log()
 }
 
 /// Return a new image by padding the given image by n pixel on each side.
-function padded(image, n = 1, fill) {
+function padded(image, n, fill) {
   const w = image[0].length
   const h = image.length
   const emptyRow = [...Array(w + 2 * n)].map((_) => fill)
@@ -95,9 +76,8 @@ function decimal(pixels) {
   return d
 }
 
-function enhance(map, image, fill1, fill2) {
-  // const base = copy(image)//padded(image, 5)
-  const base = padded(image, 1, fill1)
+function enhance(map, image, fill) {
+  const base = padded(image, 1, fill)
   // console.log('base')
   // show(base)
   let next = copy(base)
@@ -105,9 +85,7 @@ function enhance(map, image, fill1, fill2) {
   const w = base[0].length
   const h = base.length
 
-  // console.log({ baseW: w, baseH: h, imgW: image[0].length, imgH: image.length })
-
-  function pixels(y, x, debug) {
+  function pixels(y, x) {
     let px = []
     for (const dy of [-1, 0, 1]) {
       const u = y + dy
@@ -115,16 +93,13 @@ function enhance(map, image, fill1, fill2) {
         for (const dx of [-1, 0, 1]) {
           const v = x + dx
           if (v >= 0 && v < w) {
-            // if (debug) console.log(u, v, base[u][v])
             px.push(base[u][v])
           } else {
-            // if (debug) console.log(u, v, fill)
-            px.push(fill2)
+            px.push(fill)
           }
         }
       } else {
-        // if (debug) console.log(u, '-', '...')
-        px = [...px, fill2, fill2, fill2]
+        px = [...px, fill, fill, fill]
       }
     }
 
@@ -133,28 +108,13 @@ function enhance(map, image, fill1, fill2) {
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
-      // for (let y = 4; y < h - 4; y++) {
-      //   for (let x = 4; x < w - 4; x++) {
-      // prettier-ignore
-      // let pixels = [
-      //   base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
-      //   base[y + 0][x - 1], base[y + 0][x], base[y + 0][x + 1],
-      //   base[y + 1][x - 1], base[y + 1][x], base[y + 1][x + 1],
-      // ]
-      // if (y +1 === h && x +1 === w) {
-      //   const px = pixels(y, x, true)
-      //   const d = decimal(px)
-      //   const m = map[d]
-      //   console.log({y, x, d, m})
-      //   console.log(px.join(''))
-      // }
       next[y][x] = map[decimal(pixels(y, x))]
     }
   }
 
   // console.log('next')
   // show(next)
-  // console.log('--')
+
   return next
 }
 
@@ -164,9 +124,8 @@ const lightCount = (xs) =>
 function p1({ map, image }) {
   show(image)
   fill = map[0]
-  image = enhance(map, image, '.', '.')
-  image = enhance(map, image, fill, fill)
-  console.log()
+  image = enhance(map, image, '.')
+  image = enhance(map, image, fill)
   show(image)
   return lightCount(image)
 }
@@ -174,13 +133,13 @@ function p1({ map, image }) {
 function p2({ map, image }) {
   show(image)
   fill = map[0]
-  image = enhance(map, image, '.', '.')
-  for (i = 0; i < 49; i++) image = enhance(map, image, fill, fill)
-  console.log()
+  image = enhance(map, image, '.')
+  for (i = 0; i < 49; i++) image = enhance(map, image, fill)
   show(image)
   return lightCount(image)
 }
 
 const data = parse(input)
-// console.log(p1(data))
+console.log(p1(data))
+console.log()
 console.log(p2(data))
