@@ -67,28 +67,22 @@ const copy = (image) => image.map((row) => [...row])
 
 function decimal(pixels) {
   let d = 0
-  console.log(pixels)
   for (const p of pixels) {
-    console.log(p, d)
     d *= 2
     if (p === '#') d++
   }
   return d
 }
 
-function p1({ map, image }) {
-  show(image)
-
+function enhance(map, image) {
   const base = padded(image)
   let next = copy(base)
 
   const w = base[0].length
   const h = base.length
 
-  // console.log(decimal('...#...#.'.split('')), 34)
-
-  for (let y = 4; y < h - 4; y++) {
-    for (let x = 4; x < w - 4; x++) {
+  for (let y = 2; y < h - 2; y++) {
+    for (let x = 2; x < w - 2; x++) {
       // prettier-ignore
       let pixels = [
         base[y - 1][x - 1], base[y - 1][x], base[y - 1][x + 1],
@@ -99,8 +93,18 @@ function p1({ map, image }) {
     }
   }
 
-  show(next)
-  show(base)
+  return next
+}
+
+const lightCount = (xs) =>
+  xs.reduce((a, row) => a + row.reduce((a, c) => a + (c === '#' ? 1 : 0), 0), 0)
+
+function p1({ map, image }) {
+  show(image)
+  image = enhance(map, image)
+  image = enhance(map, image)
+  show(image)
+  return lightCount(image)
 }
 
 const data = parse(input)
