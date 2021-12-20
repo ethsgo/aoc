@@ -48,7 +48,7 @@ function show(image) {
 }
 
 /// Return a new image by padding the given image by 1 pixel on each side.
-function padded(image) {
+function padded1(image) {
   const w = image[0].length
   const h = image.length
   const emptyRow = [...Array(w + 2)].map((_) => '.')
@@ -59,6 +59,25 @@ function padded(image) {
       newImage[i] = [...emptyRow]
     } else {
       newImage[i] = ('.' + image[i - 1].join('') + '.').split('')
+    }
+  }
+
+  return newImage
+}
+
+/// Return a new image by padding the given image by n pixel on each side.
+function padded(image, n = 1) {
+  const w = image[0].length
+  const h = image.length
+  const emptyRow = [...Array(w + 2 * n)].map((_) => '.')
+  const side = [...Array(n)].map((_) => '.')
+
+  let newImage = []
+  for (let i = 0; i < h + 2 * n; i++) {
+    if (i < n || i >= h + n) {
+      newImage[i] = [...emptyRow]
+    } else {
+      newImage[i] = [...side, ...image[i - n], ...side]
     }
   }
 
@@ -87,28 +106,6 @@ function enhance(map, image) {
 
   console.log({ baseW: w, baseH: h, imgW: image[0].length, imgH: image.length })
 
-  function pixels2(y, x) {
-    let px = []
-    if (y > 0 && x > 0) px.push(base[y - 1][x - 1])
-    else px.push('.')
-    if (y > 0) px.push(base[y - 1][x])
-    else px.push('.')
-    if (y > 0 && x + 1 < w) px.push(base[y - 1][x + 1])
-    else px.push('.')
-    if (x > 0) px.push(base[y][x - 1])
-    else px.push('.')
-    px.push(base[y][x])
-    if (x + 1 < w) px.push(base[y][x + 1])
-    else px.push('.')
-    if (y + 1 < h && x > 0) px.push(base[y + 1][x - 1])
-    else px.push('.')
-    if (y + 1 < h) px.push(base[y + 1][x])
-    else px.push('.')
-    if (y + 1 < h && x + 1 < h) px.push(base[y + 1][x + 1])
-    else px.push('.')
-    return px
-  }
-
   function pixels(y, x, debug) {
     let px = []
     for (const dy of [-1, 0, 1]) {
@@ -125,7 +122,7 @@ function enhance(map, image) {
           }
         }
       } else {
-        if (debug) console.log(u, '-', '.')
+        if (debug) console.log(u, '-', '...')
         px = [...px, ...'...']
       }
     }
