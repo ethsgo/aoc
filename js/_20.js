@@ -132,9 +132,12 @@ function p1({ map, image }) {
 
 function p2({ map, image }) {
   show(image)
-  fill = map[0]
-  image = enhance(map, image, '.')
-  for (i = 0; i < 49; i++) image = enhance(map, image, fill)
+  fill = '.'
+  image = enhance(map, image, fill)
+  for (i = 0; i < 49; i++) {
+    fill = map[decimal([...Array(9)].map(_ => fill))]
+    image = enhance(map, image, fill)
+  }
   show(image)
   return lightCount(image)
 }
