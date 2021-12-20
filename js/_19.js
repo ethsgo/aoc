@@ -1,5 +1,3 @@
-const { inspect } = require('util')
-
 let input = `
 --- scanner 0 ---
 404,-588,-901
@@ -210,7 +208,7 @@ const intersection = (m1, m2) => [...m1.entries()].filter((e) => m2.has(e[0]))
 
 const uniqCount = (points) => new Set(points.map(JSON.stringify)).size
 
-function p1(scan) {
+function deduceTransformations(scan) {
   function transformation(si1, si2) {
     for (let pi1 = 0; pi1 < scan[si1].length; pi1++) {
       // For the base scanner, consider each point as a reference point.
@@ -238,24 +236,17 @@ function p1(scan) {
     }
   }
 
-  // Use scanner 0 as the reference coordinate space. Find the transformations
-  // to tranform the other scanner's spaces into this reference space.
-  let beacons = scan[0]
-
   let tmap = new Map()
   let newlyAdded = [0]
-  let scanners = [[0, 0, 0]]
 
   while (newlyAdded.length > 0) {
     const i = newlyAdded.shift()
-    // console.log(tmap)
     for (let j = 0; j < scan.length; j++) {
       if (i === j) continue
       if (tmap.has(i) && tmap.get(i).has(j)) continue
       if (tmap.has(j) && tmap.get(j).has(i)) continue
       const t = transformation(i, j)
       if (t) {
-        // console.log(i, j)
         tmap.set(i, tmap.get(i) ?? new Map())
         tmap.get(i).set(j, t)
         newlyAdded.push(j)
@@ -263,17 +254,25 @@ function p1(scan) {
     }
   }
 
-  console.log(require('util').inspect(tmap, {depth: 3}))
+  return tmap
+}
+
+function solve(scan) {
+  let transformationMap = deduceTransformations(scan)
+
+  // Use scanner 0 as the reference coordinate space. Find the transformations
+  // to tranform the other scanner's spaces into this reference space.
+  let beacons = scan[0]
+  let scanners = [[0, 0, 0]]
 
   for (let i = scan.length - 1; i > 0; i--) {
     let d = i
     let bx = [...scan[i]]
     let scanner
     while (d !== 0) {
-      for (const [k, v] of tmap) {
+      for (const [k, v] of transformationMap) {
         const t = v.get(d)
         if (t) {
-          console.log(`${d} => ${k}`)
           bx = bx.map((p) => transform(t, p))
           if (!scanner) {
             scanner = t.scanner
@@ -286,29 +285,8 @@ function p1(scan) {
     }
     beacons = [...beacons, ...bx]
     scanners.push(scanner)
-    console.log('--')
-  }
-  /*
-  const t01 = transformation(0, 1)
-  for (const p of scan[1]) {
-    beacons.push(transform(t01, p))
   }
 
-  const t13 = transformation(1, 3)
-  for (const p of scan[3]) {
-    beacons.push(transform(t01, transform(t13, p)))
-  }
-
-  const t14 = transformation(1, 4)
-  for (const p of scan[4]) {
-    beacons.push(transform(t01, transform(t14, p)))
-  }
-
-  const t42 = transformation(4, 2)
-  for (const p of scan[2]) {
-    beacons.push(transform(t01, transform(t14, transform(t42, p))))
-  }
-*/
   let beaconCount = uniqCount(beacons)
 
   let scandMax = 0
@@ -316,7 +294,6 @@ function p1(scan) {
     for (let j = 0; j < scanners.length; j++) {
       if (i === j) continue
       let d = manhattanDist(scanners[i], scanners[j])
-      console.log({ i, si: scanners[i], j, sj: scanners[j], d })
       if (d > scandMax) scandMax = d
     }
   }
@@ -325,4 +302,4 @@ function p1(scan) {
 }
 
 const scan = parse(input)
-console.log(p1(scan))
+console.log(solve(scan))
