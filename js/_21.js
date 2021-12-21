@@ -33,12 +33,15 @@ function gameD(i1, i2) {
 }
 
 function gameQ(i1, i2) {
-  return _gameQ(i1, i2, 0, 0, 0, 1, 1)
+  // The number of times player 1 won the game
+  let [w1, w2] = winCount(i1, i2, 0, 0, 0, 1, 1)
+  console.log({w1, w2})
+  return Math.max(w1, w2)
 }
 
-function _gameQ(i1, i2, s1, s2, rolls, dice, player) {
-  if (s1 >= 1000) return s2 * rolls
-  if (s2 >= 1000) return s1 * rolls
+function winCount(i1, i2, s1, s2, rolls, dice, player) {
+  if (s1 >= 1000) return [1, 0]
+  if (s2 >= 1000) return [0, 1]
 
   const d = dice + dice + 1 + dice + 2
   dice = dice + 3
@@ -53,7 +56,7 @@ function _gameQ(i1, i2, s1, s2, rolls, dice, player) {
     s2 += i2
     player = 1
   }
-  return _gameQ(i1, i2, s1, s2, rolls, dice, player)
+  return winCount(i1, i2, s1, s2, rolls, dice, player)
 }
 
 const p1 = (data) => gameD(...data)
