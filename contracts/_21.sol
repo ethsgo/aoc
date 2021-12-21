@@ -26,7 +26,8 @@ contract _21 is _21Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2] memory pos = parse(input);
         return (
-            0, /*p1(pos)*/
+            p1(pos),
+            // TODO: p2 is still too slow to run for depth 21
             p2(pos)
         );
     }
@@ -61,15 +62,19 @@ contract _21 is _21Parser {
         return (i > 10) ? i - 10 : i;
     }
 
+    // The straightforward implementation doesn't run with hardhat, so we need to do
+    // a bunch of contortions to speed it up.
     function p2(uint256[2] memory pos) private returns (uint256) {
         uint256 w0 = winCount(pos[0], pos[1], 0, 0, 0);
-        uint256 w1 = totalCount - w0;
-        return w0 > w1 ? w0 : w1;
+        // TODO: totalGameCount is still not correct
+        // uint256 w1 = totalGameCount - w0;
+        // return totalGameCount;//w0 > w1 ? w0 : w1;
+        return w0;
     }
 
     mapping(uint256 => uint256) memo;
-    mapping(uint256 => bool) hasMemo;
-    uint256 totalCount;
+    mapping(uint256 => uint256) memoGameCount;
+    uint256 totalGameCount;
 
     function mkey(
         uint256 i0,
@@ -91,14 +96,18 @@ contract _21 is _21Parser {
         uint256 pi
     ) private returns (uint256) {
         uint256 key = mkey(i0, i1, s0, s1, pi);
-        if (hasMemo[key]) {
+        uint256 gameCount = memoGameCount[key];
+        if (gameCount > 0) {
+            totalGameCount += gameCount;
             return memo[key];
         }
         uint256 v;
 
-        if (s0 >= 8) {
+        if (s0 >= 6) {
+            gameCount = 1;
             v = 1;
-        } else if (s1 >= 8) {
+        } else if (s1 >= 6) {
+            gameCount = 1;
             v = 0;
         } else {
             v = 0;
@@ -111,7 +120,7 @@ contract _21 is _21Parser {
                         i = advance(i, d1, d2, d3);
                         s += i;
 
-                        totalCount++;
+                        gameCount++;
                         if (pi == 0) {
                             v += winCount(i, i1, s, s1, 1);
                         } else {
@@ -123,7 +132,9 @@ contract _21 is _21Parser {
         }
 
         memo[key] = v;
-        hasMemo[key] = true;
+        memoGameCount[key] = gameCount;
+        totalGameCount += gameCount;
+
         return v;
     }
 }
