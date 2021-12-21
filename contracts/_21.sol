@@ -62,8 +62,6 @@ contract _21 is _21Parser {
         return (i > 10) ? i - 10 : i;
     }
 
-    // The straightforward implementation doesn't run with hardhat, so we need to do
-    // a bunch of contortions to speed it up.
     function p2(uint256[2] memory pos) private returns (uint256) {
         uint256 w0 = winCount(pos[0], pos[1], 0, 0, 0);
         // TODO: totalGameCount is still not correct
@@ -72,23 +70,10 @@ contract _21 is _21Parser {
         return w0;
     }
 
-    mapping(bytes32 => uint256) memo2;
-    // mapping(uint256 => uint256) memoGameCount;
-    // uint256 totalGameCount;
-    // uint256[(16 * 16 * 32 * 32 * 2) + 1] private memo;
     uint256[2**19] private memo;
 
-    // ~ 1.5x slower than the hand rolled "hash".
-    function mkey2(
-        uint256 i0,
-        uint256 i1,
-        uint256 s0,
-        uint256 s1,
-        uint256 pi
-    ) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(i0, i1, s0, s1, pi));
-    }
-
+    // The straightforward memoization using a mapping is too slow, so we need
+    // some contortions to speed it up.
     function mkey(
         uint256 i0,
         uint256 i1,
@@ -96,31 +81,10 @@ contract _21 is _21Parser {
         uint256 s1,
         uint256 pi
     ) private pure returns (uint256) {
-        // Use an arbitrary but unique mapping of the arguments to uints, for
-        // use as the key to our memoized function results.
-        // return (100 * ((100 * ((100 * ((100 * i0) + i1)) + s0)) + s1)) + pi;
-        // return (30 * ((30 * ((11 * ((11 * i0) + i1)) + s0)) + s1)) + pi;
-        require(i0 < 16 && i1 < 16);
-        require(s0 < 32 && s1 < 32);
-        //     return
-        // (i0 * (16 * 32 * 32 * 2)) |
-        // (i1 * (32 * 32 * 2)) |
-        // (s0 * (32 * 2)) |
-        // (s1 * (2)) |
-        // pi;
-
         return (((((((i0 << 4) | i1) << 5) | s0) << 5) | s1) << 1) | pi;
-        /*
-        return
-            (i0 << (4 + 5 + 5 + 1)) |
-            (i1 << (5 + 5 + 1)) |
-            (s0 << (5 + 5 + 1)) |
-            (s1 << (5 + 1)) |
-            pi;
-            */
     }
 
-    uint256 private depth = 6;
+    uint256 private depth = 14;
 
     function winCount(
         uint256 i0,
@@ -130,29 +94,14 @@ contract _21 is _21Parser {
         uint256 pi
     ) private returns (uint256) {
         uint256 key = mkey(i0, i1, s0, s1, pi);
-        bytes32 key2 = mkey2(i0, i1, s0, s1, pi);
-
-        // uint256 gameCount = memoGameCount[key];
-        // console.log(key);
         uint256 v = memo[key];
-        uint256 v2 = memo2[key2];
-        if (false && v != v2) {
-            console.log(i0, i1, s0, s1);
-            console.log(pi);
-            console.log(v, v2);
-            console.log(key);
-            revert();
-        }
-        v = v2;
         if (v > 0) {
             return v - 1;
         }
 
         if (s0 >= depth) {
-            // gameCount = 1;
             v = 1;
         } else if (s1 >= depth) {
-            // gameCount = 1;
             v = 0;
         } else {
             v = 0;
@@ -165,7 +114,6 @@ contract _21 is _21Parser {
                         i = advance(i, d1, d2, d3);
                         s += i;
 
-                        // gameCount++;
                         if (pi == 0) {
                             v += winCount(i, i1, s, s1, 1);
                         } else {
@@ -177,10 +125,6 @@ contract _21 is _21Parser {
         }
 
         memo[key] = v + 1;
-        memo2[key2] = v + 1;
-
-        // memoGameCount[key] = gameCount;
-        // totalGameCount += gameCount;
 
         return v;
     }
