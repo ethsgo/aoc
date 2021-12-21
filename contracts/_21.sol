@@ -71,21 +71,11 @@ contract _21 is _21Parser {
     }
 
     uint256[2**19] private memo;
+    uint256[10] private mult = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1];
+    uint256 private depth = 5;
 
     // The straightforward memoization using a mapping is too slow, so we need
     // some contortions to speed it up.
-    function mkey(
-        uint256 i0,
-        uint256 i1,
-        uint256 s0,
-        uint256 s1,
-        uint256 pi
-    ) private pure returns (uint256) {
-        return (((((((i0 << 4) | i1) << 5) | s0) << 5) | s1) << 1) | pi;
-    }
-
-    uint256 private depth = 14;
-
     function winCount(
         uint256 i0,
         uint256 i1,
@@ -93,11 +83,9 @@ contract _21 is _21Parser {
         uint256 s1,
         uint256 pi
     ) private returns (uint256) {
-        uint256 key = mkey(i0, i1, s0, s1, pi);
+        uint256 key = (((((((i0 << 4) | i1) << 5) | s0) << 5) | s1) << 1) | pi;
         uint256 v = memo[key];
-        if (v > 0) {
-            return v - 1;
-        }
+        if (v > 0) return v - 1;
 
         if (s0 >= depth) {
             v = 1;
@@ -106,26 +94,22 @@ contract _21 is _21Parser {
         } else {
             v = 0;
 
-            for (uint256 d1 = 1; d1 <= 3; d1++) {
-                for (uint256 d2 = 1; d2 <= 3; d2++) {
-                    for (uint256 d3 = 1; d3 <= 3; d3++) {
-                        uint256 i = pi == 0 ? i0 : i1;
-                        uint256 s = pi == 0 ? s0 : s1;
-                        i = advance(i, d1, d2, d3);
-                        s += i;
-
-                        if (pi == 0) {
-                            v += winCount(i, i1, s, s1, 1);
-                        } else {
-                            v += winCount(i0, i, s0, s, 0);
-                        }
-                    }
+            if (pi == 0) {
+                for (uint256 d = 3; d <= 9; d++) {
+                    uint256 i = i0 + d;
+                    i = (i > 10) ? i - 10 : i;
+                    v += (winCount(i, i1, s0 + i, s1, 1) * mult[d]);
+                }
+            } else {
+                for (uint256 d = 3; d <= 9; d++) {
+                    uint256 i = i1 + d;
+                    i = (i > 10) ? i - 10 : i;
+                    v += (winCount(i0, i, s0, s1 + i, 0) * mult[d]);
                 }
             }
         }
 
         memo[key] = v + 1;
-
         return v;
     }
 }
