@@ -25,11 +25,6 @@ contract _21Parser is Parser {
 contract _21 is _21Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2] memory pos = parse(input);
-        // NOTE: Even with all sorts of optimizatios, running on the full depth of 21 levels needs more than 8G of
-        // RAM configured on the NODE_OPTIONS when using Hardhat. So decrease
-        // the depth for now. The algorithm is still correct (tested by
-        // comparing the value against the Javascript solution).
-        depth = 19;
         return (p1(pos), p2(pos));
     }
 
@@ -71,10 +66,7 @@ contract _21 is _21Parser {
     uint256[2**18] private memo1;
     uint256[2**18] private memo2;
     uint256[10] private mult = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1];
-    uint256 private depth = 21;
 
-    // The straightforward memoization using a mapping is too slow, so we need
-    // some contortions to speed it up.
     function winCount(
         uint256 i0,
         uint256 i1,
@@ -85,7 +77,7 @@ contract _21 is _21Parser {
         w0 = memo1[key];
         if (w0 > 0) return (w0 - 1, memo2[key]);
 
-        if (s1 >= depth) {
+        if (s1 >= 21) {
             w1 = 1;
         } else {
             uint256 v0;
