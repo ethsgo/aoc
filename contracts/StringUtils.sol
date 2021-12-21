@@ -23,7 +23,16 @@ contract StringUtils {
 
     function _uintString(uint256 x) private pure returns (bytes memory) {
         if (x == 0) return bytes.concat();
-        bytes1 b = bytes1(uint8(bytes1("0")) + (uint8(x) % 10));
+        bytes1 b = bytes1(uint8(bytes1("0")) + (uint8(x % 10)));
         return bytes.concat(_uintString(x / 10), b);
+    }
+
+    /// Return a string representation of the given int.
+    ///
+    /// Useful for combining arrays when console logging.
+    function intString(int256 x) internal pure returns (string memory) {
+        if (x == 0) return "0";
+        if (x < 0) return string(bytes.concat("-", _uintString(uint256(-x))));
+        else return string(_uintString(uint256(x)));
     }
 }

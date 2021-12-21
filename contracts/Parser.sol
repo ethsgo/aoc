@@ -114,6 +114,7 @@ contract Parser {
                     xi.push(negative ? -int256(x) : int256(x));
                 }
                 x = 0;
+                negative = false;
                 didSeeDigit = false;
             }
         }

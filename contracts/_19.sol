@@ -150,7 +150,7 @@ contract _19Parser is Parser {
     {
         string memory s = bytes(input).length == 0 ? exampleInput : input;
 
-        string[] memory lines = split(s, "\n");
+        string[] memory lines = split(s, "\n", true);
         // count the number of empty lines to determine the number of scanners
         // (in addition to the first scanner).
         uint256 scannerCount = 1;
@@ -174,9 +174,10 @@ contract _19Parser is Parser {
             }
             scan[si] = new int256[3][](beaconCount);
             for (uint256 j = 0; j < beaconCount; j++) {
-                int256[] memory ints = parseInts(lines[i++]);
+                int256[] memory ints = parseInts(lines[i]);
                 int256[3] memory beacon = [ints[0], ints[1], ints[2]];
                 scan[si][j] = beacon;
+                i++;
             }
             // skip the empty line
             i++;
