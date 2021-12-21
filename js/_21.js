@@ -33,31 +33,32 @@ function gameD(i1, i2) {
 }
 
 function gameQ(i1, i2) {
-  return _gameQ(i1, i2, 0, 0)
+  return _gameQ(i1, i2, 0, 0, 0, 1, 1)
 }
 
-function _gameQ(i1, i2, s1, s2) {
-  let dice = 1
-  let rolls = 0
-  function move(i) {
-    const d = dice + dice + 1 + dice + 2
-    dice = dice + 3
-    rolls += 3
-    return wrap(i + (d % 10))
-  }
-  while (true) {
-    i1 = move(i1)
+function _gameQ(i1, i2, s1, s2, rolls, dice, player) {
+  if (s1 >= 1000) return s2 * rolls
+  if (s2 >= 1000) return s1 * rolls
+
+  const d = dice + dice + 1 + dice + 2
+  dice = dice + 3
+  rolls += 3
+
+  if (player === 1) {
+    i1 = wrap(i1 + (d % 10))
     s1 += i1
-    if (s1 >= 1000) return s2 * rolls
-    i2 = move(i2)
+    player = 2
+  } else {
+    i2 = wrap(i2 + (d % 10))
     s2 += i2
-    if (s2 >= 1000) return s1 * rolls
+    player = 1
   }
+  return _gameQ(i1, i2, s1, s2, rolls, dice, player)
 }
 
 const p1 = (data) => gameD(...data)
 const p2 = (data) => gameQ(...data)
 
 const data = parse(input)
-console.log(p1(data))
+// console.log(p1(data))
 console.log(p2(data))
