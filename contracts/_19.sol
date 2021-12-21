@@ -195,7 +195,12 @@ contract _19 is _19Parser, StringUtils {
         return (p1(scan), 0);
     }
 
-    int256[3][] private permutations;
+    Permutation[] private permutations;
+
+    struct Permutation {
+        uint256[3] i;
+        int256[3] m;
+    }
 
     struct Transform {
         int256[3] scannerPosition;
@@ -203,14 +208,27 @@ contract _19 is _19Parser, StringUtils {
     }
 
     function populatePermutations() private {
-        for (int256 x = -2; x <= 2; x++) {
-            for (int256 y = -2; y <= 2; y++) {
-                if (y == x || y == -x) continue;
-                for (int256 z = -2; z <= 2; z++) {
-                    if (z == x || z == -x) continue;
-                    if (z == y || z == -y) continue;
-                    permutations.push([x, y, z]);
-                    console.log(intString(x), intString(y), intString(z));
+        int256[3][8] memory ms = [
+            [int256(1), 1, -1],
+            [int256(1), -1, 1],
+            [int256(1), -1, -1],
+            [int256(1), 1, 1],
+            [int256(-1), 1, 1],
+            [int256(-1), 1, -1],
+            [int256(-1), -1, 1],
+            [int256(-1), -1, -1]
+        ];
+        for (uint256 x = 0; x <= 2; x++) {
+            for (uint256 y = 0; y <= 2; y++) {
+                if (y == x) continue;
+                for (uint256 z = 0; z <= 2; z++) {
+                    if (z == x) continue;
+                    if (z == y) continue;
+                    for (uint256 i = 0; i < ms.length; i++) {
+                        permutations.push(
+                            Permutation({i: [x, y, z], m: ms[i]})
+                        );
+                    }
                 }
             }
         }
