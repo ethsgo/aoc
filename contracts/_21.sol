@@ -62,22 +62,14 @@ contract _21 is _21Parser {
     }
 
     function p2(uint256[2] memory pos) private returns (uint256) {
-        uint256[2] memory w = winCount(pos[0], pos[1], 0, 0, 0);
-        return w[0] > w[1] ? w[0] : w[1];
+        uint256 w0 = winCount(pos[0], pos[1], 0, 0, 0);
+        uint256 w1 = totalCount - w0;
+        return w0 > w1 ? w0 : w1;
     }
 
-    mapping(uint256 => uint256[2]) memo;
-
-    // ~ 1.5x slower than the hand rolled "hash".
-    function mkey2(
-        uint256 i0,
-        uint256 i1,
-        uint256 s0,
-        uint256 s1,
-        uint256 pi
-    ) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(i0, i1, s0, s1, pi));
-    }
+    mapping(uint256 => uint256) memo;
+    mapping(uint256 => bool) hasMemo;
+    uint256 totalCount;
 
     function mkey(
         uint256 i0,
@@ -97,20 +89,19 @@ contract _21 is _21Parser {
         uint256 s0,
         uint256 s1,
         uint256 pi
-    ) private returns (uint256[2] memory) {
+    ) private returns (uint256) {
         uint256 key = mkey(i0, i1, s0, s1, pi);
-        uint256[2] memory v = memo[key];
-        if (v[0] != 0 && v[1] != 0) {
-            // console.log('hit', key);
-            return v;
+        if (hasMemo[key]) {
+            return memo[key];
         }
+        uint256 v;
 
         if (s0 >= 8) {
-            v = [uint256(1), 0];
+            v = 1;
         } else if (s1 >= 8) {
-            v = [uint256(0), 1];
+            v = 0;
         } else {
-            v = [uint256(0), 0];
+            v = 0;
 
             for (uint256 d1 = 1; d1 <= 3; d1++) {
                 for (uint256 d2 = 1; d2 <= 3; d2++) {
@@ -120,21 +111,19 @@ contract _21 is _21Parser {
                         i = advance(i, d1, d2, d3);
                         s += i;
 
-                        uint256[2] memory w;
+                        totalCount++;
                         if (pi == 0) {
-                            w = winCount(i, i1, s, s1, 1);
+                            v += winCount(i, i1, s, s1, 1);
                         } else {
-                            w = winCount(i0, i, s0, s, 0);
+                            v += winCount(i0, i, s0, s, 0);
                         }
-
-                        v[0] += w[0];
-                        v[1] += w[1];
                     }
                 }
             }
         }
 
         memo[key] = v;
+        hasMemo[key] = true;
         return v;
     }
 }
