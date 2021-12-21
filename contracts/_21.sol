@@ -72,11 +72,22 @@ contract _21 is _21Parser {
         return w0;
     }
 
-    // mapping(uint256 => uint256) memo;
+    mapping(bytes32 => uint256) memo2;
     // mapping(uint256 => uint256) memoGameCount;
     // uint256 totalGameCount;
     // uint256[(16 * 16 * 32 * 32 * 2) + 1] private memo;
     uint256[2**19] private memo;
+
+    // ~ 1.5x slower than the hand rolled "hash".
+    function mkey2(
+        uint256 i0,
+        uint256 i1,
+        uint256 s0,
+        uint256 s1,
+        uint256 pi
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(i0, i1, s0, s1, pi));
+    }
 
     function mkey(
         uint256 i0,
@@ -98,13 +109,18 @@ contract _21 is _21Parser {
         // (s1 * (2)) |
         // pi;
 
+        return (((((((i0 << 4) | i1) << 5) | s0) << 5) | s1) << 1) | pi;
+        /*
         return
             (i0 << (4 + 5 + 5 + 1)) |
             (i1 << (5 + 5 + 1)) |
             (s0 << (5 + 5 + 1)) |
             (s1 << (5 + 1)) |
             pi;
+            */
     }
+
+    uint256 private depth = 6;
 
     function winCount(
         uint256 i0,
@@ -114,14 +130,24 @@ contract _21 is _21Parser {
         uint256 pi
     ) private returns (uint256) {
         uint256 key = mkey(i0, i1, s0, s1, pi);
+        bytes32 key2 = mkey2(i0, i1, s0, s1, pi);
+
         // uint256 gameCount = memoGameCount[key];
         // console.log(key);
         uint256 v = memo[key];
+        uint256 v2 = memo2[key2];
+        if (false && v != v2) {
+            console.log(i0, i1, s0, s1);
+            console.log(pi);
+            console.log(v, v2);
+            console.log(key);
+            revert();
+        }
+        v = v2;
         if (v > 0) {
             return v - 1;
         }
 
-        uint256 depth = 5;
         if (s0 >= depth) {
             // gameCount = 1;
             v = 1;
@@ -151,6 +177,8 @@ contract _21 is _21Parser {
         }
 
         memo[key] = v + 1;
+        memo2[key2] = v + 1;
+
         // memoGameCount[key] = gameCount;
         // totalGameCount += gameCount;
 
