@@ -40,47 +40,42 @@ function gameQ(i1, i2) {
   return Math.max(w1, w2)
 }
 
-const nextDice = (() => {
-  let dice = 1
-
-  return () => {
-    const d = dice + dice + 1 + dice + 2
-    dice = dice + 3
-    return d
-  }
-})()
-
 let memo = new Map()
 
 function winCount(pos, score, pi) {
   const key = JSON.stringify([pos, score, pi])
+  // console.log(key)
   let v = memo.get(key)
   if (v) {
     console.log(key)
     return v
   }
 
-  if (score[0] >= 1000) {
-    v = [1, 0, ...score]
+  if (score[0] >= 21) {
+    v = [1, 0]
     memo.set(key, v)
     return v
   }
 
-  if (score[1] >= 1000) {
-    v = [0, 1, ...score]
+  if (score[1] >= 21) {
+    v = [0, 1]
     memo.set(key, v)
     return v
   }
 
-  let d = nextDice()
+  v = [0, 0]
+  for (const d of [1, 2, 3]) {
+    let pc = [...pos]
+    let sc = [...score]
+    const ni = pi === 0 ? 1 : 0
 
-  for (let d of [1, 2, 3]) {
+    pc[pi] = wrap(pc[pi] + (d % 10))
+    sc[pi] += pc[pi]
+
+    const w = winCount(pc, sc, ni)
+    v[0] += w[0]
+    v[1] += w[1]
   }
-  pos[pi] = wrap(pos[pi] + (d % 10))
-  score[pi] += pos[pi]
-  pi = pi === 0 ? 1 : 0
-
-  v = winCount(pos, score, pi)
 
   memo.set(key, v)
 
