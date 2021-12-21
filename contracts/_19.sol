@@ -191,7 +191,7 @@ contract _19 is _19Parser, StringUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         int256[3][][] memory scan = parse(input);
         populatePermutations();
-        return (permutations.length, 0);
+        deduceTransforms(scan);
         return (p1(scan), 0);
     }
 
@@ -233,6 +233,10 @@ contract _19 is _19Parser, StringUtils {
             }
         }
     }
+
+    mapping(uint256 => mapping(uint256 => Transform)) transformMap;
+
+    function deduceTransforms(int256[3][][] memory scan) private {}
 
     function p1(int256[3][][] memory scan) private pure returns (uint256) {
         return scan.length;
