@@ -34,7 +34,7 @@ function gameD(i1, i2) {
 
 function gameQ(i1, i2) {
   // The number of times player 1 won the game
-  let w = winCount(i1, i2, 0, 0, 1)
+  let w = winCount([i1, i2], [0, 0], 0)
   console.log(w)
   let [w1, w2] = w
   return Math.max(w1, w2)
@@ -52,40 +52,35 @@ const nextDice = (() => {
 
 let memo = new Map()
 
-function winCount(i1, i2, s1, s2, player) {
-  const key = JSON.stringify([i1, i2, s1, s2, player])
+function winCount(pos, score, pi) {
+  const key = JSON.stringify([pos, score, pi])
   let v = memo.get(key)
   if (v) {
     console.log(key)
     return v
   }
 
-  if (s1 >= 1000) {
-    v = [1, 0, s1, s2]
+  if (score[0] >= 1000) {
+    v = [1, 0, ...score]
     memo.set(key, v)
     return v
   }
 
-  if (s2 >= 1000) {
-    v = [0, 1, s1, s2]
+  if (score[1] >= 1000) {
+    v = [0, 1, ...score]
     memo.set(key, v)
     return v
   }
 
   let d = nextDice()
 
-  if (player === 1) {
-    // for (let d of [1, 2, 3])
-    i1 = wrap(i1 + (d % 10))
-    s1 += i1
-    player = 2
-  } else {
-    i2 = wrap(i2 + (d % 10))
-    s2 += i2
-    player = 1
+  for (let d of [1, 2, 3]) {
   }
+  pos[pi] = wrap(pos[pi] + (d % 10))
+  score[pi] += pos[pi]
+  pi = pi === 0 ? 1 : 0
 
-  v = winCount(i1, i2, s1, s2, player)
+  v = winCount(pos, score, pi)
 
   memo.set(key, v)
 
