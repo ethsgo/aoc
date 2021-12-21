@@ -33,65 +33,48 @@ function gameD(i1, i2) {
 }
 
 function gameQ(i1, i2) {
-  // The number of times player 1 won the game
-  let w = winCount([i1, i2], [0, 0], 0, 0)
-  console.log(w)
-  let [w1, w2] = w
-  return Math.max(w1, w2)
-}
+  let memo = new Map()
 
-let memo = new Map()
+  function winCount(pos, score, pi) {
+    const key = JSON.stringify([pos, score, pi])
+    let v = memo.get(key)
+    if (v) return v
 
-function winCount(pos, score, pi, depth) {
-  const key = JSON.stringify([pos, score, pi])
-  // console.log(key)
-  let v = memo.get(key)
-  if (v) {
-    // console.log(key)
-    return v
-  }
+    if (score[0] >= 21) {
+      v = [1, 0]
+    } else if (score[1] >= 21) {
+      v = [0, 1]
+    } else {
+      v = [0, 0]
+      for (const d1 of [1, 2, 3]) {
+        for (const d2 of [1, 2, 3]) {
+          for (const d3 of [1, 2, 3]) {
+            let d = d1 + d2 + d3
+            let pc = [...pos]
+            let sc = [...score]
+            const ni = pi === 0 ? 1 : 0
 
-  if (score[0] >= 21) {
-    v = [1, 0]
-    memo.set(key, v)
-    return v
-  }
+            pc[pi] = wrap(pc[pi] + (d % 10))
+            sc[pi] += pc[pi]
 
-  if (score[1] >= 21) {
-    v = [0, 1]
-    memo.set(key, v)
-    return v
-  }
-
-  v = [0, 0]
-  for (const d1 of [1, 2, 3]) {
-    for (const d2 of [1, 2, 3]) {
-      for (const d3 of [1, 2, 3]) {
-        let d = d1 + d2 + d3
-        let pc = [...pos]
-        let sc = [...score]
-        const ni = pi === 0 ? 1 : 0
-
-        // console.log(`player ${pi} at position ${pc[pi]} rolls ${d} - scores ${score} - depth ${depth}`)
-        pc[pi] = wrap(pc[pi] + (d % 10))
-        sc[pi] += pc[pi]
-
-        const w = winCount(pc, sc, ni, depth + 1)
-        // console.log(`player ${pi} at position ${pc[pi]} rolls ${d} - winCount ${w} - depth ${depth}`)
-        v[0] += w[0]
-        v[1] += w[1]
+            const w = winCount(pc, sc, ni)
+            v[0] += w[0]
+            v[1] += w[1]
+          }
+        }
       }
     }
+
+    memo.set(key, v)
+    return v
   }
 
-  memo.set(key, v)
-
-  return v
+  return Math.max(...winCount([i1, i2], [0, 0], 0))
 }
 
-const p1 = (data) => gameD(...data)
-const p2 = (data) => gameQ(...data)
+const p1 = (pos) => gameD(...pos)
+const p2 = (pos) => gameQ(...pos)
 
-const data = parse(input)
-// console.log(p1(data))
-console.log(p2(data))
+const pos = parse(input)
+console.log(p1(pos))
+console.log(p2(pos))
