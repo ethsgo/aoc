@@ -26,7 +26,7 @@ contract _21 is _21Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2] memory pos = parse(input);
         return (
-            p1(pos),
+            0, //p1(pos),
             // TODO: p2 is still too slow to run for depth 21
             p2(pos)
         );
@@ -72,9 +72,11 @@ contract _21 is _21Parser {
         return w0;
     }
 
-    mapping(uint256 => uint256) memo;
-    mapping(uint256 => uint256) memoGameCount;
-    uint256 totalGameCount;
+    // mapping(uint256 => uint256) memo;
+    // mapping(uint256 => uint256) memoGameCount;
+    // uint256 totalGameCount;
+    // uint256[(16 * 16 * 32 * 32 * 2) + 1] private memo;
+    uint256[2**19] private memo;
 
     function mkey(
         uint256 i0,
@@ -85,7 +87,23 @@ contract _21 is _21Parser {
     ) private pure returns (uint256) {
         // Use an arbitrary but unique mapping of the arguments to uints, for
         // use as the key to our memoized function results.
-        return (100 * ((100 * ((100 * ((100 * i0) + i1)) + s0)) + s1)) + pi;
+        // return (100 * ((100 * ((100 * ((100 * i0) + i1)) + s0)) + s1)) + pi;
+        // return (30 * ((30 * ((11 * ((11 * i0) + i1)) + s0)) + s1)) + pi;
+        require(i0 < 16 && i1 < 16);
+        require(s0 < 32 && s1 < 32);
+        //     return
+        // (i0 * (16 * 32 * 32 * 2)) |
+        // (i1 * (32 * 32 * 2)) |
+        // (s0 * (32 * 2)) |
+        // (s1 * (2)) |
+        // pi;
+
+        return
+            (i0 << (4 + 5 + 5 + 1)) |
+            (i1 << (5 + 5 + 1)) |
+            (s0 << (5 + 5 + 1)) |
+            (s1 << (5 + 1)) |
+            pi;
     }
 
     function winCount(
@@ -96,18 +114,19 @@ contract _21 is _21Parser {
         uint256 pi
     ) private returns (uint256) {
         uint256 key = mkey(i0, i1, s0, s1, pi);
-        uint256 gameCount = memoGameCount[key];
-        if (gameCount > 0) {
-            totalGameCount += gameCount;
-            return memo[key];
+        // uint256 gameCount = memoGameCount[key];
+        // console.log(key);
+        uint256 v = memo[key];
+        if (v > 0) {
+            return v - 1;
         }
-        uint256 v;
 
-        if (s0 >= 6) {
-            gameCount = 1;
+        uint256 depth = 5;
+        if (s0 >= depth) {
+            // gameCount = 1;
             v = 1;
-        } else if (s1 >= 6) {
-            gameCount = 1;
+        } else if (s1 >= depth) {
+            // gameCount = 1;
             v = 0;
         } else {
             v = 0;
@@ -120,7 +139,7 @@ contract _21 is _21Parser {
                         i = advance(i, d1, d2, d3);
                         s += i;
 
-                        gameCount++;
+                        // gameCount++;
                         if (pi == 0) {
                             v += winCount(i, i1, s, s1, 1);
                         } else {
@@ -131,9 +150,9 @@ contract _21 is _21Parser {
             }
         }
 
-        memo[key] = v;
-        memoGameCount[key] = gameCount;
-        totalGameCount += gameCount;
+        memo[key] = v + 1;
+        // memoGameCount[key] = gameCount;
+        // totalGameCount += gameCount;
 
         return v;
     }
