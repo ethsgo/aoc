@@ -50,13 +50,32 @@ const nextDice = (() => {
   }
 })()
 
+let memo = new Map()
+
 function winCount(i1, i2, s1, s2, player) {
-  if (s1 >= 1000) return [1, 0, s1, s2]
-  if (s2 >= 1000) return [0, 1, s1, s2]
+  const key = JSON.stringify([i1, i2, s1, s2, player])
+  let v = memo.get(key)
+  if (v) {
+    console.log(key)
+    return v
+  }
+
+  if (s1 >= 1000) {
+    v = [1, 0, s1, s2]
+    memo.set(key, v)
+    return v
+  }
+
+  if (s2 >= 1000) {
+    v = [0, 1, s1, s2]
+    memo.set(key, v)
+    return v
+  }
 
   let d = nextDice()
 
   if (player === 1) {
+    // for (let d of [1, 2, 3])
     i1 = wrap(i1 + (d % 10))
     s1 += i1
     player = 2
@@ -65,7 +84,12 @@ function winCount(i1, i2, s1, s2, player) {
     s2 += i2
     player = 1
   }
-  return winCount(i1, i2, s1, s2, player)
+
+  v = winCount(i1, i2, s1, s2, player)
+
+  memo.set(key, v)
+
+  return v
 }
 
 const p1 = (data) => gameD(...data)
