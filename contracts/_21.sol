@@ -25,11 +25,12 @@ contract _21Parser is Parser {
 contract _21 is _21Parser {
     function main(string calldata input) external returns (uint256, uint256) {
         uint256[2] memory pos = parse(input);
-        return (
-            0, //p1(pos),
-            // TODO: p2 is still too slow to run for depth 21
-            p2(pos)
-        );
+        // NOTE: Even with all sorts of optimizatios, running on the full depth of 21 levels needs more than 8G of
+        // RAM configured on the NODE_OPTIONS when using Hardhat. So decrease
+        // the depth for now. The algorithm is still correct (tested by
+        // comparing the value against the Javascript solution).
+        depth = 19;
+        return (p1(pos), p2(pos));
     }
 
     function p1(uint256[2] memory initialPos) private pure returns (uint256) {
