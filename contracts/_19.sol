@@ -191,7 +191,8 @@ contract _19 is _19Parser, StringUtils {
     function main(string calldata input) external returns (uint256, uint256) {
         int256[3][][] memory scan = parse(input);
         populatePermutations();
-        deduceTransforms(scan);
+        populateDistanceMap(scan);
+        populateTransformMap(scan);
         return (p1(scan), 0);
     }
 
@@ -200,11 +201,6 @@ contract _19 is _19Parser, StringUtils {
     struct Permutation {
         uint256[3] i;
         int256[3] m;
-    }
-
-    struct Transform {
-        int256[3] scannerPosition;
-        uint256 permutationId;
     }
 
     function populatePermutations() private {
@@ -234,9 +230,49 @@ contract _19 is _19Parser, StringUtils {
         }
     }
 
+    // For each scan, and for each (reference) point within that scan, all the
+    // other points of that scan indexed by their distance to the reference
+    // point.
+    //
+    // scanIndex => pointIndex => distance => point
+    //
+    mapping(uint256 => mapping(uint256 => mapping(int256 => int256[3]))) distanceMap;
+
+    function populateDistanceMap(int256[3][][] memory scan) private {
+        for (uint256 si = 0; si < scan.length; si++) {
+            for (uint256 rpi = 0; rpi < scan[si].length; rpi++) {
+                int256[3] memory rp = scan[si][rpi];
+
+                for (uint256 pi = 0; pi < scan[si].length; pi++) {
+                    int256[3] memory p = scan[si][pi];
+                    distanceMap[si][rpi][dist(p, rp)] = p;
+                }
+            }
+        }
+    }
+
+    function dist(int256[3] memory u, int256[3] memory v)
+        private
+        pure
+        returns (int256)
+    {
+        return (u[0] - v[0])**2 + (u[1] - v[1])**2 + (u[2] - v[2])**2;
+    }
+
+    struct Transform {
+        int256[3] scannerPosition;
+        uint256 permutationId;
+    }
+
     mapping(uint256 => mapping(uint256 => Transform)) transformMap;
 
-    function deduceTransforms(int256[3][][] memory scan) private {}
+    function populateTransformMap(int256[3][][] memory scan) private {}
+
+    function findTransform(
+        int256[3][][] memory scan,
+        uint256 si,
+        uint256 sj
+    ) private {}
 
     function p1(int256[3][][] memory scan) private pure returns (uint256) {
         return scan.length;
