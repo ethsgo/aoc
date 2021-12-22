@@ -13,7 +13,7 @@ To run any of the Solidity contracts in the `contracts` folder:
 
     npx hardhat exec _01
 
-It prints a gas estimate and the return from the main function in the contract.
+It prints a gas estimate and the result from the main function in the contract.
 
 To run the JS solutions:
 
@@ -25,9 +25,17 @@ given in the puzzle. To pass input, pipe into stdin:
     cat inputs/_01 | npx hardhat exec _01
     cat inputs/_01 | node js/_01.js
 
-Gas estimates are omitted when input is passed via stdin, because otherwise it
-takes too long. Even so, we sometimes hit memory limits with hardhat. As a
-workaround, set the following environment variable and run npx hardhat again.
+## Advanced
+
+Gas estimates are omitted when input is passed via stdin. For some of the later
+puzzles, even the gas estimate on the small example is not helpful and increases
+the runtime by 2x, so they can be turned off by the `--skip-gas-estimate` flag.
+For example,
+
+    npx hardhat exec --skip-gas-estimate _21
+
+Even so, we sometimes hit memory limits with hardhat. As a
+workaround, set the following environment variable and run `npx hardhat exec` again.
 This allows hardhat to use more memory than the default.
 
     export NODE_OPTIONS="--max-old-space-size=4096"
